@@ -1,0 +1,24 @@
+type: object
+required:
+  - gameDate
+  - opponent
+  - dragonsScore
+  - opponentScore
+  - stadium
+properties:
+  gameDate:
+    type: string
+    format: date
+  opponent:
+    type: string
+  dragonsScore:
+    type: integer
+    minimum: 0
+  opponentScore:
+    type: integer
+    minimum: 0
+  stadium:
+    type: string
+  notes:
+    type: string
+    nullable: true

@@ -1,0 +1,178 @@
+openapi: 3.1.1
+info:
+  title: Dragons Counter API
+  description: 中日ドラゴンズ観戦記録API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.dragons-counter.com
+    description: Production server
+
+paths:
+  /games:
+    get:
+      tags:
+        - Games
+      summary: 観戦試合一覧取得
+      description: 登録されているすべての観戦試合記録を取得します
+      operationId: getGames
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+    post:
+      tags:
+        - Games
+      summary: 観戦試合登録
+      description: 新しい観戦試合記録を登録します。試合日は未来の日付を指定することはできません。
+      operationId: createGame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameRequest'
+      responses:
+        '201':
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: リクエスト不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /games/{gameId}:
+    get:
+      tags:
+        - Games
+      summary: 観戦試合詳細取得
+      operationId: getGameById
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          description: 見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Games
+      summary: 観戦試合更新
+      operationId: updateGame
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGameRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          description: 見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Games
+      summary: 観戦試合削除
+      description: 指定された観戦試合を論理削除します。物理的にデータは削除されず、deletedAtフィールドに削除日時が記録されます。
+      operationId: deleteGame
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: 見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /statistics:
+    get:
+      tags:
+        - Statistics
+      summary: 統計情報取得
+      operationId: getStatistics
+      parameters:
+        - name: year
+          in: query
+          description: 年度
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+
+components:
+  schemas:
+    Game:
+      $ref: './schemas/Game.yaml'
+    CreateGameRequest:
+      $ref: './schemas/CreateGameRequest.yaml'
+    UpdateGameRequest:
+      $ref: './schemas/UpdateGameRequest.yaml'
+    Statistics:
+      $ref: './schemas/Statistics.yaml'
+    Error:
+      $ref: './schemas/Error.yaml'

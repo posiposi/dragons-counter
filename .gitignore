@@ -1,0 +1,7 @@
+.env
+.env.local
+.env.*.local
+./CLAUDE.md
+certs/
+.claude
+CLAUDE.md

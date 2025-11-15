@@ -1,0 +1,19 @@
+.registrationButton {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.registrationButton:hover {
+  background-color: #1d4ed8;
+}
+
+.registrationButton:active {
+  background-color: #1e40af;
+}

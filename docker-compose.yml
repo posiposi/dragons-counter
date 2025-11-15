@@ -1,0 +1,96 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - dragons-network
+
+  test-db:
+    image: mysql:8.0
+    restart: always
+    env_file:
+      - ./backend/.env.test
+    ports:
+      - "3307:3306"
+    volumes:
+      - test_mysql_data:/var/lib/mysql
+    networks:
+      - dragons-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3443:3443"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./.env:/app/.env:ro
+      - ./backend/.env.test:/app/.env.test:ro
+      - ./certs:/app/certs:ro
+    depends_on:
+      - db
+    networks:
+      - dragons-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "3043:3043"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+      - ./.env:/app/.env:ro
+      - ./certs:/app/certs:ro
+    environment:
+      NODE_ENV: development
+      WATCHPACK_POLLING: true
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+    networks:
+      - dragons-network
+
+  api-docs:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend/docs:/usr/share/nginx/html:ro
+      - ./backend/docs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - dragons-network
+
+networks:
+  dragons-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  test_mysql_data:

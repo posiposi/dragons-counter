@@ -1,0 +1,23 @@
+type: object
+properties:
+  totalGames:
+    type: integer
+    description: 総観戦試合数
+  wins:
+    type: integer
+    description: 勝利数
+  losses:
+    type: integer
+    description: 敗戦数
+  draws:
+    type: integer
+    description: 引き分け数
+  winRate:
+    type: number
+    description: 勝率
+  homeGames:
+    type: integer
+    description: ホームゲーム数
+  awayGames:
+    type: integer
+    description: アウェイゲーム数

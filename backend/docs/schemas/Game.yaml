@@ -1,0 +1,48 @@
+type: object
+required:
+  - id
+  - gameDate
+  - opponent
+  - dragonsScore
+  - opponentScore
+  - result
+  - stadium
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+    format: uuid
+    description: 試合ID
+  gameDate:
+    type: string
+    format: date
+    description: 試合日
+  opponent:
+    type: string
+    description: 対戦相手
+  dragonsScore:
+    type: integer
+    minimum: 0
+    description: ドラゴンズ得点
+  opponentScore:
+    type: integer
+    minimum: 0
+    description: 相手チーム得点
+  result:
+    type: string
+    enum: [win, lose, draw]
+    description: 試合結果
+  stadium:
+    type: string
+    description: 球場
+  notes:
+    type: string
+    nullable: true
+    description: メモ
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
