@@ -4,10 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'backend/**'
-      - '.github/workflows/backend-ci.yml'
-      - 'docker-compose.yml'
-      - '.env'
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - "docker-compose.yml"
+      - ".env"
 
 jobs:
   test:
@@ -27,11 +27,11 @@ jobs:
           MYSQL_PASSWORD: ${{ secrets.MYSQL_TEST_PASSWORD }}
         ports:
           - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+        # options: >-
+        #   --health-cmd="mysqladmin ping"
+        #   --health-interval=10s
+        #   --health-timeout=5s
+        #   --health-retries=3
 
     steps:
       - name: Checkout code
@@ -40,8 +40,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.6.0'
-          cache: 'npm'
+          node-version: "24.6.0"
+          cache: "npm"
           cache-dependency-path: ./backend/package-lock.json
 
       - name: Install dependencies
@@ -75,8 +75,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.6.0'
-          cache: 'npm'
+          node-version: "24.6.0"
+          cache: "npm"
           cache-dependency-path: ./backend/package-lock.json
 
       - name: Install dependencies
