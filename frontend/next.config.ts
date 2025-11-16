@@ -4,9 +4,8 @@ import { join } from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
+  output: "standalone",
+  serverExternalPackages: [],
   async rewrites() {
     return {
       beforeFiles: [],
