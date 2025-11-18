@@ -37,3 +37,19 @@ module "networking" {
   environment  = var.environment
   vpc_cidr     = var.vpc_cidr
 }
+
+# ================================
+# ALBモジュール
+# ================================
+module "alb" {
+  source = "../../modules/alb"
+
+  project_name       = var.project_name
+  environment        = var.environment
+  vpc_id             = module.networking.vpc_id
+  public_subnet_ids  = [
+    module.networking.public_subnet_1_id,
+    module.networking.public_subnet_2_id
+  ]
+  enable_deletion_protection = false
+}

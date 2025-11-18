@@ -26,3 +26,32 @@ output "internet_gateway_id" {
   description = "インターネットゲートウェイのID"
   value       = module.networking.internet_gateway_id
 }
+
+# ================================
+# ALB出力値
+# ================================
+
+output "alb_dns_name" {
+  description = "ALBのDNS名（アクセスURL）"
+  value       = module.alb.alb_dns_name
+}
+
+output "alb_arn" {
+  description = "ALBのARN"
+  value       = module.alb.alb_arn
+}
+
+output "alb_security_group_id" {
+  description = "ALB用セキュリティグループのID"
+  value       = module.alb.alb_security_group_id
+}
+
+output "frontend_target_group_arn" {
+  description = "フロントエンド用ターゲットグループのARN"
+  value       = module.alb.frontend_target_group_arn
+}
+
+output "backend_target_group_arn" {
+  description = "バックエンド用ターゲットグループのARN"
+  value       = module.alb.backend_target_group_arn
+}
