@@ -11,3 +11,23 @@ output "vpc_cidr" {
   description = "VPCのCIDRブロック"
   value       = aws_vpc.main.cidr_block
 }
+
+output "public_subnet_1_id" {
+  description = "パブリックサブネット1のID"
+  value       = aws_subnet.public_1.id
+}
+
+output "public_subnet_2_id" {
+  description = "パブリックサブネット2のID"
+  value       = aws_subnet.public_2.id
+}
+
+output "internet_gateway_id" {
+  description = "インターネットゲートウェイのID"
+  value       = aws_internet_gateway.main.id
+}
+
+output "public_route_table_id" {
+  description = "パブリックルートテーブルのID"
+  value       = aws_route_table.public.id
+}
