@@ -38,3 +38,39 @@ resource "aws_subnet" "public_2" {
     AZ          = data.aws_availability_zones.available.names[1]
   }
 }
+
+# ================================
+# プライベートサブネット（ECS + RDS用）
+# ================================
+
+# プライベートサブネット 1（ECS + RDS用 - AZ1）
+resource "aws_subnet" "private_1" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.private_subnet_1_cidr
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name        = "${var.project_name}-private-subnet-1"
+    Environment = var.environment
+    Type        = "private"
+    Purpose     = "ECS + RDS"
+    AZ          = data.aws_availability_zones.available.names[0]
+  }
+}
+
+# プライベートサブネット 2（RDS DBサブネットグループ要件用 - AZ2）
+resource "aws_subnet" "private_2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.private_subnet_2_cidr
+  availability_zone       = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name        = "${var.project_name}-private-subnet-2"
+    Environment = var.environment
+    Type        = "private"
+    Purpose     = "RDS (subnet group requirement)"
+    AZ          = data.aws_availability_zones.available.names[1]
+  }
+}

@@ -29,3 +29,15 @@ variable "public_subnet_2_cidr" {
   type        = string
   default     = "10.0.2.0/24"
 }
+
+variable "private_subnet_1_cidr" {
+  description = "プライベートサブネット1のCIDRブロック（ECS + RDS用、AZ1）"
+  type        = string
+  default     = "10.0.10.0/24"
+}
+
+variable "private_subnet_2_cidr" {
+  description = "プライベートサブネット2のCIDRブロック（RDS DBサブネットグループ要件用、AZ2）"
+  type        = string
+  default     = "10.0.11.0/24"
+}

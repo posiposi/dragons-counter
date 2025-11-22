@@ -27,6 +27,16 @@ output "internet_gateway_id" {
   value       = module.networking.internet_gateway_id
 }
 
+output "private_subnet_1_id" {
+  description = "プライベートサブネット1のID"
+  value       = module.networking.private_subnet_1_id
+}
+
+output "private_subnet_2_id" {
+  description = "プライベートサブネット2のID"
+  value       = module.networking.private_subnet_2_id
+}
+
 # ================================
 # ALB出力値
 # ================================

@@ -31,3 +31,18 @@ output "public_route_table_id" {
   description = "パブリックルートテーブルのID"
   value       = aws_route_table.public.id
 }
+
+output "private_subnet_1_id" {
+  description = "プライベートサブネット1のID"
+  value       = aws_subnet.private_1.id
+}
+
+output "private_subnet_2_id" {
+  description = "プライベートサブネット2のID"
+  value       = aws_subnet.private_2.id
+}
+
+output "private_route_table_id" {
+  description = "プライベートルートテーブルのID"
+  value       = aws_route_table.private.id
+}
