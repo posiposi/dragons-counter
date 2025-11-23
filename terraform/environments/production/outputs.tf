@@ -37,6 +37,16 @@ output "private_subnet_2_id" {
   value       = module.networking.private_subnet_2_id
 }
 
+output "nat_gateway_id" {
+  description = "NAT GatewayのID"
+  value       = module.networking.nat_gateway_id
+}
+
+output "nat_gateway_eip" {
+  description = "NAT Gateway用Elastic IP（固定グローバルIP）"
+  value       = module.networking.nat_gateway_eip
+}
+
 # ================================
 # ALB出力値
 # ================================

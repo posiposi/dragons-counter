@@ -46,3 +46,13 @@ output "private_route_table_id" {
   description = "プライベートルートテーブルのID"
   value       = aws_route_table.private.id
 }
+
+output "nat_gateway_id" {
+  description = "NAT GatewayのID"
+  value       = aws_nat_gateway.main.id
+}
+
+output "nat_gateway_eip" {
+  description = "NAT Gateway用Elastic IP"
+  value       = aws_eip.nat.public_ip
+}
