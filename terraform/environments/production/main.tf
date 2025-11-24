@@ -1,6 +1,3 @@
-# ================================
-# Terraform設定
-# ================================
 terraform {
   required_version = ">= 1.0"
 
@@ -12,9 +9,6 @@ terraform {
   }
 }
 
-# ================================
-# プロバイダー設定
-# ================================
 provider "aws" {
   region = var.aws_region
 
@@ -27,9 +21,6 @@ provider "aws" {
   }
 }
 
-# ================================
-# ネットワーキングモジュール
-# ================================
 module "networking" {
   source = "../../modules/networking"
 
@@ -38,30 +29,24 @@ module "networking" {
   vpc_cidr     = var.vpc_cidr
 }
 
-# ================================
-# ALBモジュール
-# ================================
 module "alb" {
   source = "../../modules/alb"
 
-  project_name       = var.project_name
-  environment        = var.environment
-  vpc_id             = module.networking.vpc_id
-  public_subnet_ids  = [
+  project_name = var.project_name
+  environment  = var.environment
+  vpc_id       = module.networking.vpc_id
+  public_subnet_ids = [
     module.networking.public_subnet_1_id,
     module.networking.public_subnet_2_id
   ]
   enable_deletion_protection = false
 }
 
-# ================================
-# セキュリティグループモジュール
-# ================================
 module "security" {
   source = "../../modules/security"
 
-  project_name           = var.project_name
-  environment            = var.environment
-  vpc_id                 = module.networking.vpc_id
-  alb_security_group_id  = module.alb.alb_security_group_id
+  project_name          = var.project_name
+  environment           = var.environment
+  vpc_id                = module.networking.vpc_id
+  alb_security_group_id = module.alb.alb_security_group_id
 }

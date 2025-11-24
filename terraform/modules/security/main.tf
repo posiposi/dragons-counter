@@ -14,7 +14,6 @@ resource "aws_security_group" "ecs" {
   }
 }
 
-# インバウンドルール: ALBからのHTTPトラフィック (port 3000)
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
   security_group_id = aws_security_group.ecs.id
   description       = "Allow HTTP from ALB on port 3000"
@@ -29,7 +28,6 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
   }
 }
 
-# アウトバウンドルール: 全て許可（インターネット、RDS接続用）
 resource "aws_vpc_security_group_egress_rule" "ecs_all" {
   security_group_id = aws_security_group.ecs.id
   description       = "Allow all outbound traffic"
@@ -41,10 +39,6 @@ resource "aws_vpc_security_group_egress_rule" "ecs_all" {
     Name = "allow-all-outbound"
   }
 }
-
-# ================================
-# RDS用セキュリティグループ
-# ================================
 
 resource "aws_security_group" "rds" {
   name_prefix = "${var.project_name}-rds-sg-"
@@ -62,7 +56,6 @@ resource "aws_security_group" "rds" {
   }
 }
 
-# インバウンドルール: ECSからのMySQLトラフィック (port 3306)
 resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs" {
   security_group_id = aws_security_group.rds.id
   description       = "Allow MySQL from ECS tasks on port 3306"

@@ -1,7 +1,3 @@
-# ================================
-# 出力値
-# ================================
-
 output "alb_id" {
   description = "ALBのID"
   value       = aws_lb.main.id

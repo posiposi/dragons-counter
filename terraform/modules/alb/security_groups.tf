@@ -1,7 +1,3 @@
-# ================================
-# ALB用セキュリティグループ
-# ================================
-
 resource "aws_security_group" "alb" {
   name_prefix = "${var.project_name}-alb-sg-"
   description = "Security group for Application Load Balancer"
@@ -17,11 +13,10 @@ resource "aws_security_group" "alb" {
   }
 }
 
-# インバウンドルール: HTTP
 resource "aws_vpc_security_group_ingress_rule" "alb_http" {
   security_group_id = aws_security_group.alb.id
   description       = "Allow HTTP from internet"
-  
+
   from_port   = 80
   to_port     = 80
   ip_protocol = "tcp"
@@ -32,11 +27,10 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http" {
   }
 }
 
-# インバウンドルール: HTTPS
 resource "aws_vpc_security_group_ingress_rule" "alb_https" {
   security_group_id = aws_security_group.alb.id
   description       = "Allow HTTPS from internet"
-  
+
   from_port   = 443
   to_port     = 443
   ip_protocol = "tcp"
@@ -47,11 +41,10 @@ resource "aws_vpc_security_group_ingress_rule" "alb_https" {
   }
 }
 
-# アウトバウンドルール: 全て許可
 resource "aws_vpc_security_group_egress_rule" "alb_all" {
   security_group_id = aws_security_group.alb.id
   description       = "Allow all outbound traffic"
-  
+
   ip_protocol = "-1"
   cidr_ipv4   = "0.0.0.0/0"
 

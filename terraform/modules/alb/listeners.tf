@@ -1,14 +1,8 @@
-# ================================
-# ALB リスナー
-# ================================
-
-# HTTPリスナー (port 80)
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
 
-  # デフォルトアクション: フロントエンドへ転送
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.frontend.arn
@@ -20,7 +14,6 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# HTTPリスナールール: /api/* → バックエンド
 resource "aws_lb_listener_rule" "backend_api" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 100
@@ -42,7 +35,6 @@ resource "aws_lb_listener_rule" "backend_api" {
   }
 }
 
-# HTTPリスナールール: /health → バックエンド
 resource "aws_lb_listener_rule" "backend_health" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 101
