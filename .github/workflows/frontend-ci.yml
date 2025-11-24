@@ -4,10 +4,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-ci.yml'
-      - 'docker-compose.yml'
-      - '.env'
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+      - "docker-compose.yml"
+      - ".env"
+      - "terraform/**"
 
 jobs:
   lint:
