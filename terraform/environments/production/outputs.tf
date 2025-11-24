@@ -77,3 +77,13 @@ output "rds_security_group_id" {
   description = "RDS用セキュリティグループのID"
   value       = module.security.rds_security_group_id
 }
+
+output "frontend_ecr_repository_url" {
+  description = "FrontendのECRリポジトリURL"
+  value       = module.ecr.frontend_repository_url
+}
+
+output "backend_ecr_repository_url" {
+  description = "BackendのECRリポジトリURL"
+  value       = module.ecr.backend_repository_url
+}
