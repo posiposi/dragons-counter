@@ -8,6 +8,7 @@ on:
       - ".github/workflows/backend-ci.yml"
       - "docker-compose.yml"
       - ".env"
+      - "terraform/**"
 
 jobs:
   test:
