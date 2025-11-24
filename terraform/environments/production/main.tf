@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -57,4 +61,17 @@ module "ecr" {
   project_name           = var.project_name
   environment            = var.environment
   image_retention_count  = 5
+}
+
+module "rds" {
+  source = "../../modules/rds"
+
+  project_name           = var.project_name
+  environment            = var.environment
+  vpc_id                 = module.networking.vpc_id
+  private_subnet_ids     = [
+    module.networking.private_subnet_1_id,
+    module.networking.private_subnet_2_id
+  ]
+  rds_security_group_id  = module.security.rds_security_group_id
 }
