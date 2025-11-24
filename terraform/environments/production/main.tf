@@ -53,3 +53,15 @@ module "alb" {
   ]
   enable_deletion_protection = false
 }
+
+# ================================
+# セキュリティグループモジュール
+# ================================
+module "security" {
+  source = "../../modules/security"
+
+  project_name           = var.project_name
+  environment            = var.environment
+  vpc_id                 = module.networking.vpc_id
+  alb_security_group_id  = module.alb.alb_security_group_id
+}

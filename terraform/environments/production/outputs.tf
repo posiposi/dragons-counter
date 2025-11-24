@@ -1,7 +1,3 @@
-# ================================
-# 出力値
-# ================================
-
 output "vpc_id" {
   description = "VPCのID"
   value       = module.networking.vpc_id
@@ -47,10 +43,6 @@ output "nat_gateway_eip" {
   value       = module.networking.nat_gateway_eip
 }
 
-# ================================
-# ALB出力値
-# ================================
-
 output "alb_dns_name" {
   description = "ALBのDNS名（アクセスURL）"
   value       = module.alb.alb_dns_name
@@ -74,4 +66,14 @@ output "frontend_target_group_arn" {
 output "backend_target_group_arn" {
   description = "バックエンド用ターゲットグループのARN"
   value       = module.alb.backend_target_group_arn
+}
+
+output "ecs_security_group_id" {
+  description = "ECS用セキュリティグループのID"
+  value       = module.security.ecs_security_group_id
+}
+
+output "rds_security_group_id" {
+  description = "RDS用セキュリティグループのID"
+  value       = module.security.rds_security_group_id
 }
