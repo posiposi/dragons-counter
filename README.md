@@ -4,15 +4,15 @@
 
 ## プロジェクト構成
 
-このプロジェクトは3つの独立したリポジトリで構成されています：
+このプロジェクトは 3 つの独立したリポジトリで構成されています：
 
-- **backend**: バックエンドAPI (NestJS/TypeScript/DDD)
+- **backend**: バックエンド API (NestJS/TypeScript/DDD)
 - **frontend**: フロントエンド (Next.js/TypeScript)
 - **infrastructure**: インフラ構成 (Terraform/AWS)
 
 ## 各リポジトリの管理
 
-各ディレクトリは独立したGitリポジトリとして管理されます。
+各ディレクトリは独立した Git リポジトリとして管理されます。
 
 ```bash
 cd backend
@@ -45,3 +45,5 @@ git remote add origin <infrastructure-repo-url>
 - Domain-Driven Design (DDD)
 - API First Development (OpenAPI)
 - Test-Driven Development (TDD)
+
+## auto_merge のテスト
