@@ -75,3 +75,22 @@ module "rds" {
   ]
   rds_security_group_id  = module.security.rds_security_group_id
 }
+
+module "ecs" {
+  source = "../../modules/ecs"
+
+  project_name               = var.project_name
+  environment                = var.environment
+  vpc_id                     = module.networking.vpc_id
+  private_subnet_ids         = [module.networking.private_subnet_1_id]
+  ecs_security_group_id      = module.security.ecs_security_group_id
+  backend_target_group_arn   = module.alb.backend_target_group_arn
+  backend_ecr_repository_url = module.ecr.backend_repository_url
+  db_host                    = module.rds.db_instance_address
+  db_name                    = module.rds.db_name
+  db_username                = module.rds.db_username
+  db_password_secret_arn     = module.rds.db_password_secret_arn
+  frontend_target_group_arn  = module.alb.frontend_target_group_arn
+  frontend_ecr_repository_url = module.ecr.frontend_repository_url
+  alb_dns_name               = module.alb.alb_dns_name
+}

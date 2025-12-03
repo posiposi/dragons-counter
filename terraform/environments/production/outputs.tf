@@ -107,3 +107,28 @@ output "db_password_secret_arn" {
   description = "データベースパスワードのSecrets Manager ARN"
   value       = module.rds.db_password_secret_arn
 }
+
+output "ecs_cluster_name" {
+  description = "ECSクラスター名"
+  value       = module.ecs.cluster_name
+}
+
+output "backend_service_name" {
+  description = "BackendサービスARN"
+  value       = module.ecs.backend_service_name
+}
+
+output "backend_cloudwatch_log_group" {
+  description = "BackendのCloudWatch Logsグループ名"
+  value       = module.ecs.backend_cloudwatch_log_group
+}
+
+output "frontend_service_name" {
+  description = "Frontendサービス名"
+  value       = module.ecs.frontend_service_name
+}
+
+output "frontend_cloudwatch_log_group" {
+  description = "FrontendのCloudWatch Logsグループ名"
+  value       = module.ecs.frontend_cloudwatch_log_group
+}
