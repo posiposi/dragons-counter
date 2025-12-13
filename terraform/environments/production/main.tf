@@ -58,20 +58,38 @@ module "security" {
 module "ecr" {
   source = "../../modules/ecr"
 
-  project_name           = var.project_name
-  environment            = var.environment
-  image_retention_count  = 5
+  project_name          = var.project_name
+  environment           = var.environment
+  image_retention_count = 5
 }
 
 module "rds" {
   source = "../../modules/rds"
 
-  project_name           = var.project_name
-  environment            = var.environment
-  vpc_id                 = module.networking.vpc_id
-  private_subnet_ids     = [
+  project_name = var.project_name
+  environment  = var.environment
+  vpc_id       = module.networking.vpc_id
+  private_subnet_ids = [
     module.networking.private_subnet_1_id,
     module.networking.private_subnet_2_id
   ]
-  rds_security_group_id  = module.security.rds_security_group_id
+  rds_security_group_id = module.security.rds_security_group_id
+}
+
+module "ec2" {
+  source = "../../modules/ec2"
+
+  project_name              = var.project_name
+  environment               = var.environment
+  aws_region                = var.aws_region
+  subnet_id                 = module.networking.private_subnet_1_id
+  ec2_security_group_id     = module.security.ec2_security_group_id
+  frontend_repo_url         = module.ecr.frontend_repository_url
+  backend_repo_url          = module.ecr.backend_repository_url
+  frontend_target_group_arn = module.alb.frontend_target_group_arn
+  backend_target_group_arn  = module.alb.backend_target_group_arn
+  db_host                   = module.rds.db_instance_address
+  db_name                   = module.rds.db_name
+  db_user                   = module.rds.db_username
+  rds_secret_arn            = module.rds.db_password_secret_arn
 }

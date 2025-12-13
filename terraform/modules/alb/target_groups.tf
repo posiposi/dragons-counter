@@ -1,9 +1,9 @@
 resource "aws_lb_target_group" "frontend" {
   name        = "${var.project_name}-frontend-tg"
-  port        = 3000
+  port        = 3043
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
-  target_type = "ip"
+  target_type = "instance"
 
   health_check {
     enabled             = true
@@ -27,10 +27,10 @@ resource "aws_lb_target_group" "frontend" {
 
 resource "aws_lb_target_group" "backend" {
   name        = "${var.project_name}-backend-tg"
-  port        = 3000
+  port        = 3443
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
-  target_type = "ip"
+  target_type = "instance"
 
   health_check {
     enabled             = true
