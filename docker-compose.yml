@@ -67,12 +67,9 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - /app/.next
-      - ./.env:/app/.env:ro
       - ./certs:/app/certs:ro
     environment:
       NODE_ENV: development
-      WATCHPACK_POLLING: true
     stdin_open: true
     tty: true
     depends_on:

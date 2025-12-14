@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Game } from "@/types/game";
 import { fetchGames, deleteGame } from "@/lib/api/games";
