@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import styles from "./GameRegistrationDialog.module.css";
 
@@ -78,7 +76,7 @@ export default function GameRegistrationDialog({
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
       if (!API_BASE_URL) {
         throw new Error("API URL is not configured");
       }

@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./DeleteResultDialog.module.css";
 
 interface DeleteResultDialogProps {
