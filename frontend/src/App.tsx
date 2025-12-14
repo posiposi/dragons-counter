@@ -1,5 +1,7 @@
 import GameList from "@/components/GameList";
 
-export default function Home() {
+function App() {
   return <GameList />;
 }
+
+export default App;
