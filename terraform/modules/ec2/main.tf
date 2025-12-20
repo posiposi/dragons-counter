@@ -26,6 +26,7 @@ resource "aws_instance" "app" {
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [var.ec2_security_group_id]
   iam_instance_profile   = aws_iam_instance_profile.ec2.name
+  key_name               = var.key_name
 
   root_block_device {
     volume_size           = var.root_volume_size
@@ -35,15 +36,14 @@ resource "aws_instance" "app" {
   }
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    aws_region        = var.aws_region
-    frontend_repo_url = var.frontend_repo_url
-    backend_repo_url  = var.backend_repo_url
-    db_host           = var.db_host
-    db_name           = var.db_name
-    db_user           = var.db_user
-    db_secret_arn     = var.rds_secret_arn
-    frontend_port     = var.frontend_port
-    backend_port      = var.backend_port
+    aws_region      = var.aws_region
+    github_repo_url = var.github_repo_url
+    db_host         = var.db_host
+    db_name         = var.db_name
+    db_user         = var.db_user
+    db_secret_arn   = var.rds_secret_arn
+    frontend_port   = var.frontend_port
+    backend_port    = var.backend_port
   }))
 
   tags = {

@@ -21,28 +21,6 @@ resource "aws_iam_role" "ec2" {
   }
 }
 
-# ECR access policy
-resource "aws_iam_role_policy" "ecr_access" {
-  name = "${var.project_name}-ecr-access"
-  role = aws_iam_role.ec2.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ecr:GetAuthorizationToken",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
 # Secrets Manager access policy for RDS credentials
 resource "aws_iam_role_policy" "secrets_access" {
   name = "${var.project_name}-secrets-access"

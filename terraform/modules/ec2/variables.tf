@@ -32,16 +32,16 @@ variable "instance_type" {
 variable "root_volume_size" {
   description = "ルートボリュームサイズ (GB)"
   type        = number
-  default     = 20
+  default     = 30
 }
 
-variable "frontend_repo_url" {
-  description = "フロントエンドのECRリポジトリURL"
+variable "key_name" {
+  description = "SSH接続用キーペア名"
   type        = string
 }
 
-variable "backend_repo_url" {
-  description = "バックエンドのECRリポジトリURL"
+variable "github_repo_url" {
+  description = "GitHubリポジトリURL"
   type        = string
 }
 
