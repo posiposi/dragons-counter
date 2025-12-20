@@ -36,7 +36,7 @@ MYSQL_PASSWORD=$${DB_PASSWORD}
 NODE_ENV=production
 FRONTEND_PORT=${frontend_port}
 BACKEND_PORT=${backend_port}
-VITE_API_URL=http://localhost:${backend_port}
+VITE_API_URL=/api
 ENVEOF
 
 cat > /opt/dragons-counter/docker-compose.prod.yml << 'COMPOSEEOF'
@@ -46,17 +46,16 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
+      args:
+        - VITE_API_URL=/api
     container_name: dragons-counter-frontend
     ports:
-      - "${frontend_port}:3000"
-    environment:
-      - NODE_ENV=production
-      - VITE_API_URL=http://backend:3000
+      - "${frontend_port}:80"
     depends_on:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
       interval: 30s
       timeout: 10s
       retries: 3
