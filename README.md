@@ -7,8 +7,8 @@
 このプロジェクトは3つの独立したリポジトリで構成されています：
 
 - **backend**: バックエンドAPI (NestJS/TypeScript/DDD)
-- **frontend**: フロントエンド (Next.js/TypeScript)
-- **infrastructure**: インフラ構成 (Terraform/AWS)
+- **frontend**: フロントエンド (Vite + React/TypeScript)
+- **terraform**: インフラ構成 (Terraform/AWS)
 
 ## 各リポジトリの管理
 
@@ -23,9 +23,9 @@ cd frontend
 git init
 git remote add origin <frontend-repo-url>
 
-cd infrastructure
+cd terraform
 git init
-git remote add origin <infrastructure-repo-url>
+git remote add origin <terraform-repo-url>
 ```
 
 ## 開発環境
@@ -37,7 +37,7 @@ git remote add origin <infrastructure-repo-url>
 
 ## デプロイ環境
 
-- AWS ECS (Fargate)
+- AWS EC2 + ALB
 - GitHub Actions (CI/CD)
 
 ## アーキテクチャ
