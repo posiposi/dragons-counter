@@ -78,14 +78,9 @@ output "rds_security_group_id" {
   value       = module.security.rds_security_group_id
 }
 
-output "frontend_ecr_repository_url" {
-  description = "FrontendのECRリポジトリURL"
-  value       = module.ecr.frontend_repository_url
-}
-
-output "backend_ecr_repository_url" {
-  description = "BackendのECRリポジトリURL"
-  value       = module.ecr.backend_repository_url
+output "bastion_public_ip" {
+  description = "踏み台サーバーのパブリックIP"
+  value       = module.bastion.bastion_public_ip
 }
 
 output "db_instance_endpoint" {
