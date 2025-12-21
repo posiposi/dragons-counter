@@ -47,7 +47,7 @@ services:
       dockerfile: Dockerfile
       target: production
       args:
-        - VITE_API_URL=/api
+        VITE_API_URL: "/api"
     container_name: dragons-counter-frontend
     ports:
       - "${frontend_port}:80"
