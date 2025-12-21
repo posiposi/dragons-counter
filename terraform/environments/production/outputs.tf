@@ -68,9 +68,9 @@ output "backend_target_group_arn" {
   value       = module.alb.backend_target_group_arn
 }
 
-output "ecs_security_group_id" {
-  description = "ECS用セキュリティグループのID"
-  value       = module.security.ecs_security_group_id
+output "ec2_security_group_id" {
+  description = "EC2用セキュリティグループのID"
+  value       = module.security.ec2_security_group_id
 }
 
 output "rds_security_group_id" {
@@ -78,14 +78,9 @@ output "rds_security_group_id" {
   value       = module.security.rds_security_group_id
 }
 
-output "frontend_ecr_repository_url" {
-  description = "FrontendのECRリポジトリURL"
-  value       = module.ecr.frontend_repository_url
-}
-
-output "backend_ecr_repository_url" {
-  description = "BackendのECRリポジトリURL"
-  value       = module.ecr.backend_repository_url
+output "bastion_public_ip" {
+  description = "踏み台サーバーのパブリックIP"
+  value       = module.bastion.bastion_public_ip
 }
 
 output "db_instance_endpoint" {
@@ -106,4 +101,19 @@ output "db_name" {
 output "db_password_secret_arn" {
   description = "データベースパスワードのSecrets Manager ARN"
   value       = module.rds.db_password_secret_arn
+}
+
+output "ec2_instance_id" {
+  description = "EC2インスタンスのID"
+  value       = module.ec2.instance_id
+}
+
+output "ec2_instance_private_ip" {
+  description = "EC2インスタンスのプライベートIP"
+  value       = module.ec2.instance_private_ip
+}
+
+output "ec2_iam_role_arn" {
+  description = "EC2用IAMロールのARN"
+  value       = module.ec2.iam_role_arn
 }

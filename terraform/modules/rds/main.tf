@@ -28,13 +28,13 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [var.rds_security_group_id]
   parameter_group_name   = aws_db_parameter_group.main.name
 
-  multi_az               = false
-  publicly_accessible    = false
-  deletion_protection    = false
-  skip_final_snapshot    = true
+  multi_az                = false
+  publicly_accessible     = false
+  deletion_protection     = false
+  skip_final_snapshot     = true
   backup_retention_period = var.backup_retention_period
-  backup_window          = var.backup_window
-  maintenance_window     = var.maintenance_window
+  backup_window           = var.backup_window
+  maintenance_window      = var.maintenance_window
 
   enabled_cloudwatch_logs_exports = ["error", "general", "slowquery"]
 

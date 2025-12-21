@@ -1,11 +1,11 @@
-output "ecs_security_group_id" {
-  description = "ECS用セキュリティグループのID"
-  value       = aws_security_group.ecs.id
+output "ec2_security_group_id" {
+  description = "EC2用セキュリティグループのID"
+  value       = aws_security_group.ec2.id
 }
 
-output "ecs_security_group_name" {
-  description = "ECS用セキュリティグループの名前"
-  value       = aws_security_group.ecs.name
+output "ec2_security_group_name" {
+  description = "EC2用セキュリティグループの名前"
+  value       = aws_security_group.ec2.name
 }
 
 output "rds_security_group_id" {

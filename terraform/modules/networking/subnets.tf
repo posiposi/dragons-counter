@@ -42,7 +42,7 @@ resource "aws_subnet" "private_1" {
     Name        = "${var.project_name}-private-subnet-1"
     Environment = var.environment
     Type        = "private"
-    Purpose     = "ECS + RDS"
+    Purpose     = "EC2 + RDS"
     AZ          = data.aws_availability_zones.available.names[0]
   }
 }

@@ -13,7 +13,7 @@ export async function fetchGames(): Promise<Game[]> {
 
   if (!response.ok) {
     throw new Error(
-      "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
+      "レスポンス取得で予期しないエラーが発生しました。しばらく経ってから再度お試しください",
     );
   }
 

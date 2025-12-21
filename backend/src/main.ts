@@ -22,6 +22,10 @@ async function bootstrap() {
       credentials: true,
     });
 
+    app.setGlobalPrefix('api', {
+      exclude: ['health'],
+    });
+
     const port = process.env.PORT ?? 3000;
     await app.listen(port, '0.0.0.0');
     console.log(`Application is running on: http://localhost:${port}`);
@@ -56,6 +60,10 @@ async function bootstrap() {
       origin: allowedOrigins,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
+    });
+
+    app.setGlobalPrefix('api', {
+      exclude: ['health'],
     });
 
     const httpsPort = process.env.HTTPS_PORT ?? 3443;

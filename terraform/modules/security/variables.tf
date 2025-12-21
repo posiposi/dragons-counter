@@ -17,3 +17,8 @@ variable "alb_security_group_id" {
   description = "ALBのセキュリティグループID"
   type        = string
 }
+
+variable "bastion_security_group_id" {
+  description = "BastionのセキュリティグループID"
+  type        = string
+}
