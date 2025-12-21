@@ -23,3 +23,9 @@ variable "enable_deletion_protection" {
   type        = bool
   default     = false
 }
+
+variable "certificate_arn" {
+  description = "ACM証明書のARN（HTTPS有効化に必要）"
+  type        = string
+  default     = null
+}

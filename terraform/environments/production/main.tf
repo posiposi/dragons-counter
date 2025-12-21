@@ -25,6 +25,14 @@ provider "aws" {
   }
 }
 
+data "aws_acm_certificate" "main" {
+  count = var.enable_https ? 1 : 0
+
+  domain      = var.domain_name
+  statuses    = ["ISSUED"]
+  most_recent = true
+}
+
 module "networking" {
   source = "../../modules/networking"
 
@@ -44,6 +52,7 @@ module "alb" {
     module.networking.public_subnet_2_id
   ]
   enable_deletion_protection = false
+  certificate_arn            = var.enable_https ? data.aws_acm_certificate.main[0].arn : null
 }
 
 module "bastion" {
@@ -96,4 +105,16 @@ module "ec2" {
   db_name                   = module.rds.db_name
   db_user                   = module.rds.db_username
   rds_secret_arn            = module.rds.db_password_secret_arn
+}
+
+module "route53" {
+  source = "../../modules/route53"
+  count  = var.enable_https ? 1 : 0
+
+  domain_name       = var.domain_name
+  alb_dns_name      = module.alb.alb_dns_name
+  alb_zone_id       = module.alb.alb_zone_id
+  create_www_record = true
+  project_name      = var.project_name
+  environment       = var.environment
 }
