@@ -38,3 +38,15 @@ variable "github_repo_url" {
   type        = string
   default     = "https://github.com/posiposi/dragons-counter.git"
 }
+
+variable "domain_name" {
+  description = "ドメイン名"
+  type        = string
+  default     = "dravincit.com"
+}
+
+variable "enable_https" {
+  description = "HTTPSを有効化するか（persistent環境のACM証明書が必要）"
+  type        = bool
+  default     = true
+}

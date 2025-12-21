@@ -117,3 +117,23 @@ output "ec2_iam_role_arn" {
   description = "EC2用IAMロールのARN"
   value       = module.ec2.iam_role_arn
 }
+
+output "https_enabled" {
+  description = "HTTPSが有効かどうか"
+  value       = var.enable_https
+}
+
+output "domain_url" {
+  description = "ドメインURL（HTTPS有効時）"
+  value       = var.enable_https ? "https://${var.domain_name}" : null
+}
+
+output "www_domain_url" {
+  description = "wwwドメインURL（HTTPS有効時）"
+  value       = var.enable_https ? "https://www.${var.domain_name}" : null
+}
+
+output "https_listener_arn" {
+  description = "HTTPSリスナーのARN"
+  value       = module.alb.https_listener_arn
+}

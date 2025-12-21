@@ -37,3 +37,8 @@ output "http_listener_arn" {
   description = "HTTPリスナーのARN"
   value       = aws_lb_listener.http.arn
 }
+
+output "https_listener_arn" {
+  description = "HTTPSリスナーのARN（HTTPS有効時のみ）"
+  value       = var.certificate_arn != null ? aws_lb_listener.https[0].arn : null
+}
