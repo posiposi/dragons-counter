@@ -84,6 +84,15 @@ cd /opt/dragons-counter
 docker-compose -f docker-compose.prod.yml build
 docker-compose -f docker-compose.prod.yml up -d
 
+echo "Waiting for backend container to be ready..."
+sleep 30
+
+echo "Running database migrations..."
+docker-compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy || \
+  docker-compose -f docker-compose.prod.yml exec -T backend npx prisma db push
+
+echo "Database migrations completed"
+
 cat > /etc/systemd/system/dragons-counter.service << 'SERVICEEOF'
 [Unit]
 Description=Dragons Counter Application
