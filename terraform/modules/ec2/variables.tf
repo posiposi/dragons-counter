@@ -86,3 +86,9 @@ variable "rds_secret_arn" {
   description = "RDSパスワードのSecrets Manager ARN"
   type        = string
 }
+
+variable "deploy_bucket_arn" {
+  description = "デプロイアーティファクト用S3バケットARN"
+  type        = string
+  default     = ""
+}
