@@ -33,6 +33,8 @@ data "aws_acm_certificate" "main" {
   most_recent = true
 }
 
+data "aws_caller_identity" "current" {}
+
 module "networking" {
   source = "../../modules/networking"
 
@@ -105,6 +107,7 @@ module "ec2" {
   db_name                   = module.rds.db_name
   db_user                   = module.rds.db_username
   rds_secret_arn            = module.rds.db_password_secret_arn
+  deploy_bucket_arn         = module.s3_deploy.bucket_arn
 }
 
 module "route53" {
@@ -117,4 +120,32 @@ module "route53" {
   create_www_record = true
   project_name      = var.project_name
   environment       = var.environment
+}
+
+module "s3_deploy" {
+  source = "../../modules/s3-deploy"
+
+  project_name = var.project_name
+  environment  = var.environment
+}
+
+module "codedeploy" {
+  source = "../../modules/codedeploy"
+
+  project_name  = var.project_name
+  environment   = var.environment
+  ec2_tag_value = "${var.project_name}-app"
+}
+
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+
+  project_name        = var.project_name
+  environment         = var.environment
+  github_org          = var.github_org
+  github_repo         = var.github_repo
+  aws_region          = var.aws_region
+  aws_account_id      = data.aws_caller_identity.current.account_id
+  s3_bucket_arn       = module.s3_deploy.bucket_arn
+  codedeploy_app_name = module.codedeploy.app_name
 }

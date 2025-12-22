@@ -39,6 +39,18 @@ variable "github_repo_url" {
   default     = "https://github.com/posiposi/dragons-counter.git"
 }
 
+variable "github_org" {
+  description = "GitHub組織名またはユーザー名"
+  type        = string
+  default     = "posiposi"
+}
+
+variable "github_repo" {
+  description = "GitHubリポジトリ名"
+  type        = string
+  default     = "dragons-counter"
+}
+
 variable "domain_name" {
   description = "ドメイン名"
   type        = string
