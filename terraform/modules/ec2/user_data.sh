@@ -19,6 +19,15 @@ ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 dnf install -y aws-cli
 
+dnf install -y ruby wget
+cd /home/ec2-user
+wget https://aws-codedeploy-${aws_region}.s3.${aws_region}.amazonaws.com/latest/install
+chmod +x ./install
+./install auto
+systemctl start codedeploy-agent
+systemctl enable codedeploy-agent
+echo "CodeDeploy agent installed and started"
+
 mkdir -p /opt/dragons-counter
 cd /opt/dragons-counter
 
