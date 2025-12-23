@@ -35,7 +35,7 @@ git clone ${github_repo_url} .
 
 DB_PASSWORD=$(aws secretsmanager get-secret-value --secret-id ${db_secret_arn} --region ${aws_region} --query 'SecretString' --output text)
 
-cat > /opt/dragons-counter/.env << ENVEOF
+cat > /opt/dragons-counter/deploy/production/.env << ENVEOF
 DATABASE_URL=mysql://${db_user}:$${DB_PASSWORD}@${db_host}:3306/${db_name}
 MYSQL_HOST=${db_host}
 MYSQL_PORT=3306
@@ -48,57 +48,16 @@ BACKEND_PORT=${backend_port}
 VITE_API_URL=/api
 ENVEOF
 
-cat > /opt/dragons-counter/docker-compose.prod.yml << 'COMPOSEEOF'
-services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: production
-      args:
-        VITE_API_URL: "/api"
-    container_name: dragons-counter-frontend
-    ports:
-      - "${frontend_port}:80"
-    depends_on:
-      - backend
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      target: production
-    container_name: dragons-counter-backend
-    ports:
-      - "${backend_port}:3000"
-    env_file:
-      - .env
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-COMPOSEEOF
-
-cd /opt/dragons-counter
-docker-compose -f docker-compose.prod.yml build
-docker-compose -f docker-compose.prod.yml up -d
+cd /opt/dragons-counter/deploy/production
+docker-compose build
+docker-compose up -d
 
 echo "Waiting for backend container to be ready..."
 sleep 30
 
 echo "Running database migrations..."
-docker-compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy || \
-  docker-compose -f docker-compose.prod.yml exec -T backend npx prisma db push
+docker-compose exec -T backend npx prisma migrate deploy || \
+  docker-compose exec -T backend npx prisma db push
 
 echo "Database migrations completed"
 
@@ -111,9 +70,9 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/opt/dragons-counter
-ExecStart=/usr/local/bin/docker-compose -f docker-compose.prod.yml up -d
-ExecStop=/usr/local/bin/docker-compose -f docker-compose.prod.yml down
+WorkingDirectory=/opt/dragons-counter/deploy/production
+ExecStart=/usr/local/bin/docker-compose up -d
+ExecStop=/usr/local/bin/docker-compose down
 TimeoutStartSec=0
 
 [Install]

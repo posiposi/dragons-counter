@@ -1,0 +1,39 @@
+services:
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: "/api"
+    container_name: dragons-counter-frontend
+    ports:
+      - "${FRONTEND_PORT:-3043}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: dragons-counter-backend
+    ports:
+      - "${BACKEND_PORT:-3443}:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
