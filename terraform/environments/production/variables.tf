@@ -25,7 +25,6 @@ variable "vpc_cidr" {
 variable "allowed_ssh_cidr" {
   description = "SSH接続を許可するCIDRブロック"
   type        = string
-  default     = "14.133.218.35/32"
 }
 
 variable "key_name" {
