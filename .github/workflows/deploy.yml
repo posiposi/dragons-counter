@@ -1,0 +1,80 @@
+name: Deploy EC2 to AWS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "deploy/**"
+      - "appspec.yml"
+      - "scripts/codedeploy/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  CODEDEPLOY_APP: ${{ secrets.CODEDEPLOY_APP }}
+  CODEDEPLOY_GROUP: ${{ secrets.CODEDEPLOY_GROUP }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@main
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create deployment package
+        run: |
+          COMMIT_SHA="${{ github.sha }}"
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          ARTIFACT_NAME="dragons-counter-${TIMESTAMP}-${COMMIT_SHA:0:7}.zip"
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
+
+          zip -r "${ARTIFACT_NAME}" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "terraform/*" \
+            -x "certs/*" \
+            -x "*.md" \
+            -x ".env*" \
+            -x "node_modules/*" \
+            -x "backend/node_modules/*" \
+            -x "frontend/node_modules/*" \
+            -x ".gitignore"
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp "${ARTIFACT_NAME}" "s3://${S3_BUCKET}/artifacts/${ARTIFACT_NAME}"
+
+      - name: Create CodeDeploy deployment
+        run: |
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name "${CODEDEPLOY_APP}" \
+            --deployment-group-name "${CODEDEPLOY_GROUP}" \
+            --s3-location "bucket=${S3_BUCKET},key=artifacts/${ARTIFACT_NAME},bundleType=zip" \
+            --description "Deployment from GitHub Actions - Commit: ${{ github.sha }}" \
+            --query 'deploymentId' \
+            --output text)
+
+          echo "DEPLOYMENT_ID=${DEPLOYMENT_ID}" >> $GITHUB_ENV
+          echo "::notice ::Deployment started: ${DEPLOYMENT_ID}"
+
+      - name: Wait for deployment to complete
+        run: |
+          echo "Waiting for deployment ${DEPLOYMENT_ID} to complete..."
+          aws deploy wait deployment-successful \
+            --deployment-id "${DEPLOYMENT_ID}"
+          echo "::notice ::Deployment ${DEPLOYMENT_ID} completed successfully!"
