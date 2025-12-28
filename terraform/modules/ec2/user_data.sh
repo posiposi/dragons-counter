@@ -23,7 +23,7 @@ dnf install -y ruby wget
 cd /home/ec2-user
 wget https://aws-codedeploy-${aws_region}.s3.${aws_region}.amazonaws.com/latest/install
 chmod +x ./install
-./install auto || true
+./install
 
 cat > /etc/systemd/system/codedeploy-agent.service << 'CODEDEPLOYEOF'
 [Unit]
