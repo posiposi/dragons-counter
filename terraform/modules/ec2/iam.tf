@@ -52,6 +52,30 @@ resource "aws_iam_role_policy_attachment" "cloudwatch" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
+resource "aws_iam_role_policy" "codedeploy_s3_access" {
+  count = var.enable_codedeploy ? 1 : 0
+  name  = "${var.project_name}-codedeploy-s3-access"
+  role  = aws_iam_role.ec2.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          var.deploy_bucket_arn,
+          "${var.deploy_bucket_arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
 # Instance Profile
 resource "aws_iam_instance_profile" "ec2" {
   name = "${var.project_name}-ec2-profile"

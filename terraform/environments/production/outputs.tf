@@ -137,3 +137,23 @@ output "https_listener_arn" {
   description = "HTTPSリスナーのARN"
   value       = module.alb.https_listener_arn
 }
+
+output "deploy_bucket_name" {
+  description = "デプロイアーティファクト用S3バケット名"
+  value       = module.s3_deploy.bucket_name
+}
+
+output "codedeploy_app_name" {
+  description = "CodeDeployアプリケーション名"
+  value       = module.codedeploy.app_name
+}
+
+output "codedeploy_deployment_group" {
+  description = "CodeDeployデプロイメントグループ名"
+  value       = module.codedeploy.deployment_group_name
+}
+
+output "github_actions_role_arn" {
+  description = "GitHub Actions用IAMロールARN"
+  value       = module.github_oidc.role_arn
+}

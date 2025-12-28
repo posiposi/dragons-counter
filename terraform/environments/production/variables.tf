@@ -25,7 +25,6 @@ variable "vpc_cidr" {
 variable "allowed_ssh_cidr" {
   description = "SSH接続を許可するCIDRブロック"
   type        = string
-  default     = "14.133.218.35/32"
 }
 
 variable "key_name" {
@@ -37,6 +36,18 @@ variable "github_repo_url" {
   description = "GitHubリポジトリURL"
   type        = string
   default     = "https://github.com/posiposi/dragons-counter.git"
+}
+
+variable "github_org" {
+  description = "GitHub組織名またはユーザー名"
+  type        = string
+  default     = "posiposi"
+}
+
+variable "github_repo" {
+  description = "GitHubリポジトリ名"
+  type        = string
+  default     = "dragons-counter"
 }
 
 variable "domain_name" {

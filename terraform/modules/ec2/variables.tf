@@ -86,3 +86,15 @@ variable "rds_secret_arn" {
   description = "RDSパスワードのSecrets Manager ARN"
   type        = string
 }
+
+variable "enable_codedeploy" {
+  description = "CodeDeployを有効化するか"
+  type        = bool
+  default     = false
+}
+
+variable "deploy_bucket_arn" {
+  description = "デプロイアーティファクト用S3バケットARN"
+  type        = string
+  default     = ""
+}
