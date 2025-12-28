@@ -9,6 +9,7 @@ on:
       - "docker-compose.yml"
       - ".env"
       - "terraform/**"
+  workflow_dispatch:
 
 jobs:
   lint:
