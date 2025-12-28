@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch" {
 }
 
 resource "aws_iam_role_policy" "codedeploy_s3_access" {
-  count = var.deploy_bucket_arn != "" ? 1 : 0
+  count = var.enable_codedeploy ? 1 : 0
   name  = "${var.project_name}-codedeploy-s3-access"
   role  = aws_iam_role.ec2.id
 

@@ -107,6 +107,7 @@ module "ec2" {
   db_name                   = module.rds.db_name
   db_user                   = module.rds.db_username
   rds_secret_arn            = module.rds.db_password_secret_arn
+  enable_codedeploy         = true
   deploy_bucket_arn         = module.s3_deploy.bucket_arn
 }
 
