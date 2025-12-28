@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "deploy" {
-  bucket = "${var.project_name}-deploy-artifacts-${var.environment}"
+  bucket        = "${var.project_name}-deploy-artifacts-${var.environment}"
+  force_destroy = true
 
   tags = {
     Name        = "${var.project_name}-deploy-artifacts"
