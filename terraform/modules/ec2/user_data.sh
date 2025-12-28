@@ -23,9 +23,27 @@ dnf install -y ruby wget
 cd /home/ec2-user
 wget https://aws-codedeploy-${aws_region}.s3.${aws_region}.amazonaws.com/latest/install
 chmod +x ./install
-./install auto
-systemctl start codedeploy-agent
+./install auto || true
+
+cat > /etc/systemd/system/codedeploy-agent.service << 'CODEDEPLOYEOF'
+[Unit]
+Description=AWS CodeDeploy Host Agent
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/codedeploy-agent/bin/codedeploy-agent start
+KillMode=process
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+CODEDEPLOYEOF
+
+systemctl daemon-reload
 systemctl enable codedeploy-agent
+systemctl start codedeploy-agent
 echo "CodeDeploy agent installed and started"
 
 mkdir -p /opt/dragons-counter
