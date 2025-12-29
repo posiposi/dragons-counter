@@ -57,25 +57,13 @@ module "alb" {
   certificate_arn            = var.enable_https ? data.aws_acm_certificate.main[0].arn : null
 }
 
-module "bastion" {
-  source = "../../modules/bastion"
-
-  project_name     = var.project_name
-  environment      = var.environment
-  vpc_id           = module.networking.vpc_id
-  subnet_id        = module.networking.public_subnet_1_id
-  allowed_ssh_cidr = var.allowed_ssh_cidr
-  key_name         = var.key_name
-}
-
 module "security" {
   source = "../../modules/security"
 
-  project_name              = var.project_name
-  environment               = var.environment
-  vpc_id                    = module.networking.vpc_id
-  alb_security_group_id     = module.alb.alb_security_group_id
-  bastion_security_group_id = module.bastion.bastion_security_group_id
+  project_name          = var.project_name
+  environment           = var.environment
+  vpc_id                = module.networking.vpc_id
+  alb_security_group_id = module.alb.alb_security_group_id
 }
 
 module "rds" {
@@ -99,7 +87,6 @@ module "ec2" {
   aws_region                = var.aws_region
   subnet_id                 = module.networking.private_subnet_1_id
   ec2_security_group_id     = module.security.ec2_security_group_id
-  key_name                  = var.key_name
   github_repo_url           = var.github_repo_url
   frontend_target_group_arn = module.alb.frontend_target_group_arn
   backend_target_group_arn  = module.alb.backend_target_group_arn

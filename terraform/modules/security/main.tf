@@ -84,16 +84,3 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ec2" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ec2_from_bastion" {
-  security_group_id = aws_security_group.ec2.id
-  description       = "Allow SSH from Bastion host"
-
-  from_port                    = 22
-  to_port                      = 22
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = var.bastion_security_group_id
-
-  tags = {
-    Name = "allow-ssh-from-bastion"
-  }
-}

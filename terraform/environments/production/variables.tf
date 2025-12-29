@@ -22,16 +22,6 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "allowed_ssh_cidr" {
-  description = "SSH接続を許可するCIDRブロック"
-  type        = string
-}
-
-variable "key_name" {
-  description = "SSH接続用キーペア名（AWSコンソールで事前に作成が必要）"
-  type        = string
-}
-
 variable "github_repo_url" {
   description = "GitHubリポジトリURL"
   type        = string
