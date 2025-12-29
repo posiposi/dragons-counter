@@ -49,7 +49,7 @@ export default function GameList() {
       await deleteGame(deleteTargetGame.id);
 
       setGames((prevGames) =>
-        prevGames.filter((game) => game.id !== deleteTargetGame.id)
+        prevGames.filter((game) => game.id !== deleteTargetGame.id),
       );
 
       setDeleteResult({
