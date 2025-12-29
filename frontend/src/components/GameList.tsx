@@ -146,7 +146,7 @@ export default function GameList() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div>
-            <h1 className={styles.title}>Dragons Counter</h1>
+            <h1 className={styles.title}>Dra Vincit</h1>
             <p className={styles.subtitle}>中日ドラゴンズ観戦記録</p>
           </div>
           <GameRegistrationButton
