@@ -3,12 +3,8 @@ name: Frontend CI
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend-ci.yml"
-      - "docker-compose.yml"
-      - ".env"
-      - "terraform/**"
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
