@@ -3,12 +3,8 @@ name: Frontend CI
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend-ci.yml"
-      - "docker-compose.yml"
-      - ".env"
-      - "terraform/**"
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -21,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
