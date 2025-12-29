@@ -26,7 +26,6 @@ resource "aws_instance" "app" {
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [var.ec2_security_group_id]
   iam_instance_profile   = aws_iam_instance_profile.ec2.name
-  key_name               = var.key_name
 
   root_block_device {
     volume_size           = var.root_volume_size

@@ -78,11 +78,6 @@ output "rds_security_group_id" {
   value       = module.security.rds_security_group_id
 }
 
-output "bastion_public_ip" {
-  description = "踏み台サーバーのパブリックIP"
-  value       = module.bastion.bastion_public_ip
-}
-
 output "db_instance_endpoint" {
   description = "RDSインスタンスのエンドポイント"
   value       = module.rds.db_instance_endpoint

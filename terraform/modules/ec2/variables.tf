@@ -35,11 +35,6 @@ variable "root_volume_size" {
   default     = 30
 }
 
-variable "key_name" {
-  description = "SSH接続用キーペア名"
-  type        = string
-}
-
 variable "github_repo_url" {
   description = "GitHubリポジトリURL"
   type        = string
