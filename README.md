@@ -1,47 +1,90 @@
-# Dragons Counter Project
+# dra vincit
 
-中日ドラゴンズ観戦記録アプリケーション
+中日ドラゴンズファン向け野球観戦記録アプリケーション
 
 ## プロジェクト構成
 
-このプロジェクトは3つの独立したリポジトリで構成されています：
-
-- **backend**: バックエンドAPI (NestJS/TypeScript/DDD)
-- **frontend**: フロントエンド (Vite + React/TypeScript)
-- **terraform**: インフラ構成 (Terraform/AWS)
-
-## 各リポジトリの管理
-
-各ディレクトリは独立したGitリポジトリとして管理されます。
-
-```bash
-cd backend
-git init
-git remote add origin <backend-repo-url>
-
-cd frontend
-git init
-git remote add origin <frontend-repo-url>
-
-cd terraform
-git init
-git remote add origin <terraform-repo-url>
+```
+dra-vincit/
+├── backend/     # NestJS/TypeScript API（DDD）
+├── frontend/    # Vite + React/TypeScript
+├── terraform/   # AWS インフラ構成
 ```
 
-## 開発環境
+## 技術スタック
 
-- Docker/Docker Compose
-- Node.js 20+
-- TypeScript
+### バックエンド
+
+- NestJS / TypeScript
+- Prisma ORM
 - MySQL 8.0
-
-## デプロイ環境
-
-- AWS EC2 + ALB
-- GitHub Actions (CI/CD)
-
-## アーキテクチャ
-
 - Domain-Driven Design (DDD)
-- API First Development (OpenAPI)
-- Test-Driven Development (TDD)
+
+### フロントエンド
+
+- Vite 6 + React 19
+- TypeScript
+- CSS Modules
+
+### インフラ
+
+- AWS (EC2 / ALB / RDS / VPC)
+- Terraform
+- Docker / Docker Compose
+
+## インフラ構成
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         AWS VPC                             │
+│                                                             │
+│  ┌─────────────────────┐    ┌─────────────────────────┐     │
+│  │  Public Subnet      │    │  Private Subnet         │     │
+│  │                     │    │                         │     │
+│  │  ┌───────────────┐  │    │  ┌─────────────────┐    │     │
+│  │  │     ALB       │──┼────┼─▶│      EC2        │    │     │
+│  │  │  (HTTPS/443)  │  │    │  │  (Backend API)  │    │     │
+│  │  └───────────────┘  │    │  │  (Frontend)     │    │     │
+│  │                     │    │  └────────┬────────┘    │     │
+│  │  ┌───────────────┐  │    │           │             │     │
+│  │  │  NAT Gateway  │  │    │  ┌────────▼────────┐    │     │
+│  │  └───────────────┘  │    │  │      RDS        │    │     │
+│  │                     │    │  │    (MySQL)      │    │     │
+│  └─────────────────────┘    │  └─────────────────┘    │     │
+│                             └─────────────────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### セキュアな EC2 アクセス
+
+EC2 インスタンスはプライベートサブネットに配置され、SSH ポートは開放していません。
+サーバーへのアクセスは **AWS Systems Manager (SSM) Session Manager** を使用します。
+
+## CI/CD パイプライン
+
+GitHub Actions + AWS CodeDeploy による自動デプロイ:
+
+```
+┌──────────┐    ┌────────────────┐    ┌─────────────┐    ┌──────┐
+│  GitHub  │───▶│ GitHub Actions │───▶│  CodeDeploy │───▶│  EC2 │
+│   Push   │    │   (CI/Build)   │    │  (Deploy)   │    │      │
+└──────────┘    └────────────────┘    └─────────────┘    └──────┘
+```
+
+### ワークフロー
+
+| ワークフロー      | トリガー  | 内容                      |
+| ----------------- | --------- | ------------------------- |
+| `backend-ci.yml`  | PR        | Lint + Test               |
+| `frontend-ci.yml` | PR        | Lint + TypeCheck + Format |
+| `deploy.yml`      | main push | CodeDeploy デプロイ       |
+
+## 開発方針
+
+- **API First**: OpenAPI 仕様に準拠
+- **TDD**: テスト駆動開発
+- **DDD**: ドメイン駆動設計
+
+## ライセンス
+
+Private
