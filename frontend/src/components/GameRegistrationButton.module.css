@@ -8,6 +8,7 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .registrationButton:hover {
