@@ -87,6 +87,19 @@ services:
     networks:
       - dragons-network
 
+  proxy:
+    image: nginx:1.29.4-alpine
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - dragons-network
+
 networks:
   dragons-network:
     driver: bridge
