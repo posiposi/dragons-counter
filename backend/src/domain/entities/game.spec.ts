@@ -3,7 +3,7 @@ import { GameId } from '../value-objects/game-id';
 import { GameDate } from '../value-objects/game-date';
 import { Opponent } from '../value-objects/opponent';
 import { Score } from '../value-objects/score';
-import { Stadium } from '../value-objects/stadium';
+import { StadiumId } from '../value-objects/stadium-id';
 import { Notes } from '../value-objects/notes';
 import { GameResultValue } from '../value-objects/game-result';
 
@@ -14,7 +14,7 @@ describe('Game Entity', () => {
     opponent: new Opponent('読売ジャイアンツ'),
     dragonsScore: new Score(5),
     opponentScore: new Score(3),
-    stadium: new Stadium('バンテリンドーム ナゴヤ'),
+    stadiumId: new StadiumId('stadium-id'),
     notes: new Notes('素晴らしい試合でした'),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -27,7 +27,7 @@ describe('Game Entity', () => {
       opponent: Opponent;
       dragonsScore: Score;
       opponentScore: Score;
-      stadium: Stadium;
+      stadiumId: StadiumId;
       notes: Notes;
       createdAt: Date;
       updatedAt: Date;
@@ -40,7 +40,7 @@ describe('Game Entity', () => {
       data.opponent,
       data.dragonsScore,
       data.opponentScore,
-      data.stadium,
+      data.stadiumId,
       data.notes,
       data.createdAt,
       data.updatedAt,
@@ -56,7 +56,7 @@ describe('Game Entity', () => {
       expect(game.dragonsScore).toBe(validGameData.dragonsScore);
       expect(game.opponentScore).toBe(validGameData.opponentScore);
       expect(game.result.value).toBe(GameResultValue.WIN);
-      expect(game.stadium).toBe(validGameData.stadium);
+      expect(game.stadiumId).toBe(validGameData.stadiumId);
     });
 
     it('should automatically determine WIN result when dragons score is higher', () => {

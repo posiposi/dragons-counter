@@ -5,7 +5,7 @@ import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
 import { Score } from '../../domain/value-objects/score';
 import { Opponent } from '../../domain/value-objects/opponent';
-import { Stadium } from '../../domain/value-objects/stadium';
+import { StadiumId } from '../../domain/value-objects/stadium-id';
 import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
 import { GameResultValue } from '../../domain/value-objects/game-result';
@@ -94,7 +94,7 @@ describe('GameAdapter Integration Tests', () => {
                 new Opponent(gameData.opponent),
                 new Score(gameData.dragonsScore),
                 new Score(gameData.opponentScore),
-                new Stadium(gameData.stadium),
+                new StadiumId(gameData.stadium),
                 new Notes(gameData.notes),
                 gameData.date,
                 gameData.date,
@@ -107,7 +107,7 @@ describe('GameAdapter Integration Tests', () => {
               expect(result.id.value).toBe(gameId.value);
               expect(result.gameDate.value).toEqual(gameData.date);
               expect(result.opponent.value).toBe(gameData.opponent);
-              expect(result.stadium.value).toBe(gameData.stadium);
+              expect(result.stadiumId.value).toBe(gameData.stadium);
               expect(result.dragonsScore.value).toBe(gameData.dragonsScore);
               expect(result.opponentScore.value).toBe(gameData.opponentScore);
               expect(result.result.value).toBe(expectedResult);
@@ -204,7 +204,7 @@ describe('GameAdapter Integration Tests', () => {
 
       expect(result[0].gameDate.value).toEqual(new Date('2024-04-03'));
       expect(result[0].opponent.value).toBe('阪神タイガース');
-      expect(result[0].stadium.value).toBe('甲子園');
+      expect(result[0].stadiumId.value).toBe('甲子園');
       expect(result[0].dragonsScore.value).toBe(2);
       expect(result[0].opponentScore.value).toBe(7);
       expect(result[0].result.value).toBe(GameResultValue.LOSE);
