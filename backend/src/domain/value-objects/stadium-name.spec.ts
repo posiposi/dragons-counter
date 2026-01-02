@@ -35,5 +35,15 @@ describe('StadiumName', () => {
       const name2 = new StadiumName('東京ドーム');
       expect(name1.equals(name2)).toBe(false);
     });
+
+    it('should return false for null', () => {
+      const name = new StadiumName('甲子園球場');
+      expect(name.equals(null as unknown as StadiumName)).toBe(false);
+    });
+
+    it('should return false for undefined', () => {
+      const name = new StadiumName('甲子園球場');
+      expect(name.equals(undefined as unknown as StadiumName)).toBe(false);
+    });
   });
 });

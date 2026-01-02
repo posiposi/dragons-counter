@@ -28,6 +28,16 @@ describe('StadiumId', () => {
       const stadiumId2 = new StadiumId('test-id-2');
       expect(stadiumId1.equals(stadiumId2)).toBe(false);
     });
+
+    it('should return false for null', () => {
+      const stadiumId = new StadiumId('test-id');
+      expect(stadiumId.equals(null as unknown as StadiumId)).toBe(false);
+    });
+
+    it('should return false for undefined', () => {
+      const stadiumId = new StadiumId('test-id');
+      expect(stadiumId.equals(undefined as unknown as StadiumId)).toBe(false);
+    });
   });
 
   describe('value getter', () => {

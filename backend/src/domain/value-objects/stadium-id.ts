@@ -13,6 +13,9 @@ export class StadiumId {
   }
 
   equals(other: StadiumId): boolean {
+    if (other == null) {
+      return false;
+    }
     return this._value === other._value;
   }
 }
