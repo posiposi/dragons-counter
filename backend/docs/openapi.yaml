@@ -164,6 +164,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/Statistics'
 
+  /stadiums:
+    get:
+      tags:
+        - Stadiums
+      summary: 球場一覧取得
+      description: 登録されているすべての球場を取得します
+      operationId: getStadiums
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stadium'
+
+  /stadiums/default:
+    get:
+      tags:
+        - Stadiums
+      summary: デフォルト球場取得
+      description: デフォルトに設定されている球場を取得します
+      operationId: getDefaultStadium
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stadium'
+        '404':
+          description: デフォルト球場が設定されていません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Game:
@@ -172,6 +210,8 @@ components:
       $ref: './schemas/CreateGameRequest.yaml'
     UpdateGameRequest:
       $ref: './schemas/UpdateGameRequest.yaml'
+    Stadium:
+      $ref: './schemas/Stadium.yaml'
     Statistics:
       $ref: './schemas/Statistics.yaml'
     Error:

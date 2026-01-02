@@ -4,21 +4,28 @@ required:
   - opponent
   - dragonsScore
   - opponentScore
-  - stadium
+  - stadiumId
 properties:
   gameDate:
     type: string
     format: date
+    description: 試合日
   opponent:
     type: string
+    description: 対戦相手
   dragonsScore:
     type: integer
     minimum: 0
+    description: ドラゴンズ得点
   opponentScore:
     type: integer
     minimum: 0
-  stadium:
+    description: 相手チーム得点
+  stadiumId:
     type: string
+    format: uuid
+    description: 球場ID
   notes:
     type: string
     nullable: true
+    description: メモ
