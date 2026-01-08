@@ -26,7 +26,7 @@ variable "ec2_security_group_id" {
 variable "instance_type" {
   description = "EC2インスタンスタイプ"
   type        = string
-  default     = "t3.small"
+  default     = "t3.nano"
 }
 
 variable "root_volume_size" {
