@@ -6,6 +6,11 @@ echo "Starting user data script at $(date)"
 
 dnf update -y
 
+dnf install -y amazon-ssm-agent
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+echo "SSM Agent status: $(systemctl is-active amazon-ssm-agent)"
+
 dnf install -y docker git
 systemctl start docker
 systemctl enable docker
@@ -48,6 +53,7 @@ NODE_ENV=production
 FRONTEND_PORT=${frontend_port}
 BACKEND_PORT=${backend_port}
 VITE_API_URL=/api
+ALLOWED_ORIGINS=https://dravincit.com,https://www.dravincit.com
 ENVEOF
 
 cd /opt/dragons-counter/deploy/production
