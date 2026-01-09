@@ -30,7 +30,7 @@ describe('GetDefaultStadiumUsecase', () => {
 
   describe('execute', () => {
     it('should return default stadium from the repository', async () => {
-      const mockStadium = new Stadium(
+      const mockStadium = Stadium.create(
         new StadiumId('stadium-1'),
         new StadiumName('バンテリンドームナゴヤ'),
         true,

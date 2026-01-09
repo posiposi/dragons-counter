@@ -21,7 +21,7 @@ describe('Stadium Entity', () => {
     }> = {},
   ): Stadium => {
     const data = { ...validStadiumData, ...overrides };
-    return new Stadium(
+    return Stadium.create(
       data.id,
       data.name,
       data.isDefault,

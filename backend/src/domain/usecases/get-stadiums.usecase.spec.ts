@@ -30,14 +30,14 @@ describe('GetStadiumsUsecase', () => {
   describe('execute', () => {
     it('should return all stadiums from the repository', async () => {
       const mockStadiums: Stadium[] = [
-        new Stadium(
+        Stadium.create(
           new StadiumId('stadium-1'),
           new StadiumName('バンテリンドームナゴヤ'),
           true,
           new Date('2025-01-01T00:00:00Z'),
           new Date('2025-01-01T00:00:00Z'),
         ),
-        new Stadium(
+        Stadium.create(
           new StadiumId('stadium-2'),
           new StadiumName('東京ドーム'),
           false,

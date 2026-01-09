@@ -8,7 +8,7 @@ export class Stadium {
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(
+  private constructor(
     id: StadiumId,
     name: StadiumName,
     isDefault: boolean,
@@ -20,6 +20,16 @@ export class Stadium {
     this._isDefault = isDefault;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
+  }
+
+  static create(
+    id: StadiumId,
+    name: StadiumName,
+    isDefault: boolean,
+    createdAt: Date,
+    updatedAt: Date,
+  ): Stadium {
+    return new Stadium(id, name, isDefault, createdAt, updatedAt);
   }
 
   get id(): StadiumId {
