@@ -2,7 +2,7 @@ import { Game } from '../entities/game';
 import { GameId } from '../value-objects/game-id';
 import { Opponent } from '../value-objects/opponent';
 import { Score } from '../value-objects/score';
-import { Stadium } from '../value-objects/stadium';
+import { StadiumId } from '../value-objects/stadium-id';
 import { Notes } from '../value-objects/notes';
 import { GameDate } from '../value-objects/game-date';
 import type { GamePort } from '../ports/game.port';
@@ -25,7 +25,7 @@ export class CreateGameUseCase {
       new Opponent(request.opponent),
       new Score(request.dragonsScore),
       new Score(request.opponentScore),
-      new Stadium(request.stadium),
+      new StadiumId(request.stadium),
       new Notes(request.notes || null),
       new Date(),
       new Date(),

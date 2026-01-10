@@ -34,8 +34,7 @@ properties:
     enum: [win, lose, draw]
     description: 試合結果
   stadium:
-    type: string
-    description: 球場
+    $ref: './Stadium.yaml'
   notes:
     type: string
     nullable: true

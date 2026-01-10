@@ -5,7 +5,7 @@ import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
 import { Score } from '../../domain/value-objects/score';
 import { Opponent } from '../../domain/value-objects/opponent';
-import { Stadium } from '../../domain/value-objects/stadium';
+import { StadiumId } from '../../domain/value-objects/stadium-id';
 import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
 
@@ -23,7 +23,7 @@ export class GameAdapter implements GamePort {
         opponent: game.opponent.value,
         dragonsScore: game.dragonsScore.value,
         opponentScore: game.opponentScore.value,
-        stadium: game.stadium.value,
+        stadium: game.stadiumId.value,
         result: game.result.value,
         notes: game.notes?.value || null,
         updatedAt: new Date(),
@@ -34,7 +34,7 @@ export class GameAdapter implements GamePort {
         opponent: game.opponent.value,
         dragonsScore: game.dragonsScore.value,
         opponentScore: game.opponentScore.value,
-        stadium: game.stadium.value,
+        stadium: game.stadiumId.value,
         result: game.result.value,
         notes: game.notes?.value || null,
       },
@@ -95,7 +95,7 @@ export class GameAdapter implements GamePort {
       new Opponent(data.opponent),
       new Score(data.dragonsScore),
       new Score(data.opponentScore),
-      new Stadium(data.stadium),
+      new StadiumId(data.stadium),
       data.notes ? new Notes(data.notes) : undefined,
       data.createdAt,
       data.updatedAt,
