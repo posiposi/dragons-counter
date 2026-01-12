@@ -67,7 +67,10 @@ echo "Running database migrations..."
 docker-compose exec -T backend npx prisma migrate deploy || \
   docker-compose exec -T backend npx prisma db push
 
-echo "Database migrations completed"
+echo "Seeding master data..."
+docker-compose exec -T backend npx prisma db seed
+
+echo "Database setup completed"
 
 cat > /etc/systemd/system/dragons-counter.service << 'SERVICEEOF'
 [Unit]
