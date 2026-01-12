@@ -1,172 +1,20 @@
 import { PrismaClient } from '@prisma/client';
+import { seedStadiums } from './seeders/stadium.seed';
+import { seedGames } from './seeders/game.seed';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Start seeding...');
 
-  const stadiumsData = [
-    {
-      name: 'バンテリンドーム ナゴヤ',
-      isDefault: true,
-    },
-    {
-      name: '神宮球場',
-      isDefault: false,
-    },
-    {
-      name: '甲子園球場',
-      isDefault: false,
-    },
-    {
-      name: '東京ドーム',
-      isDefault: false,
-    },
-    {
-      name: '横浜スタジアム',
-      isDefault: false,
-    },
-    {
-      name: 'マツダスタジアム',
-      isDefault: false,
-    },
-    {
-      name: '楽天モバイルパーク宮城',
-      isDefault: false,
-    },
-    {
-      name: 'PayPayドーム',
-      isDefault: false,
-    },
-    {
-      name: '京セラドーム大阪',
-      isDefault: false,
-    },
-    {
-      name: 'ZOZOマリンスタジアム',
-      isDefault: false,
-    },
-    {
-      name: 'ベルーナドーム',
-      isDefault: false,
-    },
-    {
-      name: 'エスコンフィールド北海道',
-      isDefault: false,
-    },
-  ];
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  for (const stadiumData of stadiumsData) {
-    const stadium = await prisma.stadium.upsert({
-      where: { name: stadiumData.name },
-      update: {},
-      create: stadiumData,
-    });
-    console.log(
-      `Created stadium: ${stadium.name} (default: ${stadium.isDefault})`,
-    );
-  }
+  await seedStadiums(prisma);
 
-  const gamesData = [
-    {
-      gameDate: new Date('2024-04-01'),
-      opponent: '巨人',
-      dragonsScore: 5,
-      opponentScore: 3,
-      result: 'WIN' as const,
-      stadium: 'バンテリンドーム ナゴヤ',
-      notes: '開幕戦！大野雄大の好投で勝利',
-    },
-    {
-      gameDate: new Date('2024-04-02'),
-      opponent: '巨人',
-      dragonsScore: 2,
-      opponentScore: 7,
-      result: 'LOSE' as const,
-      stadium: 'バンテリンドーム ナゴヤ',
-      notes: '打線が振るわず完敗',
-    },
-    {
-      gameDate: new Date('2024-04-03'),
-      opponent: '巨人',
-      dragonsScore: 4,
-      opponentScore: 4,
-      result: 'DRAW' as const,
-      stadium: 'バンテリンドーム ナゴヤ',
-      notes: '延長戦の末引き分け',
-    },
-    {
-      gameDate: new Date('2024-04-05'),
-      opponent: 'ヤクルト',
-      dragonsScore: 8,
-      opponentScore: 2,
-      result: 'WIN' as const,
-      stadium: '神宮球場',
-      notes: '打線爆発！8得点の大勝',
-    },
-    {
-      gameDate: new Date('2024-04-06'),
-      opponent: 'ヤクルト',
-      dragonsScore: 3,
-      opponentScore: 5,
-      result: 'LOSE' as const,
-      stadium: '神宮球場',
-      notes: '終盤の逆転負け',
-    },
-    {
-      gameDate: new Date('2024-04-07'),
-      opponent: 'ヤクルト',
-      dragonsScore: 6,
-      opponentScore: 1,
-      result: 'WIN' as const,
-      stadium: '神宮球場',
-      notes: '投手陣の完封リレー',
-    },
-    {
-      gameDate: new Date('2024-04-09'),
-      opponent: '横浜',
-      dragonsScore: 1,
-      opponentScore: 3,
-      result: 'LOSE' as const,
-      stadium: 'バンテリンドーム ナゴヤ',
-      notes: '投手戦の末惜敗',
-    },
-    {
-      gameDate: new Date('2024-04-10'),
-      opponent: '横浜',
-      dragonsScore: 7,
-      opponentScore: 0,
-      result: 'WIN' as const,
-      stadium: 'バンテリンドーム ナゴヤ',
-      notes: '完封勝利！チーム一丸の勝利',
-    },
-    {
-      gameDate: new Date('2024-04-11'),
-      opponent: '横浜',
-      dragonsScore: 2,
-      opponentScore: 2,
-      result: 'DRAW' as const,
-      stadium: 'バンテリンドーム ナゴヤ',
-      notes: '雨天コールドで引き分け',
-    },
-    {
-      gameDate: new Date('2024-04-13'),
-      opponent: '阪神',
-      dragonsScore: 4,
-      opponentScore: 6,
-      result: 'LOSE' as const,
-      stadium: '甲子園球場',
-      notes: '甲子園での熱戦も及ばず',
-    },
-  ];
-
-  for (const gameData of gamesData) {
-    const game = await prisma.game.create({
-      data: gameData,
-    });
-    console.log(
-      `Created game: ${game.opponent} vs 中日ドラゴンズ (${game.result})`,
-    );
+  if (!isProduction) {
+    await seedGames(prisma);
+  } else {
+    console.log('Skipping games seeding in production environment.');
   }
 
   console.log('Seeding finished.');
