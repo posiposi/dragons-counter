@@ -96,17 +96,15 @@ const gamesData = [
 export async function seedGames(prisma: PrismaClient): Promise<void> {
   console.log('Seeding games...');
 
-  await prisma.game.deleteMany();
-  console.log('Cleared existing game records.');
+  await prisma.$transaction(async (tx) => {
+    await tx.game.deleteMany();
+    console.log('Cleared existing game records.');
 
-  for (const gameData of gamesData) {
-    const game = await prisma.game.create({
-      data: gameData,
+    await tx.game.createMany({
+      data: gamesData,
     });
-    console.log(
-      `Created game: ${game.opponent} vs 中日ドラゴンズ (${game.result})`,
-    );
-  }
+    console.log(`Created ${gamesData.length} games.`);
+  });
 
   console.log('Games seeding finished.');
 }
