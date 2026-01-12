@@ -96,6 +96,9 @@ const gamesData = [
 export async function seedGames(prisma: PrismaClient): Promise<void> {
   console.log('Seeding games...');
 
+  await prisma.game.deleteMany();
+  console.log('Cleared existing game records.');
+
   for (const gameData of gamesData) {
     const game = await prisma.game.create({
       data: gameData,
