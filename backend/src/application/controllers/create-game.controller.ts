@@ -15,7 +15,7 @@ export class CreateGameController {
       opponent: dto.opponent,
       dragonsScore: dto.dragonsScore,
       opponentScore: dto.opponentScore,
-      stadium: dto.stadium,
+      stadiumId: dto.stadiumId,
       notes: dto.notes,
     });
 
@@ -26,7 +26,7 @@ export class CreateGameController {
       dragonsScore: game.dragonsScore.value,
       opponentScore: game.opponentScore.value,
       result: game.result.value,
-      stadium: game.stadium.value,
+      stadium: game.stadiumId.value,
       notes: game.notes?.value || null,
       createdAt: game.createdAt.toISOString(),
       updatedAt: game.updatedAt.toISOString(),

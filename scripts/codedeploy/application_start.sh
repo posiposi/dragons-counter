@@ -21,4 +21,7 @@ echo "Running database migrations..."
 /usr/local/bin/docker-compose exec -T backend npx prisma migrate deploy || \
     /usr/local/bin/docker-compose exec -T backend npx prisma db push
 
+echo "Seeding master data..."
+/usr/local/bin/docker-compose exec -T backend npx prisma db seed
+
 echo "=== ApplicationStart completed at $(date) ==="

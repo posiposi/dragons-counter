@@ -7,7 +7,7 @@ import { GameId } from '../../domain/value-objects/game-id';
 import { GameDate } from '../../domain/value-objects/game-date';
 import { Opponent } from '../../domain/value-objects/opponent';
 import { Score } from '../../domain/value-objects/score';
-import { Stadium } from '../../domain/value-objects/stadium';
+import { StadiumId } from '../../domain/value-objects/stadium-id';
 import { Notes } from '../../domain/value-objects/notes';
 import { randomUUID } from 'crypto';
 
@@ -35,6 +35,8 @@ describe('CreateGameController', () => {
   });
 
   describe('create', () => {
+    const mockStadiumId = '550e8400-e29b-41d4-a716-446655440000';
+
     const testCases = [
       {
         description: 'should create a game with WIN result',
@@ -43,7 +45,7 @@ describe('CreateGameController', () => {
           opponent: '横浜DeNAベイスターズ',
           dragonsScore: 5,
           opponentScore: 3,
-          stadium: 'バンテリンドーム',
+          stadiumId: mockStadiumId,
           notes: '開幕戦で勝利！',
         },
       },
@@ -54,7 +56,7 @@ describe('CreateGameController', () => {
           opponent: '阪神タイガース',
           dragonsScore: 2,
           opponentScore: 7,
-          stadium: '甲子園',
+          stadiumId: mockStadiumId,
           notes: '大敗',
         },
       },
@@ -65,7 +67,7 @@ describe('CreateGameController', () => {
           opponent: '広島東洋カープ',
           dragonsScore: 4,
           opponentScore: 4,
-          stadium: 'マツダスタジアム',
+          stadiumId: mockStadiumId,
           notes: '引き分け',
         },
       },
@@ -76,20 +78,21 @@ describe('CreateGameController', () => {
           opponent: '東京ヤクルトスワローズ',
           dragonsScore: 6,
           opponentScore: 2,
-          stadium: 'バンテリンドーム',
+          stadiumId: mockStadiumId,
         },
       },
     ];
 
     test.each(testCases)('$description', async ({ dto }) => {
       const gameId = new GameId(randomUUID());
+      const stadiumId = new StadiumId(randomUUID());
       const expectedGame = new Game(
         gameId,
         new GameDate(new Date(dto.gameDate)),
         new Opponent(dto.opponent),
         new Score(dto.dragonsScore),
         new Score(dto.opponentScore),
-        new Stadium(dto.stadium),
+        stadiumId,
         dto.notes ? new Notes(dto.notes) : undefined,
         new Date(),
         new Date(),
@@ -106,7 +109,7 @@ describe('CreateGameController', () => {
         dragonsScore: expectedGame.dragonsScore.value,
         opponentScore: expectedGame.opponentScore.value,
         result: expectedGame.result.value,
-        stadium: expectedGame.stadium.value,
+        stadium: expectedGame.stadiumId.value,
         notes: expectedGame.notes?.value || null,
         createdAt: expectedGame.createdAt.toISOString(),
         updatedAt: expectedGame.updatedAt.toISOString(),
@@ -119,7 +122,7 @@ describe('CreateGameController', () => {
         opponent: '横浜DeNAベイスターズ',
         dragonsScore: 5,
         opponentScore: 3,
-        stadium: 'バンテリンドーム',
+        stadiumId: mockStadiumId,
         notes: '開幕戦で勝利！',
       };
 

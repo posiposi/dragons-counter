@@ -25,7 +25,7 @@ export class CreateGameRequest {
   opponentScore: number;
 
   @IsString()
-  stadium: string;
+  stadiumId: string;
 
   @IsOptional()
   @IsString()
