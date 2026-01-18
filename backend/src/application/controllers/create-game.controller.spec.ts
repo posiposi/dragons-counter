@@ -35,6 +35,8 @@ describe('CreateGameController', () => {
   });
 
   describe('create', () => {
+    const mockStadiumId = '550e8400-e29b-41d4-a716-446655440000';
+
     const testCases = [
       {
         description: 'should create a game with WIN result',
@@ -43,7 +45,7 @@ describe('CreateGameController', () => {
           opponent: '横浜DeNAベイスターズ',
           dragonsScore: 5,
           opponentScore: 3,
-          stadium: 'バンテリンドーム',
+          stadiumId: mockStadiumId,
           notes: '開幕戦で勝利！',
         },
       },
@@ -54,7 +56,7 @@ describe('CreateGameController', () => {
           opponent: '阪神タイガース',
           dragonsScore: 2,
           opponentScore: 7,
-          stadium: '甲子園',
+          stadiumId: mockStadiumId,
           notes: '大敗',
         },
       },
@@ -65,7 +67,7 @@ describe('CreateGameController', () => {
           opponent: '広島東洋カープ',
           dragonsScore: 4,
           opponentScore: 4,
-          stadium: 'マツダスタジアム',
+          stadiumId: mockStadiumId,
           notes: '引き分け',
         },
       },
@@ -76,7 +78,7 @@ describe('CreateGameController', () => {
           opponent: '東京ヤクルトスワローズ',
           dragonsScore: 6,
           opponentScore: 2,
-          stadium: 'バンテリンドーム',
+          stadiumId: mockStadiumId,
         },
       },
     ];
@@ -120,7 +122,7 @@ describe('CreateGameController', () => {
         opponent: '横浜DeNAベイスターズ',
         dragonsScore: 5,
         opponentScore: 3,
-        stadium: 'バンテリンドーム',
+        stadiumId: mockStadiumId,
         notes: '開幕戦で勝利！',
       };
 

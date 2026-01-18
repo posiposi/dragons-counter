@@ -48,7 +48,7 @@ describe('CreateGameUseCase', () => {
           opponent: '阪神タイガース',
           dragonsScore,
           opponentScore,
-          stadium: 'バンテリンドーム ナゴヤ',
+          stadiumId: 'バンテリンドーム ナゴヤ',
           notes: '素晴らしい試合でした',
         };
 
@@ -91,7 +91,7 @@ describe('CreateGameUseCase', () => {
           opponent: '阪神タイガース',
           dragonsScore: 5,
           opponentScore: 3,
-          stadium: 'バンテリンドーム ナゴヤ',
+          stadiumId: 'バンテリンドーム ナゴヤ',
           ...(notes && { notes }),
         };
 
@@ -139,7 +139,7 @@ describe('CreateGameUseCase', () => {
             opponent: '阪神タイガース',
             dragonsScore: 5,
             opponentScore: 3,
-            stadium: 'バンテリンドーム ナゴヤ',
+            stadiumId: 'バンテリンドーム ナゴヤ',
           };
 
           await expect(() => useCase.execute(request)).rejects.toThrow(
@@ -154,7 +154,7 @@ describe('CreateGameUseCase', () => {
           opponent: '阪神タイガース',
           dragonsScore: 5,
           opponentScore: 3,
-          stadium: 'バンテリンドーム ナゴヤ',
+          stadiumId: 'バンテリンドーム ナゴヤ',
         };
 
         mockPort.save.mockRejectedValue(new Error('Database error'));

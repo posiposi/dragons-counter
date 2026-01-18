@@ -15,7 +15,7 @@ export class CreateGameController {
       opponent: dto.opponent,
       dragonsScore: dto.dragonsScore,
       opponentScore: dto.opponentScore,
-      stadium: dto.stadium,
+      stadiumId: dto.stadiumId,
       notes: dto.notes,
     });
 

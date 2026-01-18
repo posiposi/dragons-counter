@@ -25,7 +25,7 @@ export class CreateGameUseCase {
       new Opponent(request.opponent),
       new Score(request.dragonsScore),
       new Score(request.opponentScore),
-      new StadiumId(request.stadium),
+      new StadiumId(request.stadiumId),
       new Notes(request.notes || null),
       new Date(),
       new Date(),
