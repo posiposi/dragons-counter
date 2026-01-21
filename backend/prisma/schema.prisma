@@ -34,3 +34,12 @@ enum GameResult {
   LOSE @map("lose")
   DRAW @map("draw")
 }
+
+model Stadium {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("stadiums")
+}
