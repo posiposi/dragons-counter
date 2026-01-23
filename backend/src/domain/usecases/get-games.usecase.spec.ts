@@ -7,6 +7,8 @@ import { GameDate } from '../value-objects/game-date';
 import { Opponent } from '../value-objects/opponent';
 import { Score } from '../value-objects/score';
 import { Stadium } from '../value-objects/stadium';
+import { StadiumId } from '../value-objects/stadium-id';
+import { StadiumName } from '../value-objects/stadium-name';
 import { Notes } from '../value-objects/notes';
 import { GameResponseDto } from '../../application/dto/response/game-response.dto';
 
@@ -40,7 +42,10 @@ describe('GetGamesUsecase', () => {
           new Opponent('巨人'),
           new Score(5),
           new Score(3),
-          new Stadium('バンテリンドーム'),
+          Stadium.create(
+            StadiumId.create('stadium-1'),
+            StadiumName.create('バンテリンドーム'),
+          ),
           new Notes('逆転勝利！'),
           new Date('2024-06-01T10:00:00Z'),
           new Date('2024-06-01T10:00:00Z'),
@@ -51,7 +56,10 @@ describe('GetGamesUsecase', () => {
           new Opponent('阪神'),
           new Score(2),
           new Score(4),
-          new Stadium('甲子園'),
+          Stadium.create(
+            StadiumId.create('stadium-2'),
+            StadiumName.create('甲子園'),
+          ),
           new Notes('接戦でした'),
           new Date('2024-06-02T10:00:00Z'),
           new Date('2024-06-02T10:00:00Z'),

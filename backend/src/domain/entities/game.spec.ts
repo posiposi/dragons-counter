@@ -4,6 +4,8 @@ import { GameDate } from '../value-objects/game-date';
 import { Opponent } from '../value-objects/opponent';
 import { Score } from '../value-objects/score';
 import { Stadium } from '../value-objects/stadium';
+import { StadiumId } from '../value-objects/stadium-id';
+import { StadiumName } from '../value-objects/stadium-name';
 import { Notes } from '../value-objects/notes';
 import { GameResultValue } from '../value-objects/game-result';
 
@@ -14,7 +16,10 @@ describe('Game Entity', () => {
     opponent: new Opponent('読売ジャイアンツ'),
     dragonsScore: new Score(5),
     opponentScore: new Score(3),
-    stadium: new Stadium('バンテリンドーム ナゴヤ'),
+    stadium: Stadium.create(
+      StadiumId.create('stadium-id-001'),
+      StadiumName.create('バンテリンドーム ナゴヤ'),
+    ),
     notes: new Notes('素晴らしい試合でした'),
     createdAt: new Date(),
     updatedAt: new Date(),
