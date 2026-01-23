@@ -16,10 +16,13 @@ export class CreateGameUseCase {
     private readonly gamePort: GamePort,
   ) {}
 
-  async execute(_request: CreateGameRequest): Promise<Game> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  execute(_request: CreateGameRequest): Promise<Game> {
     // TODO: Issue #75 - 将来的にスクレイピングで試合データを取得する際に実装予定
-    throw new Error(
-      'NotImplemented: 試合登録処理は現在対応していません。将来的にスクレイピングで取得予定です。',
+    return Promise.reject(
+      new Error(
+        'NotImplemented: 試合登録処理は現在対応していません。将来的にスクレイピングで取得予定です。',
+      ),
     );
   }
 }

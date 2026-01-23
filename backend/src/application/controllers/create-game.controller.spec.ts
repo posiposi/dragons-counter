@@ -72,6 +72,7 @@ describe('CreateGameController', () => {
         // Expected to throw
       }
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(createGameUseCase.execute).toHaveBeenCalledWith({
         gameDate: dto.gameDate,
         opponent: dto.opponent,

@@ -54,6 +54,7 @@ describe('CreateGameUseCase', () => {
         // Expected to throw
       }
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockPort.save).not.toHaveBeenCalled();
     });
   });
