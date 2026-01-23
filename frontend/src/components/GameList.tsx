@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Game } from "@/types/game";
 import { fetchGames, deleteGame } from "@/lib/api/games";
 import { Trash2 } from "lucide-react";
-import GameRegistrationButton from "./GameRegistrationButton";
-import GameRegistrationDialog from "./GameRegistrationDialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import DeleteResultDialog from "./DeleteResultDialog";
 import styles from "./GameList.module.css";
@@ -12,7 +10,6 @@ export default function GameList() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [deleteTargetGame, setDeleteTargetGame] = useState<Game | null>(null);
   const [deleteResult, setDeleteResult] = useState<{
     show: boolean;
@@ -149,9 +146,6 @@ export default function GameList() {
             <h1 className={styles.title}>Dra Vincit</h1>
             <p className={styles.subtitle}>中日ドラゴンズ観戦記録</p>
           </div>
-          <GameRegistrationButton
-            onClick={() => setShowRegistrationDialog(true)}
-          />
         </div>
       </header>
 
@@ -225,14 +219,6 @@ export default function GameList() {
           <button className={styles.addButton}>観戦記録を追加</button>
         </div>
       )}
-
-      <GameRegistrationDialog
-        isOpen={showRegistrationDialog}
-        onClose={() => setShowRegistrationDialog(false)}
-        onSuccess={() => {
-          loadGames();
-        }}
-      />
 
       <DeleteConfirmDialog
         isOpen={!!deleteTargetGame}
