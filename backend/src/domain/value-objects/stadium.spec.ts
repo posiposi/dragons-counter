@@ -1,54 +1,73 @@
 import { Stadium } from './stadium';
+import { StadiumId } from './stadium-id';
+import { StadiumName } from './stadium-name';
 
 describe('Stadium', () => {
-  describe('constructor', () => {
-    describe('valid values', () => {
-      it.each([
-        ['バンテリンドーム'],
-        ['東京ドーム'],
-        ['甲子園球場'],
-        ['Nagoya Dome'],
-      ])('should create a valid Stadium with %p', (value) => {
-        const stadium = new Stadium(value);
-        expect(stadium.value).toBe(value);
-      });
+  describe('create', () => {
+    it('should create a valid Stadium with StadiumId and StadiumName', () => {
+      const id = StadiumId.create('stadium-id-123');
+      const name = StadiumName.create('バンテリンドーム ナゴヤ');
+      const stadium = Stadium.create(id, name);
 
-      it('should trim whitespace', () => {
-        const stadium = new Stadium('  マツダスタジアム  ');
-        expect(stadium.value).toBe('マツダスタジアム');
-      });
+      expect(stadium.id).toBe(id);
+      expect(stadium.name).toBe(name);
     });
 
-    describe('invalid values', () => {
-      it.each([
-        ['', 'Stadium name cannot be empty'],
-        ['   ', 'Stadium name cannot be empty'],
-        [undefined, 'Stadium name cannot be empty'],
-        [null, 'Stadium name cannot be empty'],
-      ])('should throw error for %p', (value, expectedError) => {
-        expect(() => new Stadium(value as unknown as string)).toThrow(
-          expectedError,
-        );
-      });
+    it('should create a valid Stadium with English stadium name', () => {
+      const id = StadiumId.create('stadium-id-456');
+      const name = StadiumName.create('Tokyo Dome');
+      const stadium = Stadium.create(id, name);
+
+      expect(stadium.id.value).toBe('stadium-id-456');
+      expect(stadium.name.value).toBe('Tokyo Dome');
     });
   });
 
   describe('equals', () => {
-    it.each([
-      ['神宮球場', '神宮球場', true],
-      ['横浜スタジアム', 'ほっともっとフィールド', false],
-      ['京セラドーム', '  京セラドーム  ', true],
-    ])('should return %s for %p and %p', (value1, value2, expected) => {
-      const stadium1 = new Stadium(value1);
-      const stadium2 = new Stadium(value2);
-      expect(stadium1.equals(stadium2)).toBe(expected);
+    it('should return true for same id', () => {
+      const id1 = StadiumId.create('same-id');
+      const name1 = StadiumName.create('東京ドーム');
+      const stadium1 = Stadium.create(id1, name1);
+
+      const id2 = StadiumId.create('same-id');
+      const name2 = StadiumName.create('東京ドーム');
+      const stadium2 = Stadium.create(id2, name2);
+
+      expect(stadium1.equals(stadium2)).toBe(true);
+    });
+
+    it('should return false for different id', () => {
+      const id1 = StadiumId.create('id-1');
+      const name1 = StadiumName.create('東京ドーム');
+      const stadium1 = Stadium.create(id1, name1);
+
+      const id2 = StadiumId.create('id-2');
+      const name2 = StadiumName.create('東京ドーム');
+      const stadium2 = Stadium.create(id2, name2);
+
+      expect(stadium1.equals(stadium2)).toBe(false);
     });
   });
 
-  describe('value getter', () => {
-    it('should return the internal value', () => {
-      const stadium = new Stadium('楽天モバイルパーク');
-      expect(stadium.value).toBe('楽天モバイルパーク');
+  describe('id getter', () => {
+    it('should return the StadiumId', () => {
+      const id = StadiumId.create('test-id');
+      const name = StadiumName.create('神宮球場');
+      const stadium = Stadium.create(id, name);
+
+      expect(stadium.id).toBe(id);
+      expect(stadium.id.value).toBe('test-id');
+    });
+  });
+
+  describe('name getter', () => {
+    it('should return the StadiumName', () => {
+      const id = StadiumId.create('test-id');
+      const name = StadiumName.create('甲子園球場');
+      const stadium = Stadium.create(id, name);
+
+      expect(stadium.name).toBe(name);
+      expect(stadium.name.value).toBe('甲子園球場');
     });
   });
 });

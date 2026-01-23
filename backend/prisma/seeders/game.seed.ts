@@ -1,5 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 
+// Stadium IDs from stadium.seed.ts
+const STADIUM_IDS = {
+  VANTELIN: 'a1b2c3d4-e5f6-7890-abcd-ef1234567001',
+  JINGU: 'a1b2c3d4-e5f6-7890-abcd-ef1234567002',
+  KOSHIEN: 'a1b2c3d4-e5f6-7890-abcd-ef1234567003',
+} as const;
+
 const gamesData = [
   {
     gameDate: new Date('2024-04-01'),
@@ -7,7 +14,7 @@ const gamesData = [
     dragonsScore: 5,
     opponentScore: 3,
     result: 'WIN' as const,
-    stadium: 'バンテリンドーム ナゴヤ',
+    stadiumId: STADIUM_IDS.VANTELIN,
     notes: '開幕戦！大野雄大の好投で勝利',
   },
   {
@@ -16,7 +23,7 @@ const gamesData = [
     dragonsScore: 2,
     opponentScore: 7,
     result: 'LOSE' as const,
-    stadium: 'バンテリンドーム ナゴヤ',
+    stadiumId: STADIUM_IDS.VANTELIN,
     notes: '打線が振るわず完敗',
   },
   {
@@ -25,7 +32,7 @@ const gamesData = [
     dragonsScore: 4,
     opponentScore: 4,
     result: 'DRAW' as const,
-    stadium: 'バンテリンドーム ナゴヤ',
+    stadiumId: STADIUM_IDS.VANTELIN,
     notes: '延長戦の末引き分け',
   },
   {
@@ -34,7 +41,7 @@ const gamesData = [
     dragonsScore: 8,
     opponentScore: 2,
     result: 'WIN' as const,
-    stadium: '神宮球場',
+    stadiumId: STADIUM_IDS.JINGU,
     notes: '打線爆発!8得点の大勝',
   },
   {
@@ -43,7 +50,7 @@ const gamesData = [
     dragonsScore: 3,
     opponentScore: 5,
     result: 'LOSE' as const,
-    stadium: '神宮球場',
+    stadiumId: STADIUM_IDS.JINGU,
     notes: '終盤の逆転負け',
   },
   {
@@ -52,7 +59,7 @@ const gamesData = [
     dragonsScore: 6,
     opponentScore: 0,
     result: 'WIN' as const,
-    stadium: '神宮球場',
+    stadiumId: STADIUM_IDS.JINGU,
     notes: '投手陣の完封リレー',
   },
   {
@@ -61,7 +68,7 @@ const gamesData = [
     dragonsScore: 1,
     opponentScore: 3,
     result: 'LOSE' as const,
-    stadium: 'バンテリンドーム ナゴヤ',
+    stadiumId: STADIUM_IDS.VANTELIN,
     notes: '投手戦の末惜敗',
   },
   {
@@ -70,7 +77,7 @@ const gamesData = [
     dragonsScore: 7,
     opponentScore: 0,
     result: 'WIN' as const,
-    stadium: 'バンテリンドーム ナゴヤ',
+    stadiumId: STADIUM_IDS.VANTELIN,
     notes: '完封勝利！チーム一丸の勝利',
   },
   {
@@ -79,7 +86,7 @@ const gamesData = [
     dragonsScore: 2,
     opponentScore: 2,
     result: 'DRAW' as const,
-    stadium: 'バンテリンドーム ナゴヤ',
+    stadiumId: STADIUM_IDS.VANTELIN,
     notes: '雨天コールドで引き分け',
   },
   {
@@ -88,7 +95,7 @@ const gamesData = [
     dragonsScore: 4,
     opponentScore: 6,
     result: 'LOSE' as const,
-    stadium: '甲子園球場',
+    stadiumId: STADIUM_IDS.KOSHIEN,
     notes: '甲子園での熱戦も及ばず',
   },
 ];

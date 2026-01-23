@@ -20,7 +20,7 @@ export class GetGamesUsecase {
       dragonsScore: game.dragonsScore.value,
       opponentScore: game.opponentScore.value,
       result: game.result.value.toLowerCase(),
-      stadium: game.stadium.value,
+      stadium: game.stadium.name.value,
       notes: game.notes?.value || null,
       createdAt: game.createdAt.toISOString(),
       updatedAt: game.updatedAt.toISOString(),

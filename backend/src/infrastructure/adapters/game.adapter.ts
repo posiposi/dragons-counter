@@ -1,13 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { GamePort } from '../../domain/ports/game.port';
-import { PrismaClient, Game as PrismaGame } from '@prisma/client';
+import {
+  PrismaClient,
+  Game as PrismaGame,
+  Stadium as PrismaStadium,
+} from '@prisma/client';
 import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
 import { Score } from '../../domain/value-objects/score';
 import { Opponent } from '../../domain/value-objects/opponent';
 import { Stadium } from '../../domain/value-objects/stadium';
+import { StadiumId } from '../../domain/value-objects/stadium-id';
+import { StadiumName } from '../../domain/value-objects/stadium-name';
 import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
+
+type PrismaGameWithStadium = PrismaGame & { stadium: PrismaStadium };
 
 @Injectable()
 export class GameAdapter implements GamePort {
@@ -23,7 +31,7 @@ export class GameAdapter implements GamePort {
         opponent: game.opponent.value,
         dragonsScore: game.dragonsScore.value,
         opponentScore: game.opponentScore.value,
-        stadium: game.stadium.value,
+        stadiumId: game.stadium.id.value,
         result: game.result.value,
         notes: game.notes?.value || null,
         updatedAt: new Date(),
@@ -34,9 +42,12 @@ export class GameAdapter implements GamePort {
         opponent: game.opponent.value,
         dragonsScore: game.dragonsScore.value,
         opponentScore: game.opponentScore.value,
-        stadium: game.stadium.value,
+        stadiumId: game.stadium.id.value,
         result: game.result.value,
         notes: game.notes?.value || null,
+      },
+      include: {
+        stadium: true,
       },
     });
 
@@ -51,6 +62,9 @@ export class GameAdapter implements GamePort {
       orderBy: {
         gameDate: 'desc',
       },
+      include: {
+        stadium: true,
+      },
     });
 
     return games.map((game) => this.toDomainEntity(game));
@@ -61,6 +75,9 @@ export class GameAdapter implements GamePort {
       where: {
         id: gameId.value,
         deletedAt: null,
+      },
+      include: {
+        stadium: true,
       },
     });
 
@@ -88,14 +105,19 @@ export class GameAdapter implements GamePort {
     }
   }
 
-  private toDomainEntity(data: PrismaGame): Game {
+  private toDomainEntity(data: PrismaGameWithStadium): Game {
+    const stadium = Stadium.create(
+      StadiumId.create(data.stadium.id),
+      StadiumName.create(data.stadium.name),
+    );
+
     return new Game(
       new GameId(data.id),
       new GameDate(data.gameDate),
       new Opponent(data.opponent),
       new Score(data.dragonsScore),
       new Score(data.opponentScore),
-      new Stadium(data.stadium),
+      stadium,
       data.notes ? new Notes(data.notes) : undefined,
       data.createdAt,
       data.updatedAt,

@@ -1,44 +1,28 @@
 import { Game } from '../entities/game';
-import { GameId } from '../value-objects/game-id';
-import { Opponent } from '../value-objects/opponent';
-import { Score } from '../value-objects/score';
-import { Stadium } from '../value-objects/stadium';
-import { Notes } from '../value-objects/notes';
-import { GameDate } from '../value-objects/game-date';
 import type { GamePort } from '../ports/game.port';
 import { CreateGameRequest } from '../../application/dto/request/create-game.dto';
-import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
 
+/**
+ * 試合登録ユースケース
+ *
+ * NOTE: Issue #75により、試合登録処理は現時点では対応しない。
+ * 将来的にスクレイピングで試合データを取得する予定のため、
+ * このユースケースは暫定的にNotImplementedErrorをスローする。
+ */
 export class CreateGameUseCase {
   constructor(
     @Inject('GamePort')
     private readonly gamePort: GamePort,
   ) {}
 
-  async execute(request: CreateGameRequest): Promise<Game> {
-    const gameDate = this.parseGameDate(request.gameDate);
-
-    const game = new Game(
-      new GameId(randomUUID()),
-      new GameDate(gameDate),
-      new Opponent(request.opponent),
-      new Score(request.dragonsScore),
-      new Score(request.opponentScore),
-      new Stadium(request.stadium),
-      new Notes(request.notes || null),
-      new Date(),
-      new Date(),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  execute(_request: CreateGameRequest): Promise<Game> {
+    // TODO: Issue #75 - 将来的にスクレイピングで試合データを取得する際に実装予定
+    return Promise.reject(
+      new Error(
+        'NotImplemented: 試合登録処理は現在対応していません。将来的にスクレイピングで取得予定です。',
+      ),
     );
-
-    return await this.gamePort.save(game);
-  }
-
-  private parseGameDate(dateString: string): Date {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      throw new Error('Invalid date format');
-    }
-    return date;
   }
 }

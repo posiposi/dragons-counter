@@ -1,18 +1,28 @@
-export class Stadium {
-  private readonly _value: string;
+import { StadiumId } from './stadium-id';
+import { StadiumName } from './stadium-name';
 
-  constructor(value: string) {
-    if (!value || value.trim() === '') {
-      throw new Error('Stadium name cannot be empty');
-    }
-    this._value = value.trim();
+export class Stadium {
+  private readonly _id: StadiumId;
+  private readonly _name: StadiumName;
+
+  private constructor(id: StadiumId, name: StadiumName) {
+    this._id = id;
+    this._name = name;
   }
 
-  get value(): string {
-    return this._value;
+  static create(id: StadiumId, name: StadiumName): Stadium {
+    return new Stadium(id, name);
+  }
+
+  get id(): StadiumId {
+    return this._id;
+  }
+
+  get name(): StadiumName {
+    return this._name;
   }
 
   equals(other: Stadium): boolean {
-    return this._value === other._value;
+    return this._id.equals(other._id);
   }
 }
