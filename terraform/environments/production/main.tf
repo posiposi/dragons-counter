@@ -137,3 +137,21 @@ module "github_oidc" {
   s3_bucket_arn       = module.s3_deploy.bucket_arn
   codedeploy_app_name = module.codedeploy.app_name
 }
+
+module "lambda_scraper" {
+  source = "../../modules/lambda-scraper"
+
+  project_name    = var.project_name
+  environment     = var.environment
+  lambda_zip_path = "${path.root}/../../../lambda/scraper.zip"
+}
+
+module "api_gateway" {
+  source = "../../modules/api-gateway"
+
+  project_name         = var.project_name
+  environment          = var.environment
+  lambda_invoke_arn    = module.lambda_scraper.invoke_arn
+  lambda_function_name = module.lambda_scraper.function_name
+  cors_allowed_origins = ["https://${var.domain_name}", "https://www.${var.domain_name}"]
+}
