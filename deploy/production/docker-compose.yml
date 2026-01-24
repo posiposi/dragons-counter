@@ -1,4 +1,12 @@
 services:
+  lambda-scraper-test:
+    build:
+      context: ../../lambda/scraper
+      dockerfile: Dockerfile
+    container_name: dragons-counter-lambda-test
+    profiles:
+      - test
+
   frontend:
     build:
       context: ../../frontend
