@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Post,
@@ -18,9 +19,11 @@ export class BulkCreateGameController {
 
   @Post('bulk')
   @HttpCode(HttpStatus.OK)
-  async bulkCreate(@Body() dto: BulkCreateGameDto): Promise<BulkCreateGameResult> {
+  async bulkCreate(
+    @Body() dto: BulkCreateGameDto,
+  ): Promise<BulkCreateGameResult> {
     try {
-      return await this.bulkCreateGameUsecase.execute(dto.games, dto.stadiumId);
+      return await this.bulkCreateGameUsecase.execute(dto.games);
     } catch (error) {
       throw new InternalServerErrorException('Failed to bulk create games');
     }

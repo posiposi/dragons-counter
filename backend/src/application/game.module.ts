@@ -12,7 +12,11 @@ import { PrismaService } from '../infrastructure/prisma/prisma.service';
 import { PrismaClient } from '@prisma/client';
 
 @Module({
-  controllers: [GetGamesController, DeleteGameController, BulkCreateGameController],
+  controllers: [
+    GetGamesController,
+    DeleteGameController,
+    BulkCreateGameController,
+  ],
   providers: [
     GetGamesUsecase,
     DeleteGameUsecase,

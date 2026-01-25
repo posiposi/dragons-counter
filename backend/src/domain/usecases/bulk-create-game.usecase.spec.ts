@@ -58,7 +58,7 @@ describe('BulkCreateGameUsecase', () => {
         .spyOn(bulkCreateGamePort, 'save')
         .mockResolvedValue(undefined);
 
-      const result = await usecase.execute(inputs, 'stadium-id-1');
+      const result = await usecase.execute(inputs);
 
       expect(result.savedCount).toBe(1);
       expect(result.skippedCount).toBe(0);
@@ -97,7 +97,7 @@ describe('BulkCreateGameUsecase', () => {
         .mockResolvedValue(existingGame);
       const saveSpy = jest.spyOn(bulkCreateGamePort, 'save');
 
-      const result = await usecase.execute(inputs, 'stadium-id-1');
+      const result = await usecase.execute(inputs);
 
       expect(result.savedCount).toBe(0);
       expect(result.skippedCount).toBe(1);
@@ -146,7 +146,7 @@ describe('BulkCreateGameUsecase', () => {
         .spyOn(bulkCreateGamePort, 'save')
         .mockResolvedValue(undefined);
 
-      const result = await usecase.execute(inputs, 'stadium-id-1');
+      const result = await usecase.execute(inputs);
 
       expect(result.savedCount).toBe(1);
       expect(result.skippedCount).toBe(1);
@@ -157,7 +157,7 @@ describe('BulkCreateGameUsecase', () => {
     it('should return empty result when no inputs provided', async () => {
       const inputs: GameInputDto[] = [];
 
-      const result = await usecase.execute(inputs, 'stadium-id-1');
+      const result = await usecase.execute(inputs);
 
       expect(result.savedCount).toBe(0);
       expect(result.skippedCount).toBe(0);
@@ -180,7 +180,7 @@ describe('BulkCreateGameUsecase', () => {
         .spyOn(bulkCreateGamePort, 'save')
         .mockRejectedValue(new Error('Database error'));
 
-      const result = await usecase.execute(inputs, 'stadium-id-1');
+      const result = await usecase.execute(inputs);
 
       expect(result.savedCount).toBe(0);
       expect(result.skippedCount).toBe(0);

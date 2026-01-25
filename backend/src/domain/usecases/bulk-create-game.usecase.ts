@@ -18,6 +18,24 @@ export interface BulkCreateGameResult {
   errors: string[];
 }
 
+const STADIUM_NAME_TO_ID: Record<string, string> = {
+  バンテリンドーム: 'a1b2c3d4-e5f6-7890-abcd-ef1234567001',
+  'バンテリンドーム ナゴヤ': 'a1b2c3d4-e5f6-7890-abcd-ef1234567001',
+  神宮球場: 'a1b2c3d4-e5f6-7890-abcd-ef1234567002',
+  明治神宮野球場: 'a1b2c3d4-e5f6-7890-abcd-ef1234567002',
+  神宮: 'a1b2c3d4-e5f6-7890-abcd-ef1234567002',
+  甲子園球場: 'a1b2c3d4-e5f6-7890-abcd-ef1234567003',
+  阪神甲子園球場: 'a1b2c3d4-e5f6-7890-abcd-ef1234567003',
+  甲子園: 'a1b2c3d4-e5f6-7890-abcd-ef1234567003',
+  東京ドーム: 'a1b2c3d4-e5f6-7890-abcd-ef1234567004',
+  横浜スタジアム: 'a1b2c3d4-e5f6-7890-abcd-ef1234567005',
+  横浜: 'a1b2c3d4-e5f6-7890-abcd-ef1234567005',
+  マツダスタジアム: 'a1b2c3d4-e5f6-7890-abcd-ef1234567006',
+  'MAZDA Zoom-Zoom スタジアム広島': 'a1b2c3d4-e5f6-7890-abcd-ef1234567006',
+};
+
+const DEFAULT_STADIUM_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567001';
+
 @Injectable()
 export class BulkCreateGameUsecase {
   constructor(
@@ -27,10 +45,7 @@ export class BulkCreateGameUsecase {
     private readonly findGameByDatePort: FindGameByDatePort,
   ) {}
 
-  async execute(
-    inputs: GameInputDto[],
-    stadiumId: string,
-  ): Promise<BulkCreateGameResult> {
+  async execute(inputs: GameInputDto[]): Promise<BulkCreateGameResult> {
     let savedCount = 0;
     let skippedCount = 0;
     const errors: string[] = [];
@@ -45,7 +60,7 @@ export class BulkCreateGameUsecase {
       }
 
       try {
-        const game = this.createGameEntity(input, stadiumId);
+        const game = this.createGameEntity(input);
         await this.bulkCreateGamePort.save(game);
         savedCount++;
       } catch (error) {
@@ -58,7 +73,9 @@ export class BulkCreateGameUsecase {
     return { savedCount, skippedCount, errors };
   }
 
-  private createGameEntity(input: GameInputDto, stadiumId: string): Game {
+  private createGameEntity(input: GameInputDto): Game {
+    const stadiumId = this.resolveStadiumId(input.stadium);
+
     return new Game(
       new GameId(randomUUID()),
       new GameDate(new Date(input.gameDate)),
@@ -73,5 +90,22 @@ export class BulkCreateGameUsecase {
       new Date(),
       new Date(),
     );
+  }
+
+  private resolveStadiumId(stadiumName: string): string {
+    const stadiumId = STADIUM_NAME_TO_ID[stadiumName];
+    if (stadiumId) {
+      return stadiumId;
+    }
+
+    // 部分一致で検索
+    for (const [name, id] of Object.entries(STADIUM_NAME_TO_ID)) {
+      if (stadiumName.includes(name) || name.includes(stadiumName)) {
+        return id;
+      }
+    }
+
+    // デフォルトはバンテリンドーム
+    return DEFAULT_STADIUM_ID;
   }
 }

@@ -33,10 +33,6 @@ export class GameInputDto {
 }
 
 export class BulkCreateGameDto {
-  @IsString()
-  @IsNotEmpty()
-  stadiumId: string;
-
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

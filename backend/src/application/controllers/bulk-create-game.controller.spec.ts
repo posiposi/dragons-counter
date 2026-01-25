@@ -30,7 +30,6 @@ describe('BulkCreateGameController', () => {
 
   describe('bulkCreate', () => {
     const validDto: BulkCreateGameDto = {
-      stadiumId: 'valid-stadium-uuid',
       games: [
         {
           gameDate: '2026-04-01',
@@ -56,10 +55,7 @@ describe('BulkCreateGameController', () => {
       const result = await controller.bulkCreate(validDto);
 
       expect(executeSpy).toHaveBeenCalledTimes(1);
-      expect(executeSpy).toHaveBeenCalledWith(
-        validDto.games,
-        validDto.stadiumId,
-      );
+      expect(executeSpy).toHaveBeenCalledWith(validDto.games);
       expect(result).toEqual(expectedResult);
     });
 
