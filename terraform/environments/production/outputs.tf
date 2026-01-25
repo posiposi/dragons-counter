@@ -152,3 +152,13 @@ output "github_actions_role_arn" {
   description = "GitHub Actions用IAMロールARN"
   value       = module.github_oidc.role_arn
 }
+
+output "api_gateway_url" {
+  description = "API GatewayのエンドポイントURL（スクレイピングAPI）"
+  value       = module.api_gateway.stage_invoke_url
+}
+
+output "lambda_scraper_function_name" {
+  description = "Lambda Scraper関数名"
+  value       = module.lambda_scraper.function_name
+}

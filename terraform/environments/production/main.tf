@@ -153,5 +153,9 @@ module "api_gateway" {
   environment          = var.environment
   lambda_invoke_arn    = module.lambda_scraper.invoke_arn
   lambda_function_name = module.lambda_scraper.function_name
-  cors_allowed_origins = ["https://${var.domain_name}", "https://www.${var.domain_name}"]
+  cors_allowed_origins = [
+    "https://${var.domain_name}",
+    "https://www.${var.domain_name}",
+    "https://local.dravincit.com"
+  ]
 }
