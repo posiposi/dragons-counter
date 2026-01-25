@@ -20,8 +20,14 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
   let adapter: BulkCreateGameAdapter;
 
   const testStadiums = {
-    vantelin: { id: randomUUID(), name: 'バンテリンドーム' },
-    koshien: { id: randomUUID(), name: '甲子園' },
+    vantelin: {
+      id: randomUUID(),
+      name: `バンテリンドーム_bulk_${randomUUID()}`,
+    },
+    koshien: {
+      id: randomUUID(),
+      name: `甲子園_bulk_${randomUUID()}`,
+    },
   };
 
   beforeAll(async () => {

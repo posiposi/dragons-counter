@@ -12,7 +12,10 @@ describe('FindGameByDateAdapter Integration Tests', () => {
   let adapter: FindGameByDateAdapter;
 
   const testStadiums = {
-    vantelin: { id: randomUUID(), name: 'バンテリンドーム' },
+    vantelin: {
+      id: randomUUID(),
+      name: `バンテリンドーム_findbydate_${randomUUID()}`,
+    },
   };
 
   beforeAll(async () => {
