@@ -56,7 +56,10 @@ describe('BulkCreateGameController', () => {
       const result = await controller.bulkCreate(validDto);
 
       expect(executeSpy).toHaveBeenCalledTimes(1);
-      expect(executeSpy).toHaveBeenCalledWith(validDto.games, validDto.stadiumId);
+      expect(executeSpy).toHaveBeenCalledWith(
+        validDto.games,
+        validDto.stadiumId,
+      );
       expect(result).toEqual(expectedResult);
     });
 
