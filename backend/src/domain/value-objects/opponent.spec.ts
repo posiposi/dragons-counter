@@ -40,6 +40,36 @@ describe('Opponent', () => {
     });
   });
 
+  describe('abbreviation conversion', () => {
+    it.each([
+      ['巨', '読売ジャイアンツ'],
+      ['神', '阪神タイガース'],
+      ['広', '広島東洋カープ'],
+      ['De', '横浜DeNAベイスターズ'],
+      ['ヤ', '東京ヤクルトスワローズ'],
+      ['中', '中日ドラゴンズ'],
+      ['オ', 'オリックス・バファローズ'],
+      ['ソ', '福岡ソフトバンクホークス'],
+      ['楽', '東北楽天ゴールデンイーグルス'],
+      ['西', '埼玉西武ライオンズ'],
+      ['ロ', '千葉ロッテマリーンズ'],
+      ['日', '北海道日本ハムファイターズ'],
+    ])('should convert abbreviation "%s" to "%s"', (abbr, expected) => {
+      const opponent = new Opponent(abbr);
+      expect(opponent.value).toBe(expected);
+    });
+
+    it('should keep full name unchanged', () => {
+      const opponent = new Opponent('阪神タイガース');
+      expect(opponent.value).toBe('阪神タイガース');
+    });
+
+    it('should keep unknown value unchanged', () => {
+      const opponent = new Opponent('Unknown Team');
+      expect(opponent.value).toBe('Unknown Team');
+    });
+  });
+
   describe('equals', () => {
     it('should return true for same values', () => {
       const opponent1 = new Opponent('読売ジャイアンツ');
