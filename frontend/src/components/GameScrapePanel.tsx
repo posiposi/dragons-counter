@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Calendar, Download, Loader2, CheckCircle, XCircle } from "lucide-react";
+import {
+  Calendar,
+  Download,
+  Loader2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import {
   scrapeGameResult,
   hasGame,
@@ -17,7 +23,7 @@ type Status = "idle" | "scraping" | "saving" | "success" | "error" | "noGame";
 
 export default function GameScrapePanel({ onGameSaved }: GameScrapePanelProps) {
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string>("");
@@ -70,7 +76,7 @@ export default function GameScrapePanel({ onGameSaved }: GameScrapePanelProps) {
       setMessage(
         error instanceof Error
           ? error.message
-          : "予期しないエラーが発生しました"
+          : "予期しないエラーが発生しました",
       );
     }
   };
@@ -178,7 +184,9 @@ export default function GameScrapePanel({ onGameSaved }: GameScrapePanelProps) {
             </span>
           </div>
           <div className={styles.previewContent}>
-            <div className={styles.previewOpponent}>vs {scrapedGame.opponent}</div>
+            <div className={styles.previewOpponent}>
+              vs {scrapedGame.opponent}
+            </div>
             <div className={styles.previewScore}>
               {scrapedGame.dragonsScore} - {scrapedGame.opponentScore}
             </div>

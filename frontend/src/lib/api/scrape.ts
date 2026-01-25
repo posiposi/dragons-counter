@@ -28,21 +28,19 @@ export type ScrapeResult =
   | ScrapeErrorResponse;
 
 export function isScrapeError(
-  result: ScrapeResult
+  result: ScrapeResult,
 ): result is ScrapeErrorResponse {
   return "error" in result;
 }
 
-export function hasGame(
-  result: ScrapeResult
-): result is ScrapeSuccessResponse {
+export function hasGame(result: ScrapeResult): result is ScrapeSuccessResponse {
   return "game" in result && result.game !== null;
 }
 
 export async function scrapeGameResult(date: string): Promise<ScrapeResult> {
   if (!API_GATEWAY_URL) {
     throw new Error(
-      "API Gateway URLが設定されていません。環境変数を確認してください"
+      "API Gateway URLが設定されていません。環境変数を確認してください",
     );
   }
 

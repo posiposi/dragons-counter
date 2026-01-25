@@ -59,11 +59,11 @@ export interface BulkSaveResult {
 }
 
 export async function bulkSaveGames(
-  games: BulkSaveGameInput[]
+  games: BulkSaveGameInput[],
 ): Promise<BulkSaveResult> {
   if (!API_BASE_URL) {
     throw new Error(
-      "予期しないエラーが発生しました。しばらく経ってから再度お試しください"
+      "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
     );
   }
 
