@@ -53,6 +53,7 @@ NODE_ENV=production
 FRONTEND_PORT=${frontend_port}
 BACKEND_PORT=${backend_port}
 VITE_API_URL=/api
+VITE_API_GATEWAY_URL=${api_gateway_url}
 ALLOWED_ORIGINS=https://dravincit.com,https://www.dravincit.com
 ENVEOF
 

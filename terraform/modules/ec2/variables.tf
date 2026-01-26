@@ -93,3 +93,9 @@ variable "deploy_bucket_arn" {
   type        = string
   default     = ""
 }
+
+variable "api_gateway_url" {
+  description = "API GatewayのエンドポイントURL（スクレイピングAPI）"
+  type        = string
+  default     = ""
+}
