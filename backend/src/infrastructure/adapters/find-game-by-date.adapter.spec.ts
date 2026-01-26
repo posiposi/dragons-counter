@@ -10,12 +10,8 @@ describe('FindGameByDateAdapter Integration Tests', () => {
   let prismaService: PrismaService;
   let module: TestingModule;
   let adapter: FindGameByDateAdapter;
-
-  const testStadiums = {
-    vantelin: {
-      id: randomUUID(),
-      name: `バンテリンドーム_findbydate_${randomUUID()}`,
-    },
+  let testStadiums: {
+    vantelin: { id: string; name: string };
   };
 
   beforeAll(async () => {
@@ -32,9 +28,15 @@ describe('FindGameByDateAdapter Integration Tests', () => {
 
     prismaService = module.get<PrismaService>(PrismaService);
     adapter = module.get<FindGameByDateAdapter>(FindGameByDateAdapter);
+  });
 
-    await prismaService.game.deleteMany();
-    await prismaService.stadium.deleteMany();
+  beforeEach(async () => {
+    testStadiums = {
+      vantelin: {
+        id: randomUUID(),
+        name: `バンテリンドーム_findbydate_${randomUUID()}`,
+      },
+    };
 
     for (const stadium of Object.values(testStadiums)) {
       await prismaService.stadium.create({
@@ -47,11 +49,16 @@ describe('FindGameByDateAdapter Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await prismaService.game.deleteMany();
+    const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+    await prismaService.game.deleteMany({
+      where: { stadium: { id: { in: stadiumIds } } },
+    });
+    await prismaService.stadium.deleteMany({
+      where: { id: { in: stadiumIds } },
+    });
   });
 
   afterAll(async () => {
-    await prismaService.stadium.deleteMany();
     await prismaService.$disconnect();
     await module.close();
   });

@@ -18,16 +18,9 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
   let prismaService: PrismaService;
   let module: TestingModule;
   let adapter: BulkCreateGameAdapter;
-
-  const testStadiums = {
-    vantelin: {
-      id: randomUUID(),
-      name: `バンテリンドーム_bulk_${randomUUID()}`,
-    },
-    koshien: {
-      id: randomUUID(),
-      name: `甲子園_bulk_${randomUUID()}`,
-    },
+  let testStadiums: {
+    vantelin: { id: string; name: string };
+    koshien: { id: string; name: string };
   };
 
   beforeAll(async () => {
@@ -44,9 +37,19 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
 
     prismaService = module.get<PrismaService>(PrismaService);
     adapter = module.get<BulkCreateGameAdapter>(BulkCreateGameAdapter);
+  });
 
-    await prismaService.game.deleteMany();
-    await prismaService.stadium.deleteMany();
+  beforeEach(async () => {
+    testStadiums = {
+      vantelin: {
+        id: randomUUID(),
+        name: `バンテリンドーム_bulk_${randomUUID()}`,
+      },
+      koshien: {
+        id: randomUUID(),
+        name: `甲子園_bulk_${randomUUID()}`,
+      },
+    };
 
     for (const stadium of Object.values(testStadiums)) {
       await prismaService.stadium.create({
@@ -59,11 +62,16 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await prismaService.game.deleteMany();
+    const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+    await prismaService.game.deleteMany({
+      where: { stadium: { id: { in: stadiumIds } } },
+    });
+    await prismaService.stadium.deleteMany({
+      where: { id: { in: stadiumIds } },
+    });
   });
 
   afterAll(async () => {
-    await prismaService.stadium.deleteMany();
     await prismaService.$disconnect();
     await module.close();
   });
