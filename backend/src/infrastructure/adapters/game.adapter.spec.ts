@@ -19,10 +19,11 @@ describe('GameAdapter Integration Tests', () => {
   let module: TestingModule;
   let prismaClient: PrismaClient;
 
+  // 固定のスタジアムID（game.adapter専用）
   const testStadiums = {
-    vantelin: { id: randomUUID(), name: 'バンテリンドーム' },
-    koshien: { id: randomUUID(), name: '甲子園' },
-    mazda: { id: randomUUID(), name: 'マツダスタジアム' },
+    vantelin: { id: '33333333-game-0001-0001-000000000001', name: 'バンテリンドーム_game' },
+    koshien: { id: '33333333-game-0001-0001-000000000002', name: '甲子園_game' },
+    mazda: { id: '33333333-game-0001-0001-000000000003', name: 'マツダスタジアム_game' },
   };
 
   beforeAll(async () => {
@@ -40,12 +41,12 @@ describe('GameAdapter Integration Tests', () => {
     prismaService = module.get<PrismaService>(PrismaService);
     prismaClient = prismaService;
 
-    await prismaService.game.deleteMany();
-    await prismaService.stadium.deleteMany();
-
+    // スタジアムをupsertで作成（並列実行でもCIエラーにならないように）
     for (const stadium of Object.values(testStadiums)) {
-      await prismaService.stadium.create({
-        data: {
+      await prismaService.stadium.upsert({
+        where: { id: stadium.id },
+        update: { name: stadium.name },
+        create: {
           id: stadium.id,
           name: stadium.name,
         },
@@ -54,8 +55,13 @@ describe('GameAdapter Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await prismaService.game.deleteMany();
-    await prismaService.stadium.deleteMany();
+    const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+    await prismaService.game.deleteMany({
+      where: { stadiumId: { in: stadiumIds } },
+    });
+    await prismaService.stadium.deleteMany({
+      where: { id: { in: stadiumIds } },
+    });
     await prismaService.$disconnect();
     await module.close();
   });
@@ -184,7 +190,10 @@ describe('GameAdapter Integration Tests', () => {
 
   describe('findAll', () => {
     it('should return all games ordered by gameDate desc with stadium info', async () => {
-      await prismaService.game.deleteMany();
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await prismaService.game.deleteMany({
+        where: { stadiumId: { in: stadiumIds } },
+      });
 
       const game1Id = randomUUID();
       const game2Id = randomUUID();
@@ -239,7 +248,10 @@ describe('GameAdapter Integration Tests', () => {
     });
 
     it('should return empty array when no games exist', async () => {
-      await prismaService.game.deleteMany();
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await prismaService.game.deleteMany({
+        where: { stadiumId: { in: stadiumIds } },
+      });
 
       const adapter = new GameAdapter(prismaClient);
       const result = await adapter.findAll();
@@ -248,7 +260,10 @@ describe('GameAdapter Integration Tests', () => {
     });
 
     it('should exclude soft-deleted games', async () => {
-      await prismaService.game.deleteMany();
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await prismaService.game.deleteMany({
+        where: { stadiumId: { in: stadiumIds } },
+      });
 
       const activeGameId = randomUUID();
       const deletedGameId = randomUUID();
@@ -297,9 +312,12 @@ describe('GameAdapter Integration Tests', () => {
     let adapter: GameAdapter;
 
     beforeEach(async () => {
-      await prismaService.game.deleteMany();
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await prismaService.game.deleteMany({
+        where: { stadiumId: { in: stadiumIds } },
+      });
 
-      testGameId = '123e4567-e89b-12d3-a456-426614174000';
+      testGameId = '33333333-game-test-0001-000000000001';
       testGameIdVO = new GameId(testGameId);
       nonExistentGameIdVO = new GameId('123e4567-e89b-12d3-a456-426614174999');
       adapter = new GameAdapter(prismaClient);

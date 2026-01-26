@@ -18,9 +18,17 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
   let prismaService: PrismaService;
   let module: TestingModule;
   let adapter: BulkCreateGameAdapter;
-  let testStadiums: {
-    vantelin: { id: string; name: string };
-    koshien: { id: string; name: string };
+
+  // 固定のスタジアムID（bulk-create-game専用）
+  const testStadiums = {
+    vantelin: {
+      id: '11111111-bulk-0001-0001-000000000001',
+      name: 'バンテリンドーム_bulk',
+    },
+    koshien: {
+      id: '11111111-bulk-0001-0001-000000000002',
+      name: '甲子園_bulk',
+    },
   };
 
   beforeAll(async () => {
@@ -37,23 +45,13 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
 
     prismaService = module.get<PrismaService>(PrismaService);
     adapter = module.get<BulkCreateGameAdapter>(BulkCreateGameAdapter);
-  });
 
-  beforeEach(async () => {
-    testStadiums = {
-      vantelin: {
-        id: randomUUID(),
-        name: `バンテリンドーム_bulk_${randomUUID()}`,
-      },
-      koshien: {
-        id: randomUUID(),
-        name: `甲子園_bulk_${randomUUID()}`,
-      },
-    };
-
+    // スタジアムをupsertで作成（並列実行でもCIエラーにならないように）
     for (const stadium of Object.values(testStadiums)) {
-      await prismaService.stadium.create({
-        data: {
+      await prismaService.stadium.upsert({
+        where: { id: stadium.id },
+        update: { name: stadium.name },
+        create: {
           id: stadium.id,
           name: stadium.name,
         },
@@ -64,14 +62,18 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
   afterEach(async () => {
     const stadiumIds = Object.values(testStadiums).map((s) => s.id);
     await prismaService.game.deleteMany({
-      where: { stadium: { id: { in: stadiumIds } } },
-    });
-    await prismaService.stadium.deleteMany({
-      where: { id: { in: stadiumIds } },
+      where: { stadiumId: { in: stadiumIds } },
     });
   });
 
   afterAll(async () => {
+    const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+    await prismaService.game.deleteMany({
+      where: { stadiumId: { in: stadiumIds } },
+    });
+    await prismaService.stadium.deleteMany({
+      where: { id: { in: stadiumIds } },
+    });
     await prismaService.$disconnect();
     await module.close();
   });
