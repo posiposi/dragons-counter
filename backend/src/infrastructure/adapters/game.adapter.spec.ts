@@ -21,9 +21,18 @@ describe('GameAdapter Integration Tests', () => {
 
   // 固定のスタジアムID（game.adapter専用）
   const testStadiums = {
-    vantelin: { id: '33333333-game-0001-0001-000000000001', name: 'バンテリンドーム_game' },
-    koshien: { id: '33333333-game-0001-0001-000000000002', name: '甲子園_game' },
-    mazda: { id: '33333333-game-0001-0001-000000000003', name: 'マツダスタジアム_game' },
+    vantelin: {
+      id: '33333333-game-0001-0001-000000000001',
+      name: 'バンテリンドーム_game',
+    },
+    koshien: {
+      id: '33333333-game-0001-0001-000000000002',
+      name: '甲子園_game',
+    },
+    mazda: {
+      id: '33333333-game-0001-0001-000000000003',
+      name: 'マツダスタジアム_game',
+    },
   };
 
   beforeAll(async () => {
