@@ -43,3 +43,41 @@ export async function deleteGame(gameId: string): Promise<void> {
     );
   }
 }
+
+export interface BulkSaveGameInput {
+  gameDate: string;
+  opponent: string;
+  dragonsScore: number;
+  opponentScore: number;
+  stadium: string;
+}
+
+export interface BulkSaveResult {
+  savedCount: number;
+  skippedCount: number;
+  errors: string[];
+}
+
+export async function bulkSaveGames(
+  games: BulkSaveGameInput[],
+): Promise<BulkSaveResult> {
+  if (!API_BASE_URL) {
+    throw new Error(
+      "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
+    );
+  }
+
+  const response = await fetch(`${API_BASE_URL}/games/bulk`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ games }),
+  });
+
+  if (!response.ok) {
+    throw new Error("試合結果の保存に失敗しました");
+  }
+
+  return response.json();
+}

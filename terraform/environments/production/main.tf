@@ -96,6 +96,7 @@ module "ec2" {
   rds_secret_arn            = module.rds.db_password_secret_arn
   enable_codedeploy         = true
   deploy_bucket_arn         = module.s3_deploy.bucket_arn
+  api_gateway_url           = module.api_gateway.stage_invoke_url
 }
 
 module "route53" {
@@ -136,4 +137,26 @@ module "github_oidc" {
   aws_account_id      = data.aws_caller_identity.current.account_id
   s3_bucket_arn       = module.s3_deploy.bucket_arn
   codedeploy_app_name = module.codedeploy.app_name
+}
+
+module "lambda_scraper" {
+  source = "../../modules/lambda-scraper"
+
+  project_name    = var.project_name
+  environment     = var.environment
+  lambda_zip_path = "${path.root}/../../../lambda/scraper.zip"
+}
+
+module "api_gateway" {
+  source = "../../modules/api-gateway"
+
+  project_name         = var.project_name
+  environment          = var.environment
+  lambda_invoke_arn    = module.lambda_scraper.invoke_arn
+  lambda_function_name = module.lambda_scraper.function_name
+  cors_allowed_origins = [
+    "https://${var.domain_name}",
+    "https://www.${var.domain_name}",
+    "https://local.dravincit.com"
+  ]
 }

@@ -1,4 +1,12 @@
 services:
+  lambda-scraper-test:
+    build:
+      context: ../../lambda/scraper
+      dockerfile: Dockerfile
+    container_name: dragons-counter-lambda-test
+    profiles:
+      - test
+
   frontend:
     build:
       context: ../../frontend
@@ -6,6 +14,7 @@ services:
       target: production
       args:
         VITE_API_URL: "/api"
+        VITE_API_GATEWAY_URL: "${VITE_API_GATEWAY_URL}"
     container_name: dragons-counter-frontend
     ports:
       - "${FRONTEND_PORT:-3043}:80"

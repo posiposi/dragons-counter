@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Game } from "@/types/game";
 import { fetchGames, deleteGame } from "@/lib/api/games";
 import { Trash2 } from "lucide-react";
+import GameScrapePanel from "./GameScrapePanel";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import DeleteResultDialog from "./DeleteResultDialog";
 import styles from "./GameList.module.css";
@@ -148,6 +149,8 @@ export default function GameList() {
           </div>
         </div>
       </header>
+
+      <GameScrapePanel onGameSaved={loadGames} />
 
       {games.length > 0 ? (
         <>
