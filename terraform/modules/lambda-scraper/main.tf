@@ -24,6 +24,30 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_signer_signing_profile" "lambda" {
+  platform_id = "AWSLambda-SHA384-ECDSA"
+  name_prefix = "${var.project_name}-scraper-"
+
+  tags = {
+    Name        = "${var.project_name}-scraper-signing-profile"
+    Environment = var.environment
+  }
+}
+
+resource "aws_lambda_code_signing_config" "scraper" {
+  description = "Code signing config for ${var.project_name} scraper Lambda"
+
+  allowed_publishers {
+    signing_profile_version_arns = [
+      aws_signer_signing_profile.lambda.version_arn,
+    ]
+  }
+
+  policies {
+    untrusted_artifact_on_deployment = "Warn"
+  }
+}
+
 resource "aws_lambda_function" "scraper" {
   function_name = "${var.project_name}-npb-scraper"
   role          = aws_iam_role.lambda.arn
@@ -32,6 +56,8 @@ resource "aws_lambda_function" "scraper" {
 
   filename         = var.lambda_zip_path
   source_code_hash = filebase64sha256(var.lambda_zip_path)
+
+  code_signing_config_arn = aws_lambda_code_signing_config.scraper.arn
 
   memory_size = var.memory_size
   timeout     = var.timeout
