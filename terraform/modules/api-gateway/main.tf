@@ -35,9 +35,10 @@ resource "aws_apigatewayv2_integration" "lambda" {
 }
 
 resource "aws_apigatewayv2_route" "scrape" {
-  api_id    = aws_apigatewayv2_api.scraper.id
-  route_key = "GET /scrape"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  api_id             = aws_apigatewayv2_api.scraper.id
+  route_key          = "GET /scrape"
+  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+  authorization_type = "NONE"
 }
 
 resource "aws_lambda_permission" "api_gateway" {
