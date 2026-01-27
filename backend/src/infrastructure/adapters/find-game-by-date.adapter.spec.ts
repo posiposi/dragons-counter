@@ -69,7 +69,7 @@ describe('FindGameByDateAdapter Integration Tests', () => {
   describe('findByDate', () => {
     it('should return a game when matching date exists', async () => {
       const testGameId = randomUUID();
-      const testDate = new Date('2024-04-01');
+      const testDate = new Date('2024-07-01');
 
       await prismaService.game.create({
         data: {
@@ -92,7 +92,7 @@ describe('FindGameByDateAdapter Integration Tests', () => {
 
     it('should return null when no matching game exists', async () => {
       const result = await adapter.findByDate(
-        new GameDate(new Date('2024-04-01')),
+        new GameDate(new Date('2024-07-01')),
       );
 
       expect(result).toBeNull();
@@ -102,7 +102,7 @@ describe('FindGameByDateAdapter Integration Tests', () => {
       await prismaService.game.create({
         data: {
           id: randomUUID(),
-          gameDate: new Date('2024-04-01'),
+          gameDate: new Date('2024-07-01'),
           opponent: '阪神タイガース',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
@@ -112,14 +112,14 @@ describe('FindGameByDateAdapter Integration Tests', () => {
       });
 
       const result = await adapter.findByDate(
-        new GameDate(new Date('2024-04-02')),
+        new GameDate(new Date('2024-07-02')),
       );
 
       expect(result).toBeNull();
     });
 
     it('should exclude soft-deleted games', async () => {
-      const testDate = new Date('2024-04-01');
+      const testDate = new Date('2024-07-01');
 
       await prismaService.game.create({
         data: {
