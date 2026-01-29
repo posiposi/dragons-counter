@@ -45,3 +45,33 @@ model Stadium {
 
   @@map("stadiums")
 }
+
+model User {
+  id                   String                    @id @default(uuid())
+  email                String                    @unique
+  password             String                    @map("password")
+  registrationRequests UserRegistrationRequest[]
+  createdAt            DateTime                  @default(now()) @map("created_at")
+  updatedAt            DateTime                  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model UserRegistrationRequest {
+  id                 String             @id @default(uuid())
+  userId             String             @map("user_id")
+  user               User               @relation(fields: [userId], references: [id])
+  status             RegistrationStatus @default(PENDING)
+  reasonForRejection String?
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  @@map("user_registration_requests")
+}
+
+enum RegistrationStatus {
+  PENDING  @map("pending")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+  BANNED   @map("banned")
+}
