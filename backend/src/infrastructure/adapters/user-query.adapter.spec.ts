@@ -18,6 +18,9 @@ describe('UserQueryAdapter Integration Tests', () => {
   const testPasswordHash =
     '$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ12';
 
+  // テスト固有のメールアドレス（他テストスイートとの競合防止）
+  const testEmails = [testEmail, 'nonexistent@example.com'];
+
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
@@ -35,8 +38,12 @@ describe('UserQueryAdapter Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    await prismaService.userRegistrationRequest.deleteMany({});
-    await prismaService.user.deleteMany({});
+    await prismaService.userRegistrationRequest.deleteMany({
+      where: { user: { email: { in: testEmails } } },
+    });
+    await prismaService.user.deleteMany({
+      where: { email: { in: testEmails } },
+    });
 
     // テストユーザーを作成
     await prismaService.user.create({
@@ -54,8 +61,12 @@ describe('UserQueryAdapter Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await prismaService.userRegistrationRequest.deleteMany({});
-    await prismaService.user.deleteMany({});
+    await prismaService.userRegistrationRequest.deleteMany({
+      where: { user: { email: { in: testEmails } } },
+    });
+    await prismaService.user.deleteMany({
+      where: { email: { in: testEmails } },
+    });
     await prismaService.$disconnect();
     await module.close();
   });

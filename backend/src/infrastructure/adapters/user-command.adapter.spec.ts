@@ -12,6 +12,9 @@ describe('UserCommandAdapter Integration Tests', () => {
   let module: TestingModule;
   let adapter: UserCommandAdapter;
 
+  // テスト固有のメールアドレス（他テストスイートとの競合防止）
+  const testEmails = ['test-command@example.com', 'hash-test@example.com'];
+
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
@@ -29,8 +32,12 @@ describe('UserCommandAdapter Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await prismaService.userRegistrationRequest.deleteMany({});
-    await prismaService.user.deleteMany({});
+    await prismaService.userRegistrationRequest.deleteMany({
+      where: { user: { email: { in: testEmails } } },
+    });
+    await prismaService.user.deleteMany({
+      where: { email: { in: testEmails } },
+    });
   });
 
   afterAll(async () => {
