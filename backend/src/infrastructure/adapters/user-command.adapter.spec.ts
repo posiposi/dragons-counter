@@ -4,7 +4,6 @@ import { UserCommandAdapter } from './user-command.adapter';
 import { User } from '../../domain/entities/user';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
-import { UserId } from '../../domain/value-objects/user-id';
 import { RegistrationStatus } from '../../domain/enums/registration-status';
 import { PrismaClient } from '@prisma/client';
 

@@ -27,8 +27,7 @@ export const RegistrationStatus = {
   },
 } as const;
 
-export type RegistrationStatusType =
-  (typeof RegistrationStatus)[keyof Omit<
-    typeof RegistrationStatus,
-    'toPrisma' | 'fromPrisma'
-  >];
+export type RegistrationStatusType = (typeof RegistrationStatus)[keyof Omit<
+  typeof RegistrationStatus,
+  'toPrisma' | 'fromPrisma'
+>];

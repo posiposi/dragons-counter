@@ -15,7 +15,8 @@ describe('UserQueryAdapter Integration Tests', () => {
 
   const testUserId = randomUUID();
   const testEmail = 'query-test@example.com';
-  const testPasswordHash = '$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ12';
+  const testPasswordHash =
+    '$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ12';
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
