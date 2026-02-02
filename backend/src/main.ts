@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -25,6 +25,8 @@ async function bootstrap() {
     app.setGlobalPrefix('api', {
       exclude: ['health'],
     });
+
+    app.useGlobalPipes(new ValidationPipe());
 
     const port = process.env.PORT ?? 3000;
     await app.listen(port, '0.0.0.0');
@@ -65,6 +67,8 @@ async function bootstrap() {
     app.setGlobalPrefix('api', {
       exclude: ['health'],
     });
+
+    app.useGlobalPipes(new ValidationPipe());
 
     const httpsPort = process.env.HTTPS_PORT ?? 3443;
     await app.listen(httpsPort, '0.0.0.0');
