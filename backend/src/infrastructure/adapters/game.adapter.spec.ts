@@ -236,24 +236,29 @@ describe('GameAdapter Integration Tests', () => {
       const adapter = new GameAdapter(prismaClient);
       const result = await adapter.findAll();
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toBeInstanceOf(Game);
+      // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
+      const ownGames = result.filter((g) =>
+        stadiumIds.includes(g.stadium.id.value),
+      );
+
+      expect(ownGames).toHaveLength(2);
+      expect(ownGames[0]).toBeInstanceOf(Game);
 
       // 日付降順で2番目の試合が最初に来る
-      expect(result[0].gameDate.value).toEqual(new Date('2024-04-03'));
-      expect(result[0].opponent.value).toBe('阪神タイガース');
-      expect(result[0].stadium.id.value).toBe(testStadiums.koshien.id);
-      expect(result[0].stadium.name.value).toBe(testStadiums.koshien.name);
-      expect(result[0].dragonsScore.value).toBe(2);
-      expect(result[0].opponentScore.value).toBe(7);
-      expect(result[0].result.value).toBe(GameResultValue.LOSE);
-      expect(result[0].notes?.value).toBe('大敗');
+      expect(ownGames[0].gameDate.value).toEqual(new Date('2024-04-03'));
+      expect(ownGames[0].opponent.value).toBe('阪神タイガース');
+      expect(ownGames[0].stadium.id.value).toBe(testStadiums.koshien.id);
+      expect(ownGames[0].stadium.name.value).toBe(testStadiums.koshien.name);
+      expect(ownGames[0].dragonsScore.value).toBe(2);
+      expect(ownGames[0].opponentScore.value).toBe(7);
+      expect(ownGames[0].result.value).toBe(GameResultValue.LOSE);
+      expect(ownGames[0].notes?.value).toBe('大敗');
 
-      expect(result[1].gameDate.value).toEqual(new Date('2024-04-01'));
-      expect(result[1].opponent.value).toBe('横浜DeNAベイスターズ');
-      expect(result[1].stadium.id.value).toBe(testStadiums.vantelin.id);
-      expect(result[1].stadium.name.value).toBe(testStadiums.vantelin.name);
-      expect(result[1].result.value).toBe(GameResultValue.WIN);
+      expect(ownGames[1].gameDate.value).toEqual(new Date('2024-04-01'));
+      expect(ownGames[1].opponent.value).toBe('横浜DeNAベイスターズ');
+      expect(ownGames[1].stadium.id.value).toBe(testStadiums.vantelin.id);
+      expect(ownGames[1].stadium.name.value).toBe(testStadiums.vantelin.name);
+      expect(ownGames[1].result.value).toBe(GameResultValue.WIN);
     });
 
     it('should return empty array when no games exist', async () => {
@@ -265,7 +270,12 @@ describe('GameAdapter Integration Tests', () => {
       const adapter = new GameAdapter(prismaClient);
       const result = await adapter.findAll();
 
-      expect(result).toEqual([]);
+      // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
+      const ownGames = result.filter((g) =>
+        stadiumIds.includes(g.stadium.id.value),
+      );
+
+      expect(ownGames).toEqual([]);
     });
 
     it('should exclude soft-deleted games', async () => {
@@ -307,10 +317,15 @@ describe('GameAdapter Integration Tests', () => {
       const adapter = new GameAdapter(prismaClient);
       const result = await adapter.findAll();
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id.value).toBe(activeGameId);
-      expect(result[0].opponent.value).toBe('横浜DeNAベイスターズ');
-      expect(result[0].stadium.id.value).toBe(testStadiums.vantelin.id);
+      // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
+      const ownGames = result.filter((g) =>
+        stadiumIds.includes(g.stadium.id.value),
+      );
+
+      expect(ownGames).toHaveLength(1);
+      expect(ownGames[0].id.value).toBe(activeGameId);
+      expect(ownGames[0].opponent.value).toBe('横浜DeNAベイスターズ');
+      expect(ownGames[0].stadium.id.value).toBe(testStadiums.vantelin.id);
     });
   });
 

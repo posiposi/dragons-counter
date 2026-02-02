@@ -44,7 +44,9 @@ describe('Email', () => {
     });
 
     it('should throw error for invalid email format without local part', () => {
-      expect(() => Email.create('@example.com')).toThrow('Invalid email format');
+      expect(() => Email.create('@example.com')).toThrow(
+        'Invalid email format',
+      );
     });
 
     it('should throw error for invalid email format with spaces', () => {
