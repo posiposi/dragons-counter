@@ -27,6 +27,14 @@ describe('JwtStrategy', () => {
     expect(strategy).toBeDefined();
   });
 
+  it('JWT_SECRETが未設定の場合にエラーをスローする', () => {
+    delete process.env.JWT_SECRET;
+
+    expect(() => new JwtStrategy()).toThrow(
+      'JWT_SECRET environment variable is not defined',
+    );
+  });
+
   it('validateメソッドがpayloadからuserIdとemailを返す', async () => {
     const payload = { sub: 'user-123', email: 'test@example.com' };
 
