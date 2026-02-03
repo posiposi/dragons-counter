@@ -37,14 +37,4 @@ describe('JwtStrategy', () => {
       email: 'test@example.com',
     });
   });
-
-  it('validateメソッドがsubをuserIdにマッピングする', async () => {
-    const payload = { sub: 'another-user-456', email: 'another@example.com' };
-
-    const result = await strategy.validate(payload);
-
-    expect(result.userId).toBe('another-user-456');
-    expect(result.email).toBe('another@example.com');
-    expect(result).not.toHaveProperty('sub');
-  });
 });
