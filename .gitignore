@@ -3,7 +3,10 @@
 .env.*.local
 .env.production
 .env.test
+./CLAUDE.md
 certs/
+.claude
+CLAUDE.md
 **/.terraform/*
 *.tfstate
 *.tfstate.*
@@ -20,10 +23,3 @@ override.tf.json
 terraform.rc
 .github/templates/
 lambda/*.zip
-.claude/settings.local.json
-.claude/hooks/local/
-.claude/commands/local/
-.claude/logs/
-.claude/*.log
-.claude/audit-*.log
-.DS_Store
