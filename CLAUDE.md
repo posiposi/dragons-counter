@@ -1,0 +1,161 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## プロジェクト概要
+
+Dragons Counter（Dra Vincit）は中日ドラゴンズファン向けの野球観戦記録アプリケーションです。
+
+**構成:**
+
+- **backend/**: NestJS/TypeScript API（ドメイン駆動設計）
+- **frontend/**: Vite + React/TypeScript Web アプリケーション
+- **terraform/**: AWS インフラ構成（EC2 + ALB + RDS）
+
+## 作業ドキュメントの分類
+
+各種ドキュメントの保存ディレクトリはプロジェクトルートディレクトリ配下にある`.claude`に設置するようにします。
+
+### 永続的ドキュメント(`.claude/docs`)
+
+アプリケーション全体での「**何を目的としているか**」、「**どのように目的を達成するか**」を定義しています。
+アプリケーションの基本設計や方針が変わらない限り更新されません。
+
+- **product-reuirements.md** - プロダクト要求定義書
+- **functional-design.md** - 機能設計書
+- **development-guidelines.md** - 開発ガイドライン
+- **glossary.md** - ユビキタス言語定義
+
+## 開発プロセス
+
+### タスク実装コマンド
+
+GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します。
+
+```
+/issue-to-pr <Issue番号>
+```
+
+このコマンドは以下のフェーズを自動で実行します：
+
+| Phase | 内容 | サブエージェント |
+|---|---|---|
+| 1. 仕様取得 | GitHub Issueから仕様を取得 | `orchestrator` |
+| 2. タスク分解 | 並列調査 + 1コミット粒度に分解 | `code-investigator` + `log-investigator` → `task-decomposer` |
+| 3. TDD+DDD実装 | テスト駆動 + ドメイン駆動で実装 | `tdd-implementer` |
+| 4. 実装レビュー | コードレビュー | `code-reviewer` |
+| 4-b. レビュー指摘修正 | レビュー指摘をTDDで修正 | `review-fixer` |
+| 5. PR作成 | Pull Requestを作成 | `pr-creator` |
+
+詳細は `.claude/commands/issue-to-pr.md` を参照してください。
+
+### 情報管理
+
+フェーズ間の情報連携はClaude CodeのTasks機能（TaskCreate/TaskUpdate/TaskList/TaskGet）を使用します。ステアリングファイルは使用しません。
+
+- TaskCreateでタスクを作成し、descriptionに詳細情報を記載する
+- TaskUpdateのmetadataに成果物（調査結果、設計情報等）を格納する
+- 各サブエージェントはTaskGet/TaskListで前フェーズの情報を取得する
+
+### サブエージェント
+
+開発ワークフローで以下のサブエージェントを使用します：
+
+| 用途 | サブエージェント | モデル |
+|---|---|---|
+| ワークフロー計画 | `.claude/agents/orchestrator.md` | inherit |
+| タスク分解 | `.claude/agents/task-decomposer.md` | inherit |
+| コード調査（並列） | `.claude/agents/code-investigator.md` | haiku |
+| ログ調査（並列） | `.claude/agents/log-investigator.md` | haiku |
+| TDD+DDD実装 | `.claude/agents/tdd-implementer.md` | inherit |
+| コードレビュー | `.claude/agents/code-reviewer.md` | inherit |
+| レビュー指摘修正 | `.claude/agents/review-fixer.md` | inherit |
+| PR作成 | `.claude/agents/pr-creator.md` | inherit |
+
+### スキル
+
+サブエージェントにプリロードされるスキル：
+
+| スキル | 用途 | 使用エージェント |
+|---|---|---|
+| `task-analysis` | タスク分析・調査手法 | orchestrator, task-decomposer, code-investigator, log-investigator |
+| `tdd-workflow` | TDDサイクル手順 | tdd-implementer, review-fixer |
+| `code-review` | レビュー観点 | code-reviewer, review-fixer |
+| `pr-template` | PR作成テンプレート | pr-creator |
+| `typescript-ddd-standards` | DDD開発規約 | task-decomposer, code-investigator, tdd-implementer, code-reviewer, review-fixer |
+
+## 開発者との協業
+
+### gitコマンド
+
+**重要**: 以下のgitコマンドは開発者自身が実行します。
+
+- `git add`
+- `git commit`
+- `git push`
+
+### PR作成ルール
+
+- PRタイトルはIssueタイトルに沿った内容にする
+- PRタイトルにはIssue番号を**含めない**（`#1`のような記載は不可）
+- PR本文は仕様と対応内容を簡潔に記載
+- 複雑な図表は記載しない
+- 動作確認チェック項目は記載しない（テスト実行の旨は記載可）
+- PR作成にはGitHub MCPサーバーを優先使用する（フォールバック: ghコマンド）
+
+詳細は `pr-template` スキル（`.claude/skills/pr-template/SKILL.md`）を参照
+
+## コマンド実行
+
+### テストコード実行
+
+**重要**: テストコードを実行する際には**必ず**コンテナ内で実行してください
+
+#### コマンド実行例
+
+- 全テスト実行
+
+```
+docker compose exec backend npm run test
+```
+
+- 特定のテストのみ実行
+  - `-- ` の後に実行するテストファイルの相対パス(`/src`以下)を明示する
+
+```
+docker compose exec backend npm run test -- /src/domain/value-objects/stadium-name.spec.ts
+```
+
+## ディレクトリ構成
+
+```
+.claude/
+├── agents/
+│   ├── orchestrator.md          # ワークフロー計画
+│   ├── task-decomposer.md       # タスク分解
+│   ├── code-investigator.md     # コード調査（並列実行用）
+│   ├── log-investigator.md      # ログ調査（並列実行用）
+│   ├── tdd-implementer.md       # TDD+DDD実装
+│   ├── code-reviewer.md         # 実装レビュー
+│   ├── review-fixer.md          # レビュー指摘修正
+│   └── pr-creator.md            # PR作成
+├── skills/
+│   ├── task-analysis/
+│   │   └── SKILL.md             # タスク分析スキル
+│   ├── tdd-workflow/
+│   │   └── SKILL.md             # TDDワークフロースキル
+│   ├── code-review/
+│   │   └── SKILL.md             # コードレビュースキル
+│   ├── pr-template/
+│   │   └── SKILL.md             # PR作成テンプレートスキル
+│   └── typescript-ddd-standards/
+│       ├── SKILL.md             # DDD開発規約スキル
+│       └── examples.md          # コード例
+├── commands/
+│   └── issue-to-pr.md           # ワークフロー起動コマンド
+└── docs/
+    ├── product-reuirements.md
+    ├── functional-design.md
+    ├── development-guidelines.md
+    └── glossary.md
+```

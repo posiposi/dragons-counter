@@ -3,10 +3,13 @@
 .env.*.local
 .env.production
 .env.test
-./CLAUDE.md
 certs/
-.claude
-CLAUDE.md
+.claude/settings.local.json
+.claude/hooks/local/
+.claude/commands/local/
+.claude/logs/
+.claude/*.log
+.claude/audit-*.log
 **/.terraform/*
 *.tfstate
 *.tfstate.*
