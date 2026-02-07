@@ -62,9 +62,9 @@ describe('ApproveUserUsecase', () => {
     expect(mockUserCommandPort.updateRegistrationStatus).toHaveBeenCalledTimes(
       1,
     );
-    const updatedUser =
-      mockUserCommandPort.updateRegistrationStatus.mock.calls[0][0];
-    expect(updatedUser.registrationStatus).toBe(RegistrationStatus.APPROVED);
+    expect(mockUserCommandPort.updateRegistrationStatus).toHaveBeenCalledWith(
+      user.approve(),
+    );
   });
 
   it('存在しないユーザーIDでNotFoundExceptionがスローされる', async () => {
@@ -73,9 +73,7 @@ describe('ApproveUserUsecase', () => {
     await expect(usecase.execute('non-existent-id')).rejects.toThrow(
       NotFoundException,
     );
-    expect(
-      mockUserCommandPort.updateRegistrationStatus,
-    ).not.toHaveBeenCalled();
+    expect(mockUserCommandPort.updateRegistrationStatus).not.toHaveBeenCalled();
   });
 
   it('APPROVEDユーザーを承認しようとするとInvalidStatusTransitionExceptionがスローされる', async () => {
@@ -91,8 +89,6 @@ describe('ApproveUserUsecase', () => {
     await expect(usecase.execute('test-user-id')).rejects.toThrow(
       InvalidStatusTransitionException,
     );
-    expect(
-      mockUserCommandPort.updateRegistrationStatus,
-    ).not.toHaveBeenCalled();
+    expect(mockUserCommandPort.updateRegistrationStatus).not.toHaveBeenCalled();
   });
 });

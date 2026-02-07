@@ -71,7 +71,13 @@ export class User {
         `${this._registrationStatus}から${RegistrationStatus.APPROVED}への遷移はできません`,
       );
     }
-    return new User(this._id, this._email, this._password, RegistrationStatus.APPROVED, this._role);
+    return new User(
+      this._id,
+      this._email,
+      this._password,
+      RegistrationStatus.APPROVED,
+      this._role,
+    );
   }
 
   reject(): User {
@@ -80,7 +86,13 @@ export class User {
         `${this._registrationStatus}から${RegistrationStatus.REJECTED}への遷移はできません`,
       );
     }
-    return new User(this._id, this._email, this._password, RegistrationStatus.REJECTED, this._role);
+    return new User(
+      this._id,
+      this._email,
+      this._password,
+      RegistrationStatus.REJECTED,
+      this._role,
+    );
   }
 
   canLogin(): boolean {
