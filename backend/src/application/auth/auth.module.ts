@@ -3,8 +3,10 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { SignupController } from './controllers/signup.controller';
 import { SigninController } from './controllers/signin.controller';
+import { MeController } from './controllers/me.controller';
 import { SignupUsecase } from '../../domain/usecases/signup.usecase';
 import { SigninUsecase } from '../../domain/usecases/signin.usecase';
+import { GetCurrentUserUsecase } from '../../domain/usecases/get-current-user.usecase';
 import { UserCommandAdapter } from '../../infrastructure/adapters/user-command.adapter';
 import { UserQueryAdapter } from '../../infrastructure/adapters/user-query.adapter';
 import { JwtTokenServiceAdapter } from '../../infrastructure/adapters/services/jwt-token-service.adapter';
@@ -24,10 +26,11 @@ if (!jwtSecret) {
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [SignupController, SigninController],
+  controllers: [SignupController, SigninController, MeController],
   providers: [
     SignupUsecase,
     SigninUsecase,
+    GetCurrentUserUsecase,
     LocalStrategy,
     JwtStrategy,
     {
