@@ -13,6 +13,17 @@ import { UserAlreadyExistsException } from '../../domain/exceptions/user-already
 export class UserCommandAdapter implements UserCommandPort {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async updateRegistrationStatus(user: User): Promise<User> {
+    await this.prisma.userRegistrationRequest.create({
+      data: {
+        userId: user.id.value,
+        status: RegistrationStatus.toPrisma(user.registrationStatus),
+      },
+    });
+
+    return user;
+  }
+
   async save(user: User): Promise<User> {
     try {
       const savedUser = await this.prisma.user.upsert({
