@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { GetCurrentUserUsecase } from './get-current-user.usecase';
-import { UserQueryPort } from '../ports/user-query.port';
 import { User } from '../entities/user';
 import { UserId } from '../value-objects/user-id';
 import { Email } from '../value-objects/email';
@@ -12,23 +11,27 @@ import { UserResponseDto } from '../../application/auth/dto/user-response.dto';
 
 describe('GetCurrentUserUsecase', () => {
   let usecase: GetCurrentUserUsecase;
-  let userQueryPort: UserQueryPort;
+  let mockUserQueryPort: {
+    findByEmail: jest.Mock;
+    findById: jest.Mock;
+    findAll: jest.Mock;
+  };
 
   beforeEach(async () => {
+    mockUserQueryPort = {
+      findByEmail: jest.fn(),
+      findById: jest.fn(),
+      findAll: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetCurrentUserUsecase,
-        {
-          provide: 'UserQueryPort',
-          useValue: {
-            findById: jest.fn(),
-          },
-        },
+        { provide: 'UserQueryPort', useValue: mockUserQueryPort },
       ],
     }).compile();
 
     usecase = module.get<GetCurrentUserUsecase>(GetCurrentUserUsecase);
-    userQueryPort = module.get<UserQueryPort>('UserQueryPort');
   });
 
   describe('execute', () => {
@@ -41,7 +44,7 @@ describe('GetCurrentUserUsecase', () => {
         UserRole.USER,
       );
 
-      jest.spyOn(userQueryPort, 'findById').mockResolvedValue(mockUser);
+      mockUserQueryPort.findById.mockResolvedValue(mockUser);
 
       const result = await usecase.execute('test-user-id');
 
@@ -52,32 +55,31 @@ describe('GetCurrentUserUsecase', () => {
       };
 
       expect(result).toEqual(expected);
-      expect(userQueryPort.findById).toHaveBeenCalledTimes(1);
-      expect(userQueryPort.findById).toHaveBeenCalledWith(
+      expect(mockUserQueryPort.findById).toHaveBeenCalledTimes(1);
+      expect(mockUserQueryPort.findById).toHaveBeenCalledWith(
         UserId.create('test-user-id'),
       );
     });
 
     it('ユーザーが見つからない場合、NotFoundExceptionをスローする', async () => {
-      jest.spyOn(userQueryPort, 'findById').mockResolvedValue(null);
+      mockUserQueryPort.findById.mockResolvedValue(null);
 
       await expect(usecase.execute('nonexistent-id')).rejects.toThrow(
         NotFoundException,
       );
-      expect(userQueryPort.findById).toHaveBeenCalledTimes(1);
-      expect(userQueryPort.findById).toHaveBeenCalledWith(
+      expect(mockUserQueryPort.findById).toHaveBeenCalledTimes(1);
+      expect(mockUserQueryPort.findById).toHaveBeenCalledWith(
         UserId.create('nonexistent-id'),
       );
     });
 
     it('リポジトリエラーが伝播する', async () => {
-      const error = new Error('Database error');
-      jest.spyOn(userQueryPort, 'findById').mockRejectedValue(error);
+      mockUserQueryPort.findById.mockRejectedValue(new Error('Database error'));
 
       await expect(usecase.execute('test-user-id')).rejects.toThrow(
         'Database error',
       );
-      expect(userQueryPort.findById).toHaveBeenCalledTimes(1);
+      expect(mockUserQueryPort.findById).toHaveBeenCalledTimes(1);
     });
   });
 });
