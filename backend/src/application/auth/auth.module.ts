@@ -1,13 +1,35 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { SignupController } from './controllers/signup.controller';
+import { SigninController } from './controllers/signin.controller';
 import { SignupUsecase } from '../../domain/usecases/signup.usecase';
+import { SigninUsecase } from '../../domain/usecases/signin.usecase';
 import { UserCommandAdapter } from '../../infrastructure/adapters/user-command.adapter';
 import { UserQueryAdapter } from '../../infrastructure/adapters/user-query.adapter';
+import { JwtTokenServiceAdapter } from '../../infrastructure/adapters/services/jwt-token-service.adapter';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET environment variable is not defined');
+}
 
 @Module({
-  controllers: [SignupController],
+  imports: [
+    PassportModule,
+    JwtModule.register({
+      secret: jwtSecret,
+      signOptions: { expiresIn: '7d' },
+    }),
+  ],
+  controllers: [SignupController, SigninController],
   providers: [
     SignupUsecase,
+    SigninUsecase,
+    LocalStrategy,
+    JwtStrategy,
     {
       provide: 'UserCommandPort',
       useClass: UserCommandAdapter,
@@ -15,6 +37,10 @@ import { UserQueryAdapter } from '../../infrastructure/adapters/user-query.adapt
     {
       provide: 'UserQueryPort',
       useClass: UserQueryAdapter,
+    },
+    {
+      provide: 'TokenServicePort',
+      useClass: JwtTokenServiceAdapter,
     },
   ],
 })
