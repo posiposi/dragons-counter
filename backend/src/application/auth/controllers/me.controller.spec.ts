@@ -1,3 +1,4 @@
+import { RequestMethod } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { MeController } from './me.controller';
@@ -65,9 +66,10 @@ describe('MeController', () => {
 
     it('GETメソッドでauthパス配下のmeにマッピングされている', () => {
       const path = Reflect.getMetadata('path', meMethod) as string;
-      const method = Reflect.getMetadata('method', meMethod) as string;
+      const method = Reflect.getMetadata('method', meMethod) as RequestMethod;
 
       expect(path).toBe('me');
+      expect(method).toBe(RequestMethod.GET);
     });
   });
 });
