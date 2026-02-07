@@ -8,8 +8,6 @@ import { BulkCreateGameUsecase } from '../domain/usecases/bulk-create-game.useca
 import { GameAdapter } from '../infrastructure/adapters/game.adapter';
 import { BulkCreateGameAdapter } from '../infrastructure/adapters/bulk-create-game.adapter';
 import { FindGameByDateAdapter } from '../infrastructure/adapters/find-game-by-date.adapter';
-import { PrismaService } from '../infrastructure/prisma/prisma.service';
-import { PrismaClient } from '@prisma/client';
 
 @Module({
   controllers: [
@@ -32,11 +30,6 @@ import { PrismaClient } from '@prisma/client';
     {
       provide: 'FindGameByDatePort',
       useClass: FindGameByDateAdapter,
-    },
-    PrismaService,
-    {
-      provide: PrismaClient,
-      useExisting: PrismaService,
     },
   ],
 })

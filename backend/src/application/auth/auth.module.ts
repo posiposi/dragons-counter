@@ -3,8 +3,6 @@ import { SignupController } from './controllers/signup.controller';
 import { SignupUsecase } from '../../domain/usecases/signup.usecase';
 import { UserCommandAdapter } from '../../infrastructure/adapters/user-command.adapter';
 import { UserQueryAdapter } from '../../infrastructure/adapters/user-query.adapter';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { PrismaClient } from '@prisma/client';
 
 @Module({
   controllers: [SignupController],
@@ -17,11 +15,6 @@ import { PrismaClient } from '@prisma/client';
     {
       provide: 'UserQueryPort',
       useClass: UserQueryAdapter,
-    },
-    PrismaService,
-    {
-      provide: PrismaClient,
-      useExisting: PrismaService,
     },
   ],
 })

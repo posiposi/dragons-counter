@@ -6,6 +6,71 @@ import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
 import { RegistrationStatus } from '../../domain/enums/registration-status';
 import { PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { UserAlreadyExistsException } from '../../domain/exceptions/user-already-exists.exception';
+
+describe('UserCommandAdapter Unit Tests', () => {
+  let adapter: UserCommandAdapter;
+  let mockPrismaClient: { user: { upsert: jest.Mock } };
+
+  beforeEach(() => {
+    mockPrismaClient = {
+      user: {
+        upsert: jest.fn(),
+      },
+    };
+    adapter = new UserCommandAdapter(
+      mockPrismaClient as unknown as PrismaClient,
+    );
+  });
+
+  describe('save', () => {
+    it('should throw UserAlreadyExistsException when P2002 error occurs', async () => {
+      const email = Email.create('duplicate@example.com');
+      const password = await Password.fromPlainText('password123');
+      const user = User.createNew(email, password);
+
+      mockPrismaClient.user.upsert.mockRejectedValue(
+        new PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: '5.0.0',
+        }),
+      );
+
+      await expect(adapter.save(user)).rejects.toThrow(
+        UserAlreadyExistsException,
+      );
+    });
+
+    it('should rethrow non-P2002 PrismaClientKnownRequestError as-is', async () => {
+      const email = Email.create('error@example.com');
+      const password = await Password.fromPlainText('password123');
+      const user = User.createNew(email, password);
+
+      const originalError = new PrismaClientKnownRequestError(
+        'Foreign key constraint failed',
+        {
+          code: 'P2003',
+          clientVersion: '5.0.0',
+        },
+      );
+      mockPrismaClient.user.upsert.mockRejectedValue(originalError);
+
+      await expect(adapter.save(user)).rejects.toThrow(originalError);
+    });
+
+    it('should rethrow unexpected errors as-is', async () => {
+      const email = Email.create('unexpected@example.com');
+      const password = await Password.fromPlainText('password123');
+      const user = User.createNew(email, password);
+
+      const originalError = new Error('Connection lost');
+      mockPrismaClient.user.upsert.mockRejectedValue(originalError);
+
+      await expect(adapter.save(user)).rejects.toThrow(originalError);
+    });
+  });
+});
 
 describe('UserCommandAdapter Integration Tests', () => {
   let prismaService: PrismaService;
