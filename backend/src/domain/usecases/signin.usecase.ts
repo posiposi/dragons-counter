@@ -10,7 +10,7 @@ export class SigninUsecase {
     private readonly tokenService: TokenServicePort,
   ) {}
 
-  execute(user: User): Promise<{ accessToken: string }> {
+  async execute(user: User): Promise<{ accessToken: string }> {
     if (!user.canLogin()) {
       throw new UserNotApprovedException('User is not approved');
     }
