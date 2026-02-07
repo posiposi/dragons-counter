@@ -26,7 +26,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 
 resource "aws_signer_signing_profile" "lambda" {
   platform_id = "AWSLambda-SHA384-ECDSA"
-  name_prefix = "${var.project_name}-scraper-"
+  name_prefix = replace("${var.project_name}_scraper_", "-", "_")
 
   tags = {
     Name        = "${var.project_name}-scraper-signing-profile"
