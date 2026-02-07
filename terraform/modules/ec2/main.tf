@@ -34,7 +34,7 @@ resource "aws_instance" "app" {
     delete_on_termination = true
   }
 
-  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
+  user_data_base64 = base64encode(templatefile("${path.module}/user_data.sh", {
     aws_region      = var.aws_region
     github_repo_url = var.github_repo_url
     db_host         = var.db_host
