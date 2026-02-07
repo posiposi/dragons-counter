@@ -10,6 +10,7 @@ import {
 import { SigninUsecase } from '../../../domain/usecases/signin.usecase';
 import { SigninRequestDto } from '../dto/signin-request.dto';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { User } from '../../../domain/entities/user';
 
 @Controller('auth')
 export class SigninController {
@@ -20,7 +21,7 @@ export class SigninController {
   @UseGuards(LocalAuthGuard)
   async signin(
     @Body() dto: SigninRequestDto,
-    @Request() req: { user: any },
+    @Request() req: { user: User },
   ): Promise<{ accessToken: string }> {
     return this.signinUsecase.execute(req.user);
   }

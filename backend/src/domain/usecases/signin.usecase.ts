@@ -1,14 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, Inject } from '@nestjs/common';
+import type { TokenServicePort } from '../ports/token-service.port';
 import { User } from '../entities/user';
+import { UserNotApprovedException } from '../exceptions/user-not-approved.exception';
 
 @Injectable()
 export class SigninUsecase {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    @Inject('TokenServicePort')
+    private readonly tokenService: TokenServicePort,
+  ) {}
 
   async execute(user: User): Promise<{ accessToken: string }> {
+    if (!user.canLogin()) {
+      throw new UserNotApprovedException('User is not approved');
+    }
     const payload = { sub: user.id.value, email: user.email.value };
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
+    const accessToken = this.tokenService.sign(payload);
+    return Promise.resolve({ accessToken });
   }
 }

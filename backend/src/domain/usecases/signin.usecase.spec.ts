@@ -1,19 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
 import { SigninUsecase } from './signin.usecase';
 import { User } from '../entities/user';
 import { UserId } from '../value-objects/user-id';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
 import { RegistrationStatus } from '../enums/registration-status';
-import { UserRole } from '../enums/user-role';
+import { UserNotApprovedException } from '../exceptions/user-not-approved.exception';
+import type { TokenServicePort } from '../ports/token-service.port';
 
 describe('SigninUsecase', () => {
   let usecase: SigninUsecase;
-  let mockJwtService: { sign: jest.Mock };
+  let mockTokenService: { sign: jest.Mock };
 
   beforeEach(async () => {
-    mockJwtService = {
+    mockTokenService = {
       sign: jest.fn().mockReturnValue('test-jwt-token'),
     };
 
@@ -21,8 +21,8 @@ describe('SigninUsecase', () => {
       providers: [
         SigninUsecase,
         {
-          provide: JwtService,
-          useValue: mockJwtService,
+          provide: 'TokenServicePort',
+          useValue: mockTokenService as TokenServicePort,
         },
       ],
     }).compile();
@@ -37,7 +37,6 @@ describe('SigninUsecase', () => {
         Email.create('test@example.com'),
         Password.fromHash('hashed-password'),
         RegistrationStatus.APPROVED,
-        UserRole.USER,
       );
 
       const result = await usecase.execute(user);
@@ -45,22 +44,49 @@ describe('SigninUsecase', () => {
       expect(result).toEqual({ accessToken: 'test-jwt-token' });
     });
 
-    it('JwtService.signが正しいペイロードで呼ばれる', async () => {
+    it('TokenServicePort.signが正しいペイロードで呼ばれる', async () => {
       const user = User.fromRepository(
         UserId.create('test-user-id'),
         Email.create('test@example.com'),
         Password.fromHash('hashed-password'),
         RegistrationStatus.APPROVED,
-        UserRole.USER,
       );
 
       await usecase.execute(user);
 
-      expect(mockJwtService.sign).toHaveBeenCalledTimes(1);
-      expect(mockJwtService.sign).toHaveBeenCalledWith({
+      expect(mockTokenService.sign).toHaveBeenCalledTimes(1);
+      expect(mockTokenService.sign).toHaveBeenCalledWith({
         sub: 'test-user-id',
         email: 'test@example.com',
       });
+    });
+
+    it('PENDINGステータスのユーザーはUserNotApprovedExceptionがスローされる', async () => {
+      const user = User.fromRepository(
+        UserId.create('test-user-id'),
+        Email.create('test@example.com'),
+        Password.fromHash('hashed-password'),
+        RegistrationStatus.PENDING,
+      );
+
+      await expect(usecase.execute(user)).rejects.toThrow(
+        UserNotApprovedException,
+      );
+      expect(mockTokenService.sign).not.toHaveBeenCalled();
+    });
+
+    it('REJECTEDステータスのユーザーはUserNotApprovedExceptionがスローされる', async () => {
+      const user = User.fromRepository(
+        UserId.create('test-user-id'),
+        Email.create('test@example.com'),
+        Password.fromHash('hashed-password'),
+        RegistrationStatus.REJECTED,
+      );
+
+      await expect(usecase.execute(user)).rejects.toThrow(
+        UserNotApprovedException,
+      );
+      expect(mockTokenService.sign).not.toHaveBeenCalled();
     });
   });
 });
