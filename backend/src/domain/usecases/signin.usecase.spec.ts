@@ -5,6 +5,7 @@ import { UserId } from '../value-objects/user-id';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
 import { RegistrationStatus } from '../enums/registration-status';
+import { UserNotApprovedException } from '../exceptions/user-not-approved.exception';
 import type { TokenServicePort } from '../ports/token-service.port';
 
 describe('SigninUsecase', () => {
@@ -58,6 +59,34 @@ describe('SigninUsecase', () => {
         sub: 'test-user-id',
         email: 'test@example.com',
       });
+    });
+
+    it('PENDINGステータスのユーザーはUserNotApprovedExceptionがスローされる', async () => {
+      const user = User.fromRepository(
+        UserId.create('test-user-id'),
+        Email.create('test@example.com'),
+        Password.fromHash('hashed-password'),
+        RegistrationStatus.PENDING,
+      );
+
+      await expect(usecase.execute(user)).rejects.toThrow(
+        UserNotApprovedException,
+      );
+      expect(mockTokenService.sign).not.toHaveBeenCalled();
+    });
+
+    it('REJECTEDステータスのユーザーはUserNotApprovedExceptionがスローされる', async () => {
+      const user = User.fromRepository(
+        UserId.create('test-user-id'),
+        Email.create('test@example.com'),
+        Password.fromHash('hashed-password'),
+        RegistrationStatus.REJECTED,
+      );
+
+      await expect(usecase.execute(user)).rejects.toThrow(
+        UserNotApprovedException,
+      );
+      expect(mockTokenService.sign).not.toHaveBeenCalled();
     });
   });
 });
