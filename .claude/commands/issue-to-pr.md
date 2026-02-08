@@ -53,7 +53,7 @@ GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番�
   - ブランチ名は簡潔な**英語**で記述すること
 
 ```bash
-git switch -c "{#issue_no.} {issue_name}"
+git switch -c "{#issue_no.}_{issue_name}"
 ```
 
 ### Phase 3-2: 実装エージェント起動

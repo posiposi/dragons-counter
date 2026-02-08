@@ -90,7 +90,7 @@ GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します�
 git worktreeを使用して複数のIssueを並列で開発できる。
 
 - ワークツリーは `.worktrees/` 配下に配置（git管理外）
-- ブランチは常に `main` から切り出し、ディレクトリ名はブランチ名と同名
+- ブランチは基本的に `main` から切り出し、ディレクトリ名はブランチ名と同名
 - 各ワークツリーで独立したDockerコンテナを起動（ポートオフセットで競合回避）
 
 詳細は `worktree-setup` スキル（`.claude/skills/worktree-setup/SKILL.md`）を参照
