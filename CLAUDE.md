@@ -38,14 +38,14 @@ GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します�
 
 このコマンドは以下のフェーズを自動で実行します：
 
-| Phase | 内容 | サブエージェント |
-|---|---|---|
-| 1. 仕様取得 | GitHub Issueから仕様を取得 | `orchestrator` |
-| 2. タスク分解 | 並列調査 + 1コミット粒度に分解 | `code-investigator` + `log-investigator` → `task-decomposer` |
-| 3. TDD+DDD実装 | テスト駆動 + ドメイン駆動で実装 | `tdd-implementer` |
-| 4. 実装レビュー | コードレビュー | `code-reviewer` |
-| 4-b. レビュー指摘修正 | レビュー指摘をTDDで修正 | `review-fixer` |
-| 5. PR作成 | Pull Requestを作成 | `pr-creator` |
+| Phase                 | 内容                            | サブエージェント                                             |
+| --------------------- | ------------------------------- | ------------------------------------------------------------ |
+| 1. 仕様取得           | GitHub Issueから仕様を取得      | `orchestrator`                                               |
+| 2. タスク分解         | 並列調査 + 1コミット粒度に分解  | `code-investigator` + `log-investigator` → `task-decomposer` |
+| 3. TDD+DDD実装        | テスト駆動 + ドメイン駆動で実装 | `tdd-implementer`                                            |
+| 4. 実装レビュー       | コードレビュー                  | `code-reviewer`                                              |
+| 4-b. レビュー指摘修正 | レビュー指摘をTDDで修正         | `review-fixer`                                               |
+| 5. PR作成             | Pull Requestを作成              | `pr-creator`                                                 |
 
 詳細は `.claude/commands/issue-to-pr.md` を参照してください。
 
@@ -61,38 +61,32 @@ GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します�
 
 開発ワークフローで以下のサブエージェントを使用します：
 
-| 用途 | サブエージェント | モデル |
-|---|---|---|
-| ワークフロー計画 | `.claude/agents/orchestrator.md` | inherit |
-| タスク分解 | `.claude/agents/task-decomposer.md` | inherit |
-| コード調査（並列） | `.claude/agents/code-investigator.md` | haiku |
-| ログ調査（並列） | `.claude/agents/log-investigator.md` | haiku |
-| TDD+DDD実装 | `.claude/agents/tdd-implementer.md` | inherit |
-| コードレビュー | `.claude/agents/code-reviewer.md` | inherit |
-| レビュー指摘修正 | `.claude/agents/review-fixer.md` | inherit |
-| PR作成 | `.claude/agents/pr-creator.md` | inherit |
+| 用途               | サブエージェント                      | モデル  |
+| ------------------ | ------------------------------------- | ------- |
+| ワークフロー計画   | `.claude/agents/orchestrator.md`      | inherit |
+| タスク分解         | `.claude/agents/task-decomposer.md`   | inherit |
+| コード調査（並列） | `.claude/agents/code-investigator.md` | haiku   |
+| ログ調査（並列）   | `.claude/agents/log-investigator.md`  | haiku   |
+| TDD+DDD実装        | `.claude/agents/tdd-implementer.md`   | inherit |
+| コードレビュー     | `.claude/agents/code-reviewer.md`     | inherit |
+| レビュー指摘修正   | `.claude/agents/review-fixer.md`      | inherit |
+| PR作成             | `.claude/agents/pr-creator.md`        | inherit |
 
 ### スキル
 
 サブエージェントにプリロードされるスキル：
 
-| スキル | 用途 | 使用エージェント |
-|---|---|---|
-| `task-analysis` | タスク分析・調査手法 | orchestrator, task-decomposer, code-investigator, log-investigator |
-| `tdd-workflow` | TDDサイクル手順 | tdd-implementer, review-fixer |
-| `code-review` | レビュー観点 | code-reviewer, review-fixer |
-| `pr-template` | PR作成テンプレート | pr-creator |
-| `typescript-ddd-standards` | DDD開発規約 | task-decomposer, code-investigator, tdd-implementer, code-reviewer, review-fixer |
+| スキル                     | 用途                 | 使用エージェント                                                                 |
+| -------------------------- | -------------------- | -------------------------------------------------------------------------------- |
+| `task-analysis`            | タスク分析・調査手法 | orchestrator, task-decomposer, code-investigator, log-investigator               |
+| `tdd-workflow`             | TDDサイクル手順      | tdd-implementer, review-fixer                                                    |
+| `code-review`              | レビュー観点         | code-reviewer, review-fixer                                                      |
+| `pr-template`              | PR作成テンプレート   | pr-creator                                                                       |
+| `typescript-ddd-standards` | DDD開発規約          | task-decomposer, code-investigator, tdd-implementer, code-reviewer, review-fixer |
 
 ## 開発者との協業
 
 ### gitコマンド
-
-**重要**: 以下のgitコマンドは開発者自身が実行します。
-
-- `git add`
-- `git commit`
-- `git push`
 
 ### PR作成ルール
 
