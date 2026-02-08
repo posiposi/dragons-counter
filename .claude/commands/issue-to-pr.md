@@ -50,6 +50,7 @@ GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番�
 
 - `main`ブランチから実装用のブランチを作成し、スイッチする
   - issueNo.の前には`#`を入れること
+  - ブランチ名は簡潔な**英語**で記述すること
 
 ```bash
 git switch -c "{#issue_no.} {issue_name}"
