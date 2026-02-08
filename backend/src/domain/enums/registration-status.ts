@@ -16,13 +16,13 @@ export const RegistrationStatus = {
     return mapping[status];
   },
 
-  fromPrisma(prismaStatus: PrismaRegistrationStatus): string {
-    const mapping: Record<PrismaRegistrationStatus, string> = {
+  fromPrisma(prismaStatus: PrismaRegistrationStatus) {
+    const mapping = {
       [PrismaRegistrationStatus.PENDING]: 'PENDING',
       [PrismaRegistrationStatus.APPROVED]: 'APPROVED',
       [PrismaRegistrationStatus.REJECTED]: 'REJECTED',
       [PrismaRegistrationStatus.BANNED]: 'BANNED',
-    };
+    } as const;
     return mapping[prismaStatus];
   },
 } as const;
