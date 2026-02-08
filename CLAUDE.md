@@ -83,6 +83,17 @@ GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します�
 | `code-review`              | レビュー観点         | code-reviewer, review-fixer                                                      |
 | `pr-template`              | PR作成テンプレート   | pr-creator                                                                       |
 | `typescript-ddd-standards` | DDD開発規約          | task-decomposer, code-investigator, tdd-implementer, code-reviewer, review-fixer |
+| `worktree-setup`           | worktree並列開発環境 | （ユーザー呼び出し可能）                                                         |
+
+## Worktree並列開発
+
+git worktreeを使用して複数のIssueを並列で開発できる。
+
+- ワークツリーは `.worktrees/` 配下に配置（git管理外）
+- ブランチは基本的に `main` から切り出し、ディレクトリ名はブランチ名と同名
+- 各ワークツリーで独立したDockerコンテナを起動（ポートオフセットで競合回避）
+
+詳細は `worktree-setup` スキル（`.claude/skills/worktree-setup/SKILL.md`）を参照
 
 ## 開発者との協業
 
@@ -142,9 +153,11 @@ docker compose exec backend npm run test -- /src/domain/value-objects/stadium-na
 │   │   └── SKILL.md             # コードレビュースキル
 │   ├── pr-template/
 │   │   └── SKILL.md             # PR作成テンプレートスキル
-│   └── typescript-ddd-standards/
-│       ├── SKILL.md             # DDD開発規約スキル
-│       └── examples.md          # コード例
+│   ├── typescript-ddd-standards/
+│   │   ├── SKILL.md             # DDD開発規約スキル
+│   │   └── examples.md          # コード例
+│   └── worktree-setup/
+│       └── SKILL.md             # worktree並列開発スキル
 ├── commands/
 │   └── issue-to-pr.md           # ワークフロー起動コマンド
 └── docs/

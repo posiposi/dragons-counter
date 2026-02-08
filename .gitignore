@@ -26,3 +26,4 @@ override.tf.json
 terraform.rc
 .github/templates/
 lambda/*.zip
+.worktrees/
