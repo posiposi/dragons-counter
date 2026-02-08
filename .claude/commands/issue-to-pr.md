@@ -11,6 +11,12 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, TaskCreate, TaskUp
 GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番に実行する。
 各フェーズ間の情報連携はClaude CodeのTasks機能を使用する。
 
+## 並列開発セットアップ
+
+### skill読み込み
+
+- `worktree-setup`スキルを読み込み、並列開発環境をセットアップしてから実装を進める
+
 ## Phase 1: 仕様取得
 
 1. GitHub MCPサーバー（`mcp__github__issue_read`）を使用してIssue #$ARGUMENTS の内容を取得する
