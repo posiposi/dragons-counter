@@ -46,12 +46,24 @@ GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番�
 
 ## Phase 3: TDD + DDD実装
 
+### Phase 3-1: ブランチ切り替え
+
+- `main`ブランチから実装用のブランチを作成し、スイッチする
+  - issueNo.の前には`#`を入れること
+
+```bash
+git switch -c "{#issue_no.} {issue_name}"
+```
+
+### Phase 3-2: 実装エージェント起動
+
 **`tdd-implementer`** サブエージェントを起動する。
 
 - TaskListから未着手の実装タスクを取得して順番に実装する
 - Red→Green→Refactorのサイクルを厳守する
 - `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
 - テストは必ずDockerコンテナ内で実行する（`docker compose exec backend npm run test`）
+- タスク単位で`git add`および`git commit`を行うこと
 
 ## Phase 4: 実装レビュー
 
@@ -69,6 +81,7 @@ GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番�
 - code-reviewerのレビュー結果をTasksから取得する
 - TDDサイクル（Red→Green→Refactor）で指摘事項を修正する
 - `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
+- 指摘**1つの修正毎**に`git add`および`git commit`を行うこと
 - 修正完了後、必要に応じてPhase 4のレビューを再実行する
 
 ## Phase 5: PR作成
