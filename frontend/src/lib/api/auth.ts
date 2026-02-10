@@ -17,12 +17,9 @@ export async function signup(request: AuthRequest): Promise<void> {
     body: JSON.stringify(request),
   });
 
-  if (response.status === 409) {
-    throw new Error("このメールアドレスは既に登録されています");
-  }
-
   if (!response.ok) {
-    throw new Error("ユーザー登録に失敗しました");
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? "ユーザー登録に失敗しました");
   }
 }
 
@@ -41,12 +38,9 @@ export async function signin(request: AuthRequest): Promise<SigninResponse> {
     body: JSON.stringify(request),
   });
 
-  if (response.status === 401) {
-    throw new Error("メールアドレスまたはパスワードが正しくありません");
-  }
-
   if (!response.ok) {
-    throw new Error("ログインに失敗しました");
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? "ログインに失敗しました");
   }
 
   return await response.json() as SigninResponse;
@@ -69,12 +63,9 @@ export async function fetchCurrentUser(accessToken: string): Promise<User> {
     },
   });
 
-  if (response.status === 401) {
-    throw new Error("認証に失敗しました。再度ログインしてください");
-  }
-
   if (!response.ok) {
-    throw new Error("ユーザー情報の取得に失敗しました");
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? "ユーザー情報の取得に失敗しました");
   }
 
   return await response.json() as User;
