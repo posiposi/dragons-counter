@@ -43,7 +43,7 @@ export async function signin(request: AuthRequest): Promise<SigninResponse> {
     throw new Error(body?.message ?? "ログインに失敗しました");
   }
 
-  return await response.json() as SigninResponse;
+  return (await response.json()) as SigninResponse;
 }
 
 export function signout(): void {
@@ -68,5 +68,5 @@ export async function fetchCurrentUser(accessToken: string): Promise<User> {
     throw new Error(body?.message ?? "ユーザー情報の取得に失敗しました");
   }
 
-  return await response.json() as User;
+  return (await response.json()) as User;
 }
