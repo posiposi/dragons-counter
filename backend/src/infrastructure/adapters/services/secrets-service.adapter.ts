@@ -32,8 +32,12 @@ export class SecretsServiceAdapter implements SecretsServicePort {
       return value;
     }
 
-    const envValue = process.env.API_GATEWAY_API_KEY;
+    const envValue = process.env[secretId];
     if (envValue) return envValue;
+
+    const fallbackValue = process.env.API_GATEWAY_API_KEY;
+    if (fallbackValue) return fallbackValue;
+
     throw new Error(`Secret ${secretId} not found in environment variables`);
   }
 }
