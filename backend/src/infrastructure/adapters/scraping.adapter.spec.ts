@@ -169,4 +169,21 @@ describe('ScrapingAdapter', () => {
       details: 'リクエストがタイムアウトしました',
     });
   });
+
+  it('dateパラメータがURLエンコードされる', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ game: null, message: 'no game' }),
+    });
+
+    await adapter.scrapeGameResult('2024/04/01');
+
+    const fetchCall = (global.fetch as jest.Mock).mock.calls[0] as [
+      string,
+      RequestInit,
+    ];
+    expect(fetchCall[0]).toBe(
+      'https://api.example.com/scrape?date=2024%2F04%2F01',
+    );
+  });
 });
