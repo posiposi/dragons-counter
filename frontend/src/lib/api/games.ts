@@ -34,13 +34,9 @@ export async function deleteGame(gameId: string): Promise<void> {
     },
   });
 
-  if (response.status === 404) {
-    throw new Error("指定された試合記録が見つかりません");
-  }
-  if (response.status === 500) {
-    throw new Error(
-      "サーバーエラーが発生しました。しばらく経ってから再度お試しください",
-    );
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? "試合記録の削除に失敗しました");
   }
 }
 

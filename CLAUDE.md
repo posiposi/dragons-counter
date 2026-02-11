@@ -95,11 +95,21 @@ git worktreeを使用して複数のIssueを並列で開発できる。
 
 詳細は `worktree-setup` スキル（`.claude/skills/worktree-setup/SKILL.md`）を参照
 
-## 開発者との協業
+## Agent Teams使用規約
 
-### gitコマンド
+複雑かつ大規模なタスクに対してはAgent Teamsを[公式ドキュメント](https://code.claude.com/docs/en/agent-teams)を参考に使用する。
+ただし、下記ルールに基づくこと。
 
-### PR作成ルール
+- Agent Teamsの使用を検討する必要があるタスクの場合は使用許可をユーザーに求める
+- タスクにおける対応項目を分割し、各Agentに委任する
+  - **例**
+    - タスク仕様の検討
+    - 仕様に基づくタスク分割
+    - テストコード実装
+    - 実装
+    - コードレビュー
+
+## PR作成ルール
 
 - PRタイトルはIssueタイトルに沿った内容にする
 - PRタイトルにはIssue番号を**含めない**（`#1`のような記載は不可）
