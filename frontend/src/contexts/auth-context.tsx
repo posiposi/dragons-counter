@@ -51,8 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signin = useCallback(async (request: AuthRequest) => {
     const response = await apiSignin(request);
     localStorage.setItem("accessToken", response.accessToken);
-    const currentUser = await fetchCurrentUser(response.accessToken);
-    setUser(currentUser);
+    try {
+      const currentUser = await fetchCurrentUser(response.accessToken);
+      setUser(currentUser);
+    } catch (error) {
+      localStorage.removeItem("accessToken");
+      throw error;
+    }
   }, []);
 
   const signout = useCallback(() => {
