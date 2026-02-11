@@ -1,4 +1,5 @@
 import { User, AuthRequest } from "@/types/user";
+import { getCsrfToken } from "../csrf";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -53,9 +54,11 @@ export async function signout(): Promise<void> {
     );
   }
 
+  const csrfToken = getCsrfToken();
   const response = await fetch(`${API_BASE_URL}/auth/signout`, {
     method: "POST",
     credentials: "include",
+    ...(csrfToken ? { headers: { "X-CSRF-Token": csrfToken } } : {}),
   });
 
   if (!response.ok) {

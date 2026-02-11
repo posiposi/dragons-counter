@@ -44,7 +44,9 @@ export async function scrapeGameResult(date: string): Promise<ScrapeResult> {
     );
   }
 
-  const response = await fetch(`${API_GATEWAY_URL}/scrape?date=${date}`);
+  const response = await fetch(`${API_GATEWAY_URL}/scrape?date=${date}`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("試合結果の取得に失敗しました");

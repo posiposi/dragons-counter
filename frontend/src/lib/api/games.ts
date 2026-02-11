@@ -1,4 +1,5 @@
 import { Game } from "@/types/game";
+import { getCsrfToken } from "../csrf";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -9,7 +10,9 @@ export async function fetchGames(): Promise<Game[]> {
     );
   }
 
-  const response = await fetch(`${API_BASE_URL}/games`);
+  const response = await fetch(`${API_BASE_URL}/games`, {
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error(
@@ -27,11 +30,14 @@ export async function deleteGame(gameId: string): Promise<void> {
     );
   }
 
+  const csrfToken = getCsrfToken();
   const response = await fetch(`${API_BASE_URL}/games/${gameId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
+      ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
     },
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -63,11 +69,14 @@ export async function bulkSaveGames(
     );
   }
 
+  const csrfToken = getCsrfToken();
   const response = await fetch(`${API_BASE_URL}/games/bulk`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
     },
+    credentials: "include",
     body: JSON.stringify({ games }),
   });
 
