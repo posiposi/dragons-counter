@@ -1,4 +1,4 @@
-import { User, AuthRequest, SigninResponse } from "@/types/user";
+import { User, AuthRequest } from "@/types/user";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -14,6 +14,7 @@ export async function signup(request: AuthRequest): Promise<void> {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(request),
   });
 
@@ -23,7 +24,7 @@ export async function signup(request: AuthRequest): Promise<void> {
   }
 }
 
-export async function signin(request: AuthRequest): Promise<SigninResponse> {
+export async function signin(request: AuthRequest): Promise<void> {
   if (!API_BASE_URL) {
     throw new Error(
       "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
@@ -35,6 +36,7 @@ export async function signin(request: AuthRequest): Promise<SigninResponse> {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(request),
   });
 
@@ -42,15 +44,27 @@ export async function signin(request: AuthRequest): Promise<SigninResponse> {
     const body = await response.json().catch(() => null);
     throw new Error(body?.message ?? "ログインに失敗しました");
   }
-
-  return (await response.json()) as SigninResponse;
 }
 
-export function signout(): void {
-  localStorage.removeItem("accessToken");
+export async function signout(): Promise<void> {
+  if (!API_BASE_URL) {
+    throw new Error(
+      "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
+    );
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/signout`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? "サインアウトに失敗しました");
+  }
 }
 
-export async function fetchCurrentUser(accessToken: string): Promise<User> {
+export async function fetchCurrentUser(): Promise<User> {
   if (!API_BASE_URL) {
     throw new Error(
       "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
@@ -58,9 +72,7 @@ export async function fetchCurrentUser(accessToken: string): Promise<User> {
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    credentials: "include",
   });
 
   if (!response.ok) {
