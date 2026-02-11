@@ -151,7 +151,14 @@ export default function GameList({ onSignout }: GameListProps) {
             <h1 className={styles.title}>Dra Vincit</h1>
             <p className={styles.subtitle}>中日ドラゴンズ観戦記録</p>
           </div>
-          <button className={styles.signoutButton} onClick={onSignout}>
+          <button
+            className={styles.signoutButton}
+            onClick={() => {
+              onSignout().catch((err: unknown) => {
+                console.error("Failed to sign out:", err);
+              });
+            }}
+          >
             <LogOut size={18} />
             <span>ログアウト</span>
           </button>
