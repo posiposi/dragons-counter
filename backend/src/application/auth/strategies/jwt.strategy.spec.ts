@@ -53,7 +53,11 @@ describe('JwtStrategy', () => {
     let jwtFromRequest: (req: Request) => string | null;
 
     beforeEach(() => {
-      jwtFromRequest = (strategy as any)._jwtFromRequest;
+      jwtFromRequest = (
+        strategy as unknown as {
+          _jwtFromRequest: (req: Request) => string | null;
+        }
+      )._jwtFromRequest;
     });
 
     it('CookieのaccessTokenからJWTを抽出する', () => {
