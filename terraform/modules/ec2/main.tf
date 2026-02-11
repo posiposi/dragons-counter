@@ -43,7 +43,8 @@ resource "aws_instance" "app" {
     db_secret_arn   = var.rds_secret_arn
     frontend_port   = var.frontend_port
     backend_port    = var.backend_port
-    api_gateway_url = var.api_gateway_url
+    api_gateway_url           = var.api_gateway_url
+    scraper_api_key_secret_id = var.scraper_api_key_secret_id
   }))
 
   tags = {

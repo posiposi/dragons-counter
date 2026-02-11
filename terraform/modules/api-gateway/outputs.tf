@@ -23,6 +23,11 @@ output "scraper_api_key_secret_arn" {
   value       = aws_secretsmanager_secret.scraper_api_key.arn
 }
 
+output "scraper_api_key_secret_id" {
+  description = "スクレイピング用APIキーのSecrets Managerシークレット名"
+  value       = aws_secretsmanager_secret.scraper_api_key.name
+}
+
 output "scraper_api_key_value" {
   description = "スクレイピング用APIキーの値"
   value       = random_password.scraper_api_key.result

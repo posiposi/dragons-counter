@@ -105,3 +105,9 @@ variable "scraper_api_key_secret_arn" {
   type        = string
   default     = ""
 }
+
+variable "scraper_api_key_secret_id" {
+  description = "スクレイピング用APIキーのSecrets Managerシークレット名"
+  type        = string
+  default     = ""
+}

@@ -98,6 +98,7 @@ module "ec2" {
   deploy_bucket_arn         = module.s3_deploy.bucket_arn
   api_gateway_url            = module.api_gateway.stage_invoke_url
   scraper_api_key_secret_arn = module.api_gateway.scraper_api_key_secret_arn
+  scraper_api_key_secret_id  = module.api_gateway.scraper_api_key_secret_id
 }
 
 module "route53" {

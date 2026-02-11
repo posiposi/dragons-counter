@@ -53,7 +53,8 @@ NODE_ENV=production
 FRONTEND_PORT=${frontend_port}
 BACKEND_PORT=${backend_port}
 VITE_API_URL=/api
-VITE_API_GATEWAY_URL=${api_gateway_url}
+API_GATEWAY_URL=${api_gateway_url}
+SCRAPER_API_KEY_SECRET_ID=${scraper_api_key_secret_id}
 ALLOWED_ORIGINS=https://dravincit.com,https://www.dravincit.com
 ENVEOF
 
