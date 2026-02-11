@@ -82,6 +82,11 @@
   background: var(--primary-hover);
 }
 
+.submitButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .submitButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -116,4 +121,9 @@
 
 .switchLink:hover {
   color: var(--primary-hover);
+}
+
+.switchLink:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
