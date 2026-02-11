@@ -8,7 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { randomUUID } from 'crypto';
 import { SigninUsecase } from '../../../domain/usecases/signin.usecase';
 import { SigninRequestDto } from '../dto/signin-request.dto';

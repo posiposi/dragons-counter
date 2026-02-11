@@ -64,7 +64,8 @@ resource "aws_lambda_function" "scraper" {
 
   environment {
     variables = {
-      NPB_BASE_URL = var.npb_base_url
+      NPB_BASE_URL    = var.npb_base_url
+      SCRAPER_API_KEY = var.scraper_api_key
     }
   }
 

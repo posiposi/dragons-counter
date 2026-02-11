@@ -21,7 +21,7 @@ resource "aws_iam_role" "ec2" {
   }
 }
 
-# Secrets Manager access policy for RDS credentials
+# Secrets Manager access policy for RDS credentials and scraper API key
 resource "aws_iam_role_policy" "secrets_access" {
   name = "${var.project_name}-secrets-access"
   role = aws_iam_role.ec2.id
@@ -34,7 +34,10 @@ resource "aws_iam_role_policy" "secrets_access" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = var.rds_secret_arn
+        Resource = compact([
+          var.rds_secret_arn,
+          var.scraper_api_key_secret_arn
+        ])
       }
     ]
   })

@@ -1,4 +1,6 @@
-const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL;
+import { getCsrfToken } from "../csrf";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface ScrapedGame {
   gameDate: string;
@@ -38,13 +40,22 @@ export function hasGame(result: ScrapeResult): result is ScrapeSuccessResponse {
 }
 
 export async function scrapeGameResult(date: string): Promise<ScrapeResult> {
-  if (!API_GATEWAY_URL) {
+  if (!API_BASE_URL) {
     throw new Error(
-      "API Gateway URLが設定されていません。環境変数を確認してください",
+      "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
     );
   }
 
-  const response = await fetch(`${API_GATEWAY_URL}/scrape?date=${date}`);
+  const csrfToken = getCsrfToken();
+  const response = await fetch(`${API_BASE_URL.replace(/\/+$/, "")}/scrape`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+    },
+    credentials: "include",
+    body: JSON.stringify({ date }),
+  });
 
   if (!response.ok) {
     throw new Error("試合結果の取得に失敗しました");

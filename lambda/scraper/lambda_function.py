@@ -23,6 +23,12 @@ def handler(event, context):
     Returns:
         dict: API Gatewayレスポンス形式のJSON
     """
+    expected_key = os.environ.get("SCRAPER_API_KEY")
+    if expected_key:
+        request_key = (event.get("headers") or {}).get("x-api-key")
+        if request_key != expected_key:
+            return create_response(403, {"error": "Forbidden"})
+
     try:
         query_params = event.get("queryStringParameters") or {}
         date_str = query_params.get("date")
@@ -194,10 +200,7 @@ def create_response(status_code: int, body: dict) -> dict:
     return {
         "statusCode": status_code,
         "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Methods": "GET, OPTIONS"
+            "Content-Type": "application/json"
         },
         "body": json.dumps(body, ensure_ascii=False)
     }

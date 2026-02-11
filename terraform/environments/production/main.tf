@@ -96,7 +96,9 @@ module "ec2" {
   rds_secret_arn            = module.rds.db_password_secret_arn
   enable_codedeploy         = true
   deploy_bucket_arn         = module.s3_deploy.bucket_arn
-  api_gateway_url           = module.api_gateway.stage_invoke_url
+  api_gateway_url            = module.api_gateway.stage_invoke_url
+  scraper_api_key_secret_arn = module.api_gateway.scraper_api_key_secret_arn
+  scraper_api_key_secret_id  = module.api_gateway.scraper_api_key_secret_id
 }
 
 module "route53" {
@@ -145,6 +147,7 @@ module "lambda_scraper" {
   project_name    = var.project_name
   environment     = var.environment
   lambda_zip_path = "${path.root}/../../../lambda/scraper.zip"
+  scraper_api_key = module.api_gateway.scraper_api_key_value
 }
 
 module "api_gateway" {

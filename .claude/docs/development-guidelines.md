@@ -183,4 +183,5 @@ docker compose up
 - `.env.test` - テスト環境設定
 - `ALLOWED_ORIGINS` - CORS許可オリジン（カンマ区切り）
 - `DATABASE_URL` - Prisma接続URL
-- `VITE_API_GATEWAY_URL` - スクレイピングAPI URL
+- `API_GATEWAY_URL` - スクレイピングAPI Gateway URL（バックエンド用）
+- `API_GATEWAY_API_KEY` - スクレイピングAPI Gatewayキー（バックエンド用）
