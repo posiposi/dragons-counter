@@ -16,8 +16,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new Error('JWT_SECRET environment variable is not defined');
     }
     super({
-      jwtFromRequest: (req: Request) => {
-        return req?.cookies?.accessToken ?? null;
+      jwtFromRequest: (req: Request): string | null => {
+        const cookies = req?.cookies as Record<string, string> | undefined;
+        return cookies?.accessToken ?? null;
       },
       ignoreExpiration: false,
       secretOrKey: secret,
