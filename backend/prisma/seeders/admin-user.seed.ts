@@ -1,4 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import {
+  PrismaClient,
+  UserRole,
+  RegistrationStatus,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 export async function seedAdminUser(prisma: PrismaClient): Promise<void> {
@@ -29,10 +33,10 @@ export async function seedAdminUser(prisma: PrismaClient): Promise<void> {
     data: {
       email: adminEmail,
       password: hashedPassword,
-      role: 'ADMIN',
+      role: UserRole.ADMIN,
       registrationRequests: {
         create: {
-          status: 'APPROVED',
+          status: RegistrationStatus.APPROVED,
         },
       },
     },

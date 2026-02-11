@@ -22,6 +22,12 @@ describe('UserRole', () => {
       const result = UserRole.toPrisma(UserRole.ADMIN);
       expect(result).toBe(PrismaUserRole.ADMIN);
     });
+
+    it('should throw error for unknown role', () => {
+      expect(() => UserRole.toPrisma('UNKNOWN')).toThrow(
+        'Unknown UserRole: UNKNOWN',
+      );
+    });
   });
 
   describe('fromPrisma', () => {

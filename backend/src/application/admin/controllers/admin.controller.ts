@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Param,
+  ParseUUIDPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -32,7 +33,9 @@ export class GetUserController {
   constructor(private readonly getCurrentUserUsecase: GetCurrentUserUsecase) {}
 
   @Get('users/:id')
-  async getUser(@Param('id') id: string): Promise<UserResponseDto> {
+  async getUser(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<UserResponseDto> {
     return this.getCurrentUserUsecase.execute(id);
   }
 }
@@ -44,7 +47,9 @@ export class ApproveUserController {
 
   @Patch('users/:id/approve')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async approveUser(@Param('id') id: string): Promise<void> {
+  async approveUser(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
     await this.approveUserUsecase.execute(id);
   }
 }
@@ -56,7 +61,9 @@ export class RejectUserController {
 
   @Patch('users/:id/reject')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async rejectUser(@Param('id') id: string): Promise<void> {
+  async rejectUser(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
     await this.rejectUserUsecase.execute(id);
   }
 }

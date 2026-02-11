@@ -13,7 +13,11 @@ export const RegistrationStatus = {
       REJECTED: PrismaRegistrationStatus.REJECTED,
       BANNED: PrismaRegistrationStatus.BANNED,
     };
-    return mapping[status];
+    const result = mapping[status];
+    if (!result) {
+      throw new Error(`Unknown RegistrationStatus: ${status}`);
+    }
+    return result;
   },
 
   fromPrisma(prismaStatus: PrismaRegistrationStatus) {

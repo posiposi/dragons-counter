@@ -9,7 +9,11 @@ export const UserRole = {
       USER: PrismaUserRole.USER,
       ADMIN: PrismaUserRole.ADMIN,
     };
-    return mapping[role];
+    const result = mapping[role];
+    if (!result) {
+      throw new Error(`Unknown UserRole: ${role}`);
+    }
+    return result;
   },
 
   fromPrisma(prismaRole: PrismaUserRole) {

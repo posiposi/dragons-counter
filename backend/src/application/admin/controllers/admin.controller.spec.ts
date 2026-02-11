@@ -140,6 +140,18 @@ describe('GetUserController', () => {
       expect(result).toEqual(mockUser);
       expect(executeSpy).toHaveBeenCalledWith('user-1');
     });
+
+    it('GETメソッドでadmin/users/:idにマッピングされている', () => {
+      const method = Object.getOwnPropertyDescriptor(
+        GetUserController.prototype,
+        'getUser',
+      )!.value as (...args: unknown[]) => unknown;
+      const path = Reflect.getMetadata('path', method) as string;
+      const httpMethod = Reflect.getMetadata('method', method) as RequestMethod;
+
+      expect(path).toBe('users/:id');
+      expect(httpMethod).toBe(RequestMethod.GET);
+    });
   });
 });
 
