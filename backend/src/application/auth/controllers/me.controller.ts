@@ -5,9 +5,7 @@ import { UserResponseDto } from '../dto/user-response.dto';
 
 @Controller('auth')
 export class MeController {
-  constructor(
-    private readonly getCurrentUserUsecase: GetCurrentUserUsecase,
-  ) {}
+  constructor(private readonly getCurrentUserUsecase: GetCurrentUserUsecase) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)

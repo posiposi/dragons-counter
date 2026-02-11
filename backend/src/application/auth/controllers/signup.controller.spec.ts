@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SignupController } from './signup.controller';
 import { SignupUsecase } from '../../../domain/usecases/signup.usecase';
 import { UserAlreadyExistsException } from '../../../domain/exceptions/user-already-exists.exception';
+import { SKIP_CSRF_KEY } from '../decorators/skip-csrf.decorator';
 
 describe('SignupController', () => {
   let controller: SignupController;
@@ -57,6 +58,20 @@ describe('SignupController', () => {
           password: 'password123',
         }),
       ).rejects.toThrow(UserAlreadyExistsException);
+    });
+
+    it('SkipCsrfデコレータが適用されている', () => {
+      const signupMethod = Object.getOwnPropertyDescriptor(
+        SignupController.prototype,
+        'signup',
+      )!.value as (...args: unknown[]) => unknown;
+
+      const skipCsrf = Reflect.getMetadata(
+        SKIP_CSRF_KEY,
+        signupMethod,
+      ) as boolean;
+
+      expect(skipCsrf).toBe(true);
     });
   });
 });

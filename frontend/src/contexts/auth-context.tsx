@@ -19,10 +19,12 @@ export interface AuthContextType {
   isLoading: boolean;
   signup: (request: AuthRequest) => Promise<void>;
   signin: (request: AuthRequest) => Promise<void>;
-  signout: () => void;
+  signout: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -30,14 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      if (accessToken) {
-        try {
-          const currentUser = await fetchCurrentUser(accessToken);
-          setUser(currentUser);
-        } catch {
-          localStorage.removeItem("accessToken");
-        }
+      try {
+        const currentUser = await fetchCurrentUser();
+        setUser(currentUser);
+      } catch {
+        // Cookie無効 or 未認証: ユーザーはnullのまま
       }
       setIsLoading(false);
     };
@@ -49,24 +48,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signin = useCallback(async (request: AuthRequest) => {
-    const response = await apiSignin(request);
-    localStorage.setItem("accessToken", response.accessToken);
-    try {
-      const currentUser = await fetchCurrentUser(response.accessToken);
-      setUser(currentUser);
-    } catch (error) {
-      localStorage.removeItem("accessToken");
-      throw error;
-    }
+    await apiSignin(request);
+    const currentUser = await fetchCurrentUser();
+    setUser(currentUser);
   }, []);
 
-  const signout = useCallback(() => {
-    apiSignout();
+  const signout = useCallback(async () => {
+    await apiSignout();
     setUser(null);
   }, []);
 
   return (
-    <AuthContext value={{ user, isAuthenticated: user !== null, isLoading, signup, signin, signout }}>
+    <AuthContext
+      value={{
+        user,
+        isAuthenticated: user !== null,
+        isLoading,
+        signup,
+        signin,
+        signout,
+      }}
+    >
       {children}
     </AuthContext>
   );

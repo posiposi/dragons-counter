@@ -54,10 +54,9 @@ describe('MeController', () => {
     });
 
     it('JwtAuthGuardが適用されている', () => {
-      const guards = Reflect.getMetadata(
-        GUARDS_METADATA,
-        meMethod,
-      ) as Array<new (...args: unknown[]) => unknown>;
+      const guards = Reflect.getMetadata(GUARDS_METADATA, meMethod) as Array<
+        new (...args: unknown[]) => unknown
+      >;
 
       expect(guards).toBeDefined();
       expect(guards).toHaveLength(1);
