@@ -29,9 +29,7 @@ export class GetUsersController {
 @Controller('admin')
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class GetUserController {
-  constructor(
-    private readonly getCurrentUserUsecase: GetCurrentUserUsecase,
-  ) {}
+  constructor(private readonly getCurrentUserUsecase: GetCurrentUserUsecase) {}
 
   @Get('users/:id')
   async getUser(@Param('id') id: string): Promise<UserResponseDto> {

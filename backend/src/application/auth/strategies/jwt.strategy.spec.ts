@@ -39,7 +39,11 @@ describe('JwtStrategy', () => {
   });
 
   it('validateメソッドがpayloadからuserIdとemailとroleを返す', async () => {
-    const payload = { sub: 'user-123', email: 'test@example.com', role: 'USER' };
+    const payload = {
+      sub: 'user-123',
+      email: 'test@example.com',
+      role: 'USER',
+    };
 
     const result = await strategy.validate(payload);
 

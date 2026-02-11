@@ -31,7 +31,7 @@ describe('GetUsersController', () => {
     }).compile();
 
     controller = module.get<GetUsersController>(GetUsersController);
-    usecase = module.get<GetUsersUsecase>(GetUsersUsecase);
+    usecase = module.get(GetUsersUsecase);
   });
 
   describe('クラスレベルGuard', () => {
@@ -65,12 +65,14 @@ describe('GetUsersController', () => {
         },
       ];
 
-      jest.spyOn(usecase, 'execute').mockResolvedValue(mockUsers);
+      const executeSpy = jest
+        .spyOn(usecase, 'execute')
+        .mockResolvedValue(mockUsers);
 
       const result = await controller.getUsers();
 
       expect(result).toEqual(mockUsers);
-      expect(usecase.execute).toHaveBeenCalledTimes(1);
+      expect(executeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('GETメソッドでadmin/usersにマッピングされている', () => {
@@ -103,7 +105,7 @@ describe('GetUserController', () => {
     }).compile();
 
     controller = module.get<GetUserController>(GetUserController);
-    usecase = module.get<GetCurrentUserUsecase>(GetCurrentUserUsecase);
+    usecase = module.get(GetCurrentUserUsecase);
   });
 
   describe('クラスレベルGuard', () => {
@@ -129,12 +131,14 @@ describe('GetUserController', () => {
         role: 'ADMIN',
       };
 
-      jest.spyOn(usecase, 'execute').mockResolvedValue(mockUser);
+      const executeSpy = jest
+        .spyOn(usecase, 'execute')
+        .mockResolvedValue(mockUser);
 
       const result = await controller.getUser('user-1');
 
       expect(result).toEqual(mockUser);
-      expect(usecase.execute).toHaveBeenCalledWith('user-1');
+      expect(executeSpy).toHaveBeenCalledWith('user-1');
     });
   });
 });
@@ -155,7 +159,7 @@ describe('ApproveUserController', () => {
     }).compile();
 
     controller = module.get<ApproveUserController>(ApproveUserController);
-    usecase = module.get<ApproveUserUsecase>(ApproveUserUsecase);
+    usecase = module.get(ApproveUserUsecase);
   });
 
   describe('クラスレベルGuard', () => {
@@ -174,11 +178,13 @@ describe('ApproveUserController', () => {
 
   describe('approveUser', () => {
     it('ApproveUserUsecase.executeにIDを渡して呼び出す', async () => {
-      jest.spyOn(usecase, 'execute').mockResolvedValue(undefined);
+      const executeSpy = jest
+        .spyOn(usecase, 'execute')
+        .mockResolvedValue(undefined);
 
       await controller.approveUser('user-1');
 
-      expect(usecase.execute).toHaveBeenCalledWith('user-1');
+      expect(executeSpy).toHaveBeenCalledWith('user-1');
     });
 
     it('PATCHメソッドでadmin/users/:id/approveにマッピングされている', () => {
@@ -211,7 +217,7 @@ describe('RejectUserController', () => {
     }).compile();
 
     controller = module.get<RejectUserController>(RejectUserController);
-    usecase = module.get<RejectUserUsecase>(RejectUserUsecase);
+    usecase = module.get(RejectUserUsecase);
   });
 
   describe('クラスレベルGuard', () => {
@@ -230,11 +236,13 @@ describe('RejectUserController', () => {
 
   describe('rejectUser', () => {
     it('RejectUserUsecase.executeにIDを渡して呼び出す', async () => {
-      jest.spyOn(usecase, 'execute').mockResolvedValue(undefined);
+      const executeSpy = jest
+        .spyOn(usecase, 'execute')
+        .mockResolvedValue(undefined);
 
       await controller.rejectUser('user-1');
 
-      expect(usecase.execute).toHaveBeenCalledWith('user-1');
+      expect(executeSpy).toHaveBeenCalledWith('user-1');
     });
 
     it('PATCHメソッドでadmin/users/:id/rejectにマッピングされている', () => {
