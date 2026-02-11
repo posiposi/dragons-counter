@@ -1,11 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScrapingAdapter } from './scraping.adapter';
-import type { SecretsServicePort } from '../../domain/ports/secrets-service.port';
 import type { ScrapeResult } from '../../domain/ports/scraping.port';
 
 describe('ScrapingAdapter', () => {
   let adapter: ScrapingAdapter;
-  let secretsService: SecretsServicePort;
   const originalEnv = process.env;
   const originalFetch = global.fetch;
 
@@ -29,7 +27,6 @@ describe('ScrapingAdapter', () => {
     }).compile();
 
     adapter = module.get<ScrapingAdapter>(ScrapingAdapter);
-    secretsService = module.get<SecretsServicePort>('SecretsServicePort');
   });
 
   afterEach(() => {
@@ -88,7 +85,7 @@ describe('ScrapingAdapter', () => {
         headers: {
           'x-api-key': 'test-api-key',
         },
-        signal: expect.any(AbortSignal),
+        signal: expect.any(AbortSignal) as AbortSignal,
       }),
     );
   });

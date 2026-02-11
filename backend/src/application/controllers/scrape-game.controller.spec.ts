@@ -1,9 +1,12 @@
 import { RequestMethod } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import { ScrapeGameController } from './scrape-game.controller';
 import { ScrapeGameUsecase } from '../../domain/usecases/scrape-game.usecase';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ScrapeGameRequestDto } from '../dto/request/scrape-game-request.dto';
 import type { ScrapeResult } from '../../domain/ports/scraping.port';
 
 describe('ScrapeGameController', () => {
@@ -37,7 +40,10 @@ describe('ScrapeGameController', () => {
       .spyOn(usecase, 'execute')
       .mockResolvedValue({ game: null, message: 'no game' });
 
-    await controller.scrape({ date: '2024-04-01' });
+    const dto = plainToInstance(ScrapeGameRequestDto, {
+      date: '2024-04-01',
+    });
+    await controller.scrape(dto);
 
     expect(spy).toHaveBeenCalledWith('2024-04-01');
   });
@@ -55,7 +61,10 @@ describe('ScrapeGameController', () => {
 
     jest.spyOn(usecase, 'execute').mockResolvedValue(expectedResult);
 
-    const result = await controller.scrape({ date: '2024-04-01' });
+    const dto = plainToInstance(ScrapeGameRequestDto, {
+      date: '2024-04-01',
+    });
+    const result = await controller.scrape(dto);
 
     expect(result).toEqual(expectedResult);
   });
@@ -68,7 +77,10 @@ describe('ScrapeGameController', () => {
 
     jest.spyOn(usecase, 'execute').mockResolvedValue(expectedResult);
 
-    const result = await controller.scrape({ date: '2024-04-01' });
+    const dto = plainToInstance(ScrapeGameRequestDto, {
+      date: '2024-04-01',
+    });
+    const result = await controller.scrape(dto);
 
     expect(result).toEqual(expectedResult);
   });
@@ -89,5 +101,48 @@ describe('ScrapeGameController', () => {
 
     expect(path).toBe('/');
     expect(method).toBe(RequestMethod.POST);
+  });
+});
+
+describe('ScrapeGameRequestDto', () => {
+  it('有効なYYYY-MM-DD形式のdateでバリデーションが通る', async () => {
+    const dto = plainToInstance(ScrapeGameRequestDto, {
+      date: '2024-04-01',
+    });
+    const errors = await validate(dto);
+
+    expect(errors).toHaveLength(0);
+  });
+
+  it('dateが空文字の場合バリデーションエラーになる', async () => {
+    const dto = plainToInstance(ScrapeGameRequestDto, { date: '' });
+    const errors = await validate(dto);
+
+    expect(errors.length).toBeGreaterThan(0);
+  });
+
+  it('dateが不正な形式の場合バリデーションエラーになる', async () => {
+    const dto = plainToInstance(ScrapeGameRequestDto, {
+      date: '2024/04/01',
+    });
+    const errors = await validate(dto);
+
+    expect(errors.length).toBeGreaterThan(0);
+    const dateError = errors.find((e) => e.property === 'date');
+    expect(dateError).toBeDefined();
+  });
+
+  it('dateが未指定の場合バリデーションエラーになる', async () => {
+    const dto = plainToInstance(ScrapeGameRequestDto, {});
+    const errors = await validate(dto);
+
+    expect(errors.length).toBeGreaterThan(0);
+  });
+
+  it('dateが数値の場合バリデーションエラーになる', async () => {
+    const dto = plainToInstance(ScrapeGameRequestDto, { date: 20240401 });
+    const errors = await validate(dto);
+
+    expect(errors.length).toBeGreaterThan(0);
   });
 });
