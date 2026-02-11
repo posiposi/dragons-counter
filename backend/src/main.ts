@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import cookieParser from 'cookie-parser';
 import { DomainExceptionFilter } from './application/filters/domain-exception.filter';
 
 async function bootstrap() {
@@ -22,6 +23,8 @@ async function bootstrap() {
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
     });
+
+    app.use(cookieParser());
 
     app.setGlobalPrefix('api', {
       exclude: ['health'],
@@ -65,6 +68,8 @@ async function bootstrap() {
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true,
     });
+
+    app.use(cookieParser());
 
     app.setGlobalPrefix('api', {
       exclude: ['health'],
