@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Game } from "@/types/game";
 import { fetchGames, deleteGame } from "@/lib/api/games";
+import { useAuth } from "@/hooks/use-auth";
 import { Trash2, LogOut } from "lucide-react";
 import GameScrapePanel from "./GameScrapePanel";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import DeleteResultDialog from "./DeleteResultDialog";
 import styles from "./GameList.module.css";
 
-interface GameListProps {
-  onSignout: () => Promise<void>;
-}
-
-export default function GameList({ onSignout }: GameListProps) {
+export default function GameList() {
+  const navigate = useNavigate();
+  const { signout } = useAuth();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,9 +154,11 @@ export default function GameList({ onSignout }: GameListProps) {
           <button
             className={styles.signoutButton}
             onClick={() => {
-              onSignout().catch((err: unknown) => {
-                console.error("Failed to sign out:", err);
-              });
+              signout()
+                .then(() => navigate("/login"))
+                .catch((err: unknown) => {
+                  console.error("Failed to sign out:", err);
+                });
             }}
           >
             <LogOut size={18} />

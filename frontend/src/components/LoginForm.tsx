@@ -1,12 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import styles from "./AuthForm.module.css";
 
-interface LoginFormProps {
-  onSwitchToSignup: () => void;
-}
-
-export default function LoginForm({ onSwitchToSignup }: LoginFormProps) {
+export default function LoginForm() {
+  const navigate = useNavigate();
   const { signin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +17,7 @@ export default function LoginForm({ onSwitchToSignup }: LoginFormProps) {
     setIsSubmitting(true);
     try {
       await signin({ email, password });
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "ログインに失敗しました");
     } finally {
@@ -76,7 +75,7 @@ export default function LoginForm({ onSwitchToSignup }: LoginFormProps) {
           <button
             className={styles.switchLink}
             type="button"
-            onClick={onSwitchToSignup}
+            onClick={() => navigate("/signup")}
           >
             会員登録はこちら
           </button>

@@ -1,35 +1,28 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth-context";
-import { useAuth } from "@/hooks/use-auth";
-import GameList from "@/components/GameList";
-import LoginForm from "@/components/LoginForm";
-import SignupForm from "@/components/SignupForm";
-import styles from "./App.module.css";
-
-function AppContent() {
-  const { isAuthenticated, isLoading, signout } = useAuth();
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-
-  if (isLoading) {
-    return <div className={styles.loading}>読み込み中...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return authMode === "login" ? (
-      <LoginForm onSwitchToSignup={() => setAuthMode("signup")} />
-    ) : (
-      <SignupForm onSwitchToLogin={() => setAuthMode("login")} />
-    );
-  }
-
-  return <GameList onSignout={signout} />;
-}
+import ProtectedRoute from "@/components/ProtectedRoute";
+import LoginPage from "@/pages/LoginPage";
+import SignupPage from "@/pages/SignupPage";
+import HomePage from "@/pages/HomePage";
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
