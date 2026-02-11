@@ -1,16 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { CsrfValidationGuard } from './csrf-validation.guard';
 
 describe('CsrfValidationGuard', () => {
   let guard: CsrfValidationGuard;
+  let reflector: Reflector;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CsrfValidationGuard],
+      providers: [CsrfValidationGuard, Reflector],
     }).compile();
 
     guard = module.get<CsrfValidationGuard>(CsrfValidationGuard);
+    reflector = module.get<Reflector>(Reflector);
   });
 
   const createMockExecutionContext = (
@@ -26,6 +29,8 @@ describe('CsrfValidationGuard', () => {
           headers,
         }),
       }),
+      getHandler: () => jest.fn(),
+      getClass: () => jest.fn(),
     } as unknown as ExecutionContext;
   };
 
@@ -147,6 +152,31 @@ describe('CsrfValidationGuard', () => {
         { 'csrf-token': 'cookie-token' },
         { 'x-csrf-token': 'different-header-token' },
       );
+
+      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
+    });
+  });
+
+  describe('SkipCsrfメタデータ', () => {
+    it('SkipCsrfメタデータがtrueの場合はCSRF検証をスキップする', () => {
+      const context = createMockExecutionContext('POST', {}, {});
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
+
+      const result = guard.canActivate(context);
+
+      expect(result).toBe(true);
+    });
+
+    it('SkipCsrfメタデータがfalseの場合はCSRF検証を実行する', () => {
+      const context = createMockExecutionContext('POST', {}, {});
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+
+      expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
+    });
+
+    it('SkipCsrfメタデータが未設定の場合はCSRF検証を実行する', () => {
+      const context = createMockExecutionContext('POST', {}, {});
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
       expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
     });

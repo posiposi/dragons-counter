@@ -4,6 +4,7 @@ import { GUARDS_METADATA, HTTP_CODE_METADATA } from '@nestjs/common/constants';
 import { SigninController } from './signin.controller';
 import { SigninUsecase } from '../../../domain/usecases/signin.usecase';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { SKIP_CSRF_KEY } from '../decorators/skip-csrf.decorator';
 
 describe('SigninController', () => {
   let controller: SigninController;
@@ -135,6 +136,15 @@ describe('SigninController', () => {
       ) as number;
 
       expect(httpCode).toBe(HttpStatus.OK);
+    });
+
+    it('SkipCsrfデコレータが適用されている', () => {
+      const skipCsrf = Reflect.getMetadata(
+        SKIP_CSRF_KEY,
+        signinMethod,
+      ) as boolean;
+
+      expect(skipCsrf).toBe(true);
     });
   });
 });

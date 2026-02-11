@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto';
 import { SigninUsecase } from '../../../domain/usecases/signin.usecase';
 import { SigninRequestDto } from '../dto/signin-request.dto';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { SkipCsrf } from '../decorators/skip-csrf.decorator';
 import { User } from '../../../domain/entities/user';
 
 @Controller('auth')
@@ -22,6 +23,7 @@ export class SigninController {
   @Post('signin')
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
+  @SkipCsrf()
   async signin(
     @Body() dto: SigninRequestDto,
     @Request() req: { user: User },
