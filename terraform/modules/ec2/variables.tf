@@ -99,3 +99,9 @@ variable "api_gateway_url" {
   type        = string
   default     = ""
 }
+
+variable "scraper_api_key_secret_arn" {
+  description = "スクレイピング用APIキーのSecrets Manager ARN"
+  type        = string
+  default     = ""
+}

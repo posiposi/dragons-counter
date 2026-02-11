@@ -96,7 +96,8 @@ module "ec2" {
   rds_secret_arn            = module.rds.db_password_secret_arn
   enable_codedeploy         = true
   deploy_bucket_arn         = module.s3_deploy.bucket_arn
-  api_gateway_url           = module.api_gateway.stage_invoke_url
+  api_gateway_url            = module.api_gateway.stage_invoke_url
+  scraper_api_key_secret_arn = module.api_gateway.scraper_api_key_secret_arn
 }
 
 module "route53" {
