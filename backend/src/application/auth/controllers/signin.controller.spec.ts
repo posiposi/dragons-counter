@@ -110,11 +110,10 @@ describe('SigninController', () => {
         mockRes as never,
       );
 
-      const csrfTokenCall = mockRes.cookie.mock.calls.find(
-        (call: string[]) => call[0] === 'csrf-token',
-      );
+      const calls = mockRes.cookie.mock.calls as [string, string, unknown][];
+      const csrfTokenCall = calls.find((call) => call[0] === 'csrf-token');
       expect(csrfTokenCall).toBeDefined();
-      const csrfToken = csrfTokenCall![1] as string;
+      const csrfToken = csrfTokenCall![1];
       expect(csrfToken.length).toBeGreaterThan(0);
     });
 
