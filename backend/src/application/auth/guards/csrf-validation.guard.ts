@@ -30,7 +30,8 @@ export class CsrfValidationGuard implements CanActivate {
       return true;
     }
 
-    const cookieToken = request.cookies?.['csrf-token'];
+    const cookies = request.cookies as Record<string, string> | undefined;
+    const cookieToken = cookies?.['csrf-token'];
     const headerToken = request.headers['x-csrf-token'];
 
     if (!cookieToken || !headerToken) {
