@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { Game } from "@/types/game";
 import { fetchGames, deleteGame } from "@/lib/api/games";
-import { Trash2 } from "lucide-react";
+import { Trash2, LogOut } from "lucide-react";
 import GameScrapePanel from "./GameScrapePanel";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import DeleteResultDialog from "./DeleteResultDialog";
 import styles from "./GameList.module.css";
 
-export default function GameList() {
+interface GameListProps {
+  onSignout: () => Promise<void>;
+}
+
+export default function GameList({ onSignout }: GameListProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,6 +151,10 @@ export default function GameList() {
             <h1 className={styles.title}>Dra Vincit</h1>
             <p className={styles.subtitle}>中日ドラゴンズ観戦記録</p>
           </div>
+          <button className={styles.signoutButton} onClick={onSignout}>
+            <LogOut size={18} />
+            <span>ログアウト</span>
+          </button>
         </div>
       </header>
 
