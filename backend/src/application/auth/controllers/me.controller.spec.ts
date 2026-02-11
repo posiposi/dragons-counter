@@ -38,6 +38,7 @@ describe('MeController', () => {
         id: 'test-user-id',
         email: 'test@example.com',
         registrationStatus: 'APPROVED',
+        role: 'USER',
       };
 
       const executeSpy = jest

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { seedStadiums } from './seeders/stadium.seed';
 import { seedGames } from './seeders/game.seed';
+import { seedAdminUser } from './seeders/admin-user.seed';
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,7 @@ async function main() {
   const isProduction = process.env.NODE_ENV === 'production';
 
   await seedStadiums(prisma);
+  await seedAdminUser(prisma);
 
   if (!isProduction) {
     await seedGames(prisma);

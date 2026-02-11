@@ -50,11 +50,17 @@ model User {
   id                   String                    @id @default(uuid())
   email                String                    @unique
   password             String                    @map("password")
+  role                 UserRole                  @default(USER)
   registrationRequests UserRegistrationRequest[]
   createdAt            DateTime                  @default(now()) @map("created_at")
   updatedAt            DateTime                  @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+enum UserRole {
+  USER  @map("user")
+  ADMIN @map("admin")
 }
 
 model UserRegistrationRequest {

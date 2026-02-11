@@ -5,6 +5,7 @@ import { UserId } from '../value-objects/user-id';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
 import { RegistrationStatus } from '../enums/registration-status';
+import { UserRole } from '../enums/user-role';
 import { UserNotApprovedException } from '../exceptions/user-not-approved.exception';
 import type { TokenServicePort } from '../ports/token-service.port';
 
@@ -58,6 +59,7 @@ describe('SigninUsecase', () => {
       expect(mockTokenService.sign).toHaveBeenCalledWith({
         sub: 'test-user-id',
         email: 'test@example.com',
+        role: UserRole.USER,
       });
     });
 

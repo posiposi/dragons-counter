@@ -38,14 +38,15 @@ describe('JwtStrategy', () => {
     );
   });
 
-  it('validateメソッドがpayloadからuserIdとemailを返す', async () => {
-    const payload = { sub: 'user-123', email: 'test@example.com' };
+  it('validateメソッドがpayloadからuserIdとemailとroleを返す', async () => {
+    const payload = { sub: 'user-123', email: 'test@example.com', role: 'USER' };
 
     const result = await strategy.validate(payload);
 
     expect(result).toEqual({
       userId: 'user-123',
       email: 'test@example.com',
+      role: 'USER',
     });
   });
 
