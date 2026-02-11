@@ -30,3 +30,10 @@ variable "npb_base_url" {
   type        = string
   default     = "https://npb.jp"
 }
+
+variable "scraper_api_key" {
+  description = "スクレイピングAPI用のAPIキー"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

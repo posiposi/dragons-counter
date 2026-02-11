@@ -5,7 +5,7 @@ resource "aws_apigatewayv2_api" "scraper" {
   cors_configuration {
     allow_origins = var.cors_allowed_origins
     allow_methods = ["GET", "OPTIONS"]
-    allow_headers = ["Content-Type"]
+    allow_headers = ["Content-Type", "x-api-key"]
     max_age       = 3600
   }
 

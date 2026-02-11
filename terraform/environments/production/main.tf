@@ -145,6 +145,7 @@ module "lambda_scraper" {
   project_name    = var.project_name
   environment     = var.environment
   lambda_zip_path = "${path.root}/../../../lambda/scraper.zip"
+  scraper_api_key = module.api_gateway.scraper_api_key_value
 }
 
 module "api_gateway" {
