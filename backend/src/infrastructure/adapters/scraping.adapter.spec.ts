@@ -74,7 +74,7 @@ describe('ScrapingAdapter', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('x-api-keyヘッダーがリクエストに含まれる', async () => {
+  it('x-api-keyヘッダーとAbortSignalがリクエストに含まれる', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue({ game: null, message: 'no game' }),
@@ -84,11 +84,12 @@ describe('ScrapingAdapter', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       'https://api.example.com/scrape?date=2024-04-01',
-      {
+      expect.objectContaining({
         headers: {
           'x-api-key': 'test-api-key',
         },
-      },
+        signal: expect.any(AbortSignal),
+      }),
     );
   });
 
@@ -125,6 +126,47 @@ describe('ScrapingAdapter', () => {
     expect(result).toEqual({
       error: 'スクレイピングに失敗しました',
       details: 'HTTP 500',
+    });
+  });
+
+  it('ネットワークエラーの場合ScrapeErrorResultを返す', async () => {
+    (global.fetch as jest.Mock).mockRejectedValue(
+      new Error('fetch failed: network error'),
+    );
+
+    const result = await adapter.scrapeGameResult('2024-04-01');
+
+    expect(result).toEqual({
+      error: 'スクレイピングに失敗しました',
+      details: 'fetch failed: network error',
+    });
+  });
+
+  it('AbortControllerのsignalがfetchに渡される', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ game: null, message: 'no game' }),
+    });
+
+    await adapter.scrapeGameResult('2024-04-01');
+
+    const fetchCall = (global.fetch as jest.Mock).mock.calls[0] as [
+      string,
+      RequestInit,
+    ];
+    expect(fetchCall[1].signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('タイムアウトによるAbortErrorの場合タイムアウトエラーを返す', async () => {
+    const abortError = new Error('The operation was aborted');
+    abortError.name = 'AbortError';
+    (global.fetch as jest.Mock).mockRejectedValue(abortError);
+
+    const result = await adapter.scrapeGameResult('2024-04-01');
+
+    expect(result).toEqual({
+      error: 'スクレイピングに失敗しました',
+      details: 'リクエストがタイムアウトしました',
     });
   });
 });
