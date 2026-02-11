@@ -19,12 +19,24 @@ export default function SignupForm({ onSwitchToLogin }: SignupFormProps) {
     setIsSubmitting(true);
     try {
       await signup({ email, password });
-      await signin({ email, password });
     } catch (err) {
       setError(err instanceof Error ? err.message : "会員登録に失敗しました");
-    } finally {
       setIsSubmitting(false);
+      return;
     }
+
+    try {
+      await signin({ email, password });
+    } catch {
+      setError(
+        "アカウントは作成されました。ログイン画面からログインしてください",
+      );
+      setIsSubmitting(false);
+      onSwitchToLogin();
+      return;
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
