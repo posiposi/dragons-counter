@@ -32,21 +32,89 @@ describe('SigninController', () => {
   });
 
   describe('signin', () => {
-    it('SigninUsecase.executeにreq.userを渡してaccessTokenを返す', async () => {
-      const mockUser = { id: 'user-id', email: 'test@example.com' };
-      const mockResult = { accessToken: 'test-jwt-token' };
+    const mockUser = { id: 'user-id', email: 'test@example.com' };
+    const mockResult = { accessToken: 'test-jwt-token' };
+
+    const createMockResponse = () => ({
+      cookie: jest.fn(),
+    });
+
+    it('SigninUsecase.executeにreq.userを渡して呼び出す', async () => {
+      const mockRes = createMockResponse();
       const executeSpy = jest
         .spyOn(usecase, 'execute')
         .mockResolvedValue(mockResult);
 
-      const result = await controller.signin(
+      await controller.signin(
         { email: 'test@example.com', password: 'password123' },
         { user: mockUser as never },
+        mockRes as never,
       );
 
       expect(executeSpy).toHaveBeenCalledTimes(1);
       expect(executeSpy).toHaveBeenCalledWith(mockUser);
-      expect(result).toEqual({ accessToken: 'test-jwt-token' });
+    });
+
+    it('accessTokenをHttpOnly Cookieとしてセットする', async () => {
+      const mockRes = createMockResponse();
+      jest.spyOn(usecase, 'execute').mockResolvedValue(mockResult);
+
+      await controller.signin(
+        { email: 'test@example.com', password: 'password123' },
+        { user: mockUser as never },
+        mockRes as never,
+      );
+
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'accessToken',
+        'test-jwt-token',
+        {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          path: '/api',
+        },
+      );
+    });
+
+    it('csrf-tokenをJavaScriptから読み取り可能なCookieとしてセットする', async () => {
+      const mockRes = createMockResponse();
+      jest.spyOn(usecase, 'execute').mockResolvedValue(mockResult);
+
+      await controller.signin(
+        { email: 'test@example.com', password: 'password123' },
+        { user: mockUser as never },
+        mockRes as never,
+      );
+
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'csrf-token',
+        expect.any(String),
+        {
+          httpOnly: false,
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+        },
+      );
+    });
+
+    it('csrf-tokenは空でないランダム文字列である', async () => {
+      const mockRes = createMockResponse();
+      jest.spyOn(usecase, 'execute').mockResolvedValue(mockResult);
+
+      await controller.signin(
+        { email: 'test@example.com', password: 'password123' },
+        { user: mockUser as never },
+        mockRes as never,
+      );
+
+      const csrfTokenCall = mockRes.cookie.mock.calls.find(
+        (call: string[]) => call[0] === 'csrf-token',
+      );
+      expect(csrfTokenCall).toBeDefined();
+      const csrfToken = csrfTokenCall![1] as string;
+      expect(csrfToken.length).toBeGreaterThan(0);
     });
 
     it('LocalAuthGuardが適用されている', () => {
