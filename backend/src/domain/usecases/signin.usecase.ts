@@ -14,7 +14,11 @@ export class SigninUsecase {
     if (!user.canLogin()) {
       throw new UserNotApprovedException('User is not approved');
     }
-    const payload = { sub: user.id.value, email: user.email.value };
+    const payload = {
+      sub: user.id.value,
+      email: user.email.value,
+      role: user.role,
+    };
     const accessToken = this.tokenService.sign(payload);
     return Promise.resolve({ accessToken });
   }

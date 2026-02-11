@@ -6,7 +6,7 @@ import type { TokenServicePort } from '../../../domain/ports/token-service.port'
 export class JwtTokenServiceAdapter implements TokenServicePort {
   constructor(private readonly jwtService: JwtService) {}
 
-  sign(payload: { sub: string; email: string }): string {
+  sign(payload: { sub: string; email: string; role: string }): string {
     return this.jwtService.sign(payload);
   }
 }

@@ -7,6 +7,7 @@ import { UserId } from '../../domain/value-objects/user-id';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
 import { RegistrationStatus } from '../../domain/enums/registration-status';
+import { UserRole } from '../../domain/enums/user-role';
 import { UserAlreadyExistsException } from '../../domain/exceptions/user-already-exists.exception';
 
 @Injectable()
@@ -31,11 +32,13 @@ export class UserCommandAdapter implements UserCommandPort {
         update: {
           email: user.email.value,
           password: user.password.hash,
+          role: UserRole.toPrisma(user.role),
         },
         create: {
           id: user.id.value,
           email: user.email.value,
           password: user.password.hash,
+          role: UserRole.toPrisma(user.role),
           registrationRequests: {
             create: {
               status: RegistrationStatus.toPrisma(user.registrationStatus),
@@ -57,6 +60,7 @@ export class UserCommandAdapter implements UserCommandPort {
         Email.create(savedUser.email),
         Password.fromHash(savedUser.password),
         RegistrationStatus.fromPrisma(latestStatus),
+        UserRole.fromPrisma(savedUser.role),
       );
     } catch (error) {
       if (

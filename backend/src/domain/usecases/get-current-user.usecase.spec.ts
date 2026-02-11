@@ -52,6 +52,7 @@ describe('GetCurrentUserUsecase', () => {
         id: 'test-user-id',
         email: 'test@example.com',
         registrationStatus: 'APPROVED',
+        role: 'USER',
       };
 
       expect(result).toEqual(expected);

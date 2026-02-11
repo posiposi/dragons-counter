@@ -6,6 +6,7 @@ import { Request } from 'express';
 interface JwtPayload {
   sub: string;
   email: string;
+  role: string;
 }
 
 @Injectable()
@@ -27,10 +28,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(
     payload: JwtPayload,
-  ): Promise<{ userId: string; email: string }> {
+  ): Promise<{ userId: string; email: string; role: string }> {
     return await Promise.resolve({
       userId: payload.sub,
       email: payload.email,
+      role: payload.role,
     });
   }
 }
