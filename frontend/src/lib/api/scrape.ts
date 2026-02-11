@@ -47,7 +47,7 @@ export async function scrapeGameResult(date: string): Promise<ScrapeResult> {
   }
 
   const csrfToken = getCsrfToken();
-  const response = await fetch(`${API_BASE_URL}/scrape`, {
+  const response = await fetch(`${API_BASE_URL.replace(/\/+$/, "")}/scrape`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

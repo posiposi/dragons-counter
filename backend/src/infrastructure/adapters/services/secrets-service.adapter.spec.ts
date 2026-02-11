@@ -6,7 +6,7 @@ jest.mock('@aws-sdk/client-secrets-manager', () => ({
   SecretsManagerClient: jest.fn().mockImplementation(() => ({
     send: mockSend,
   })),
-  GetSecretValueCommand: jest.fn().mockImplementation((input) => input),
+  GetSecretValueCommand: jest.fn().mockImplementation((input: Record<string, unknown>) => input),
 }));
 
 describe('SecretsServiceAdapter', () => {
