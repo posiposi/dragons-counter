@@ -3,6 +3,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { SignupController } from './controllers/signup.controller';
 import { SigninController } from './controllers/signin.controller';
+import { SignoutController } from './controllers/signout.controller';
 import { MeController } from './controllers/me.controller';
 import { SignupUsecase } from '../../domain/usecases/signup.usecase';
 import { SigninUsecase } from '../../domain/usecases/signin.usecase';
@@ -26,7 +27,12 @@ if (!jwtSecret) {
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [SignupController, SigninController, MeController],
+  controllers: [
+    SignupController,
+    SigninController,
+    SignoutController,
+    MeController,
+  ],
   providers: [
     SignupUsecase,
     SigninUsecase,

@@ -1,9 +1,11 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import cookieParser from 'cookie-parser';
 import { DomainExceptionFilter } from './application/filters/domain-exception.filter';
+import { CsrfValidationGuard } from './application/auth/guards/csrf-validation.guard';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -23,12 +25,15 @@ async function bootstrap() {
       credentials: true,
     });
 
+    app.use(cookieParser());
+
     app.setGlobalPrefix('api', {
       exclude: ['health'],
     });
 
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new DomainExceptionFilter());
+    app.useGlobalGuards(new CsrfValidationGuard(new Reflector()));
 
     const port = process.env.PORT ?? 3000;
     await app.listen(port, '0.0.0.0');
@@ -66,12 +71,15 @@ async function bootstrap() {
       credentials: true,
     });
 
+    app.use(cookieParser());
+
     app.setGlobalPrefix('api', {
       exclude: ['health'],
     });
 
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new DomainExceptionFilter());
+    app.useGlobalGuards(new CsrfValidationGuard(new Reflector()));
 
     const httpsPort = process.env.HTTPS_PORT ?? 3443;
     await app.listen(httpsPort, '0.0.0.0');

@@ -73,7 +73,23 @@ git switch -c "{#issue_no.}_{issue_name}"
 - Red→Green→Refactorのサイクルを厳守する
 - `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
 - テストは必ずDockerコンテナ内で実行する（`docker compose exec backend npm run test`）
-- タスク単位で`git add`および`git commit`を行うこと
+
+#### linter実行
+
+- テストがPASSした後に**コンテナ内で**コマンドを実行してlint確認を行うこと
+  - **フロントエンドのlint実行**
+    - frontendコンテナ内で下記コマンドを順に実行する
+      1. `npm run lint`
+      2. `npm run typecheck`
+      3. `npm run format:check`
+    - コマンド実行後にlintエラーがある場合はfrontendコンテナ内で`npm run format`を実行してlintエラー修正を行う
+  - **バックエンドのlint実行**
+    - backendコンテナ内で`npm run format`を実行する
+
+#### gitコマンド実行
+
+- テストおよびlintをPASSした場合はコミット行う
+  - タスク単位で`git add`および`git commit`を行うこと
 
 ## Phase 4: 実装レビュー
 
