@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import styles from "./SignupForm.module.css";
+import styles from "./AuthForm.module.css";
 
 interface SignupFormProps {
   onSwitchToLogin: () => void;
