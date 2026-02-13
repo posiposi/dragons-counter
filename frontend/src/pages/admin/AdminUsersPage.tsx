@@ -65,10 +65,7 @@ export default function AdminUsersPage() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <h1 className={styles.title}>ユーザー管理</h1>
-          <button
-            className={styles.backLink}
-            onClick={() => navigate("/")}
-          >
+          <button className={styles.backLink} onClick={() => navigate("/")}>
             <ArrowLeft size={18} />
             <span>ホームへ戻る</span>
           </button>
@@ -97,14 +94,10 @@ export default function AdminUsersPage() {
         ))}
       </div>
 
-      <div className={styles.userCount}>
-        {filteredUsers.length}件のユーザー
-      </div>
+      <div className={styles.userCount}>{filteredUsers.length}件のユーザー</div>
 
       {filteredUsers.length === 0 ? (
-        <div className={styles.emptyState}>
-          該当するユーザーはいません
-        </div>
+        <div className={styles.emptyState}>該当するユーザーはいません</div>
       ) : (
         <div className={styles.tableCard}>
           <table className={styles.table}>

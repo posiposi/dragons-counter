@@ -23,9 +23,7 @@ export default function AdminUserDetailPage() {
       setUser(data);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "ユーザー情報の取得に失敗しました",
+        err instanceof Error ? err.message : "ユーザー情報の取得に失敗しました",
       );
     } finally {
       setLoading(false);
@@ -45,9 +43,7 @@ export default function AdminUserDetailPage() {
       const updated = await fetchAdminUser(id);
       setUser(updated);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "承認処理に失敗しました",
-      );
+      setError(err instanceof Error ? err.message : "承認処理に失敗しました");
     } finally {
       setActionLoading(false);
     }
@@ -62,9 +58,7 @@ export default function AdminUserDetailPage() {
       const updated = await fetchAdminUser(id);
       setUser(updated);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "拒否処理に失敗しました",
-      );
+      setError(err instanceof Error ? err.message : "拒否処理に失敗しました");
     } finally {
       setActionLoading(false);
     }
