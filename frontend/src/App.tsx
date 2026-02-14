@@ -1,9 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth-context";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import HomePage from "@/pages/HomePage";
+import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import AdminUserDetailPage from "@/pages/admin/AdminUserDetailPage";
 
 function App() {
   return (
@@ -18,6 +21,22 @@ function App() {
               <ProtectedRoute>
                 <HomePage />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users/:id"
+            element={
+              <AdminRoute>
+                <AdminUserDetailPage />
+              </AdminRoute>
             }
           />
         </Routes>
