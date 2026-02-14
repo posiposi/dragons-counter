@@ -188,7 +188,7 @@
   margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
+@media (width <=768px) {
   .table thead {
     display: none;
   }
