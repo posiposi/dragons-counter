@@ -28,11 +28,12 @@ TaskListで完了済み（completed）の実装タスク（metadata.type === "im
 coderabbit CLIを実行して自動レビューを取得する。
 
 ```bash
-/coderabbit review --prompt-only --base <ベースブランチ>
+coderabbit review --prompt-only --base <ベースブランチ>
 ```
 
 - ベースブランチはTaskGetで取得した情報、または `main` を使用する
 - 実行結果を解析し、critical / suggestion レベルの指摘を抽出する
+- `which`で検索を行わずに上記コマンドを実行すること
 
 ### 3. Phase 2: プロジェクト固有観点の補足レビュー
 
