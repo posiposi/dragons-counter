@@ -10,7 +10,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: ./frontend
