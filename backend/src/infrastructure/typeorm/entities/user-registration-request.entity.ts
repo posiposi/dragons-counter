@@ -36,5 +36,5 @@ export class UserRegistrationRequestEntity {
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
