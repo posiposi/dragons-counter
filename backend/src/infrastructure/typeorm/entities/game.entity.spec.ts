@@ -78,12 +78,13 @@ describe('GameEntity', () => {
       expect(resultColumn!.options.enum).toBe(GameResultEnum);
     });
 
-    it('stadiumIdカラムがstadium_idにマッピングされる', () => {
+    it('stadiumIdカラムがstadium_idにマッピングされvarchar(191)型である', () => {
       const stadiumIdColumn = findColumn('stadiumId');
 
       expect(stadiumIdColumn).toBeDefined();
       expect(stadiumIdColumn!.options.name).toBe('stadium_id');
-      expect(stadiumIdColumn!.options.type).toBe('uuid');
+      expect(stadiumIdColumn!.options.type).toBe('varchar');
+      expect(stadiumIdColumn!.options.length).toBe(191);
     });
 
     it('notesカラムがtext型でnullableとして定義される', () => {

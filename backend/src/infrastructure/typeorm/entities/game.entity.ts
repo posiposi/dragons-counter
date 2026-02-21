@@ -31,7 +31,7 @@ export class GameEntity {
   @Column({ type: 'enum', enum: GameResultEnum })
   result: GameResultEnum;
 
-  @Column({ name: 'stadium_id', type: 'uuid' })
+  @Column({ name: 'stadium_id', type: 'varchar', length: 191 })
   stadiumId: string;
 
   @ManyToOne(() => StadiumEntity, (stadium) => stadium.games)
