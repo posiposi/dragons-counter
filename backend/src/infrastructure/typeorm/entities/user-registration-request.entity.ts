@@ -29,7 +29,7 @@ export class UserRegistrationRequestEntity {
   })
   status: RegistrationStatusEnum;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'reasonForRejection', type: 'varchar', nullable: true })
   reasonForRejection: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
