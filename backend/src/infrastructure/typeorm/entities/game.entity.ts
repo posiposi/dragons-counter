@@ -38,7 +38,7 @@ export class GameEntity {
   @JoinColumn({ name: 'stadium_id' })
   stadium: StadiumEntity;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 191, nullable: true })
   notes: string | null;
 
   @CreateDateColumn({ name: 'created_at' })

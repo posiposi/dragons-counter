@@ -87,11 +87,12 @@ describe('GameEntity', () => {
       expect(stadiumIdColumn!.options.length).toBe(191);
     });
 
-    it('notesカラムがtext型でnullableとして定義される', () => {
+    it('notesカラムがvarchar(191)型でnullableとして定義される', () => {
       const notesColumn = findColumn('notes');
 
       expect(notesColumn).toBeDefined();
-      expect(notesColumn!.options.type).toBe('text');
+      expect(notesColumn!.options.type).toBe('varchar');
+      expect(notesColumn!.options.length).toBe(191);
       expect(notesColumn!.options.nullable).toBe(true);
     });
 
