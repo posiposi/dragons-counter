@@ -20,10 +20,11 @@ describe('UserEntity', () => {
   });
 
   describe('カラム定義', () => {
-    it('idカラムがUUID型の主キーとして定義される', () => {
+    it('idカラムがvarchar(191)型の主キーとして定義される', () => {
       const idColumn = findColumn('id');
       expect(idColumn).toBeDefined();
-      expect(idColumn!.options.type).toBe('uuid');
+      expect(idColumn!.options.type).toBe('varchar');
+      expect(idColumn!.options.length).toBe(191);
       expect(idColumn!.mode).toBe('regular');
     });
 

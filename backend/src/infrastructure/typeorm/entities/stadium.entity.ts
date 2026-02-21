@@ -10,7 +10,7 @@ import { GameEntity } from './game.entity';
 
 @Entity('stadiums')
 export class StadiumEntity {
-  @PrimaryColumn({ type: 'uuid' })
+  @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 
   @Column({ type: 'varchar', unique: true })

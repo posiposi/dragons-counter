@@ -13,7 +13,7 @@ import { StadiumEntity } from './stadium.entity';
 
 @Entity('games')
 export class GameEntity {
-  @PrimaryColumn({ type: 'uuid' })
+  @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 
   @Column({ name: 'game_date', type: 'datetime' })

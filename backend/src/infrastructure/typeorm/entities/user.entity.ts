@@ -11,7 +11,7 @@ import { UserRegistrationRequestEntity } from './user-registration-request.entit
 
 @Entity('users')
 export class UserEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 
   @Column({ type: 'varchar', unique: true })

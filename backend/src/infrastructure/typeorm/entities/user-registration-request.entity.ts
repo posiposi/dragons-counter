@@ -12,7 +12,7 @@ import { UserEntity } from './user.entity';
 
 @Entity('user_registration_requests')
 export class UserRegistrationRequestEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 
   @Column({ name: 'user_id', type: 'uuid' })
