@@ -26,7 +26,7 @@ Dragons Counter（Dra Vincit）は中日ドラゴンズファン向けの野球�
 - **development-guidelines.md** - 開発ガイドライン
 - **glossary.md** - ユビキタス言語定義
 
-#### 実装リスト(`.claude/docs/implement-lists)
+#### 実装リスト(`.claude/docs/implement-lists`)
 
 大規模なプロジェクトタスクの場合はgithubにIssuesを細分化して作成しますが、その大本となるプロジェクト概要を保存するディレクトリです。
 ユーザーからプロジェクトファイル作成の指示がある場合、下記定義に従って各タスクプロジェクトを保存するファイルを作成して、概要および詳細仕様を記述します。
