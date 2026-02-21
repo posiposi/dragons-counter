@@ -52,8 +52,24 @@ describe('createDataSourceOptions', () => {
     expect(options.logging).toBe(false);
   });
 
-  it('不正なURLの場合にエラーをスローする', () => {
-    expect(() => createDataSourceOptions('')).toThrow();
-    expect(() => createDataSourceOptions('invalid-url')).toThrow();
+  it('空文字列の場合にエラーをスローする', () => {
+    expect(() => createDataSourceOptions('')).toThrow(
+      'DATABASE_URL is required',
+    );
+  });
+
+  it('不正なURLの場合に認証情報を含まないエラーメッセージをスローする', () => {
+    const invalidUrl = 'not-a-valid-url-with-secret';
+
+    let thrownError: Error | undefined;
+    try {
+      createDataSourceOptions(invalidUrl);
+    } catch (error) {
+      thrownError = error as Error;
+    }
+
+    expect(thrownError).toBeDefined();
+    expect(thrownError!.message).toBe('Invalid DATABASE_URL format');
+    expect(thrownError!.message).not.toContain(invalidUrl);
   });
 });

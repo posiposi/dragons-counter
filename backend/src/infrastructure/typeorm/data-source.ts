@@ -11,7 +11,7 @@ function parseUrl(databaseUrl: string): URL {
   try {
     return new URL(databaseUrl);
   } catch {
-    throw new Error(`Invalid DATABASE_URL: ${databaseUrl}`);
+    throw new Error('Invalid DATABASE_URL format');
   }
 }
 
