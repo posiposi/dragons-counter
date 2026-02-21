@@ -44,10 +44,10 @@ describe('UserRegistrationRequestEntity', () => {
       );
     });
 
-    it('reasonForRejectionカラムがreason_for_rejectionにマッピングされnullableである', () => {
+    it('reasonForRejectionカラムがカラム名マッピングなしでnullableとして定義される', () => {
       const reasonColumn = findColumn('reasonForRejection');
       expect(reasonColumn).toBeDefined();
-      expect(reasonColumn!.options.name).toBe('reason_for_rejection');
+      expect(reasonColumn!.options.name).toBeUndefined();
       expect(reasonColumn!.options.type).toBe('varchar');
       expect(reasonColumn!.options.nullable).toBe(true);
     });
