@@ -24,7 +24,7 @@ TypeORMパッケージの導入とNestJSモジュール設定、および全テ�
 - `tsconfig.json`で`emitDecoratorMetadata`と`experimentalDecorators`の有効化を確認
 - TypeORM DataSource設定ファイル（`data-source.ts`）の作成
   - type: "mysql", host/port/username/password/database を環境変数から取得
-  - entities, migrations, synchronize（開発:true/本番:false）, logging設定
+  - entities, migrations, synchronize: false（全環境共通。Prisma並行動作期間中はマイグレーション競合を防ぐためfalse固定）, logging設定
 - `TypeOrmModule.forRoot()`による`app.module.ts`への組み込み
   - NestJS公式の`@nestjs/typeorm`インテグレーションを使用
 - TypeORMエンティティクラスの定義（`@Entity`, `@Column`, `@PrimaryColumn`等のデコレータ使用）
