@@ -94,13 +94,13 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 #### gitコマンド実行
 
-- テストおよびlintをPASSした場合はコミット行う
+- テストおよびlint、ユーザーのレビューをPASSした場合はコミットを行う
   - タスク単位で`git add`および`git commit`を行うこと
 - `git commit`完了後に別のコミット単位でのタスクがある場合は**`tdd-implementer`** サブエージェント起動に戻り実装を継続する
 
 ## Phase 4: 実装レビュー
 
-**`code-reviewer`** サブエージェントを起動する。
+Phase 3までの全タスクを消化した段階で、**`code-reviewer`** サブエージェントを起動する。
 
 - 完了済み実装タスクの変更内容をレビューする
 - レビュー結果をTaskUpdateでmetadataに記録する
