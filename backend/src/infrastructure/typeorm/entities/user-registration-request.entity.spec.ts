@@ -30,10 +30,12 @@ describe('UserRegistrationRequestEntity', () => {
       expect(idColumn!.mode).toBe('regular');
     });
 
-    it('userIdカラムがuser_idにマッピングされる', () => {
+    it('userIdカラムがuser_idにマッピングされvarchar(191)型である', () => {
       const userIdColumn = findColumn('userId');
       expect(userIdColumn).toBeDefined();
       expect(userIdColumn!.options.name).toBe('user_id');
+      expect(userIdColumn!.options.type).toBe('varchar');
+      expect(userIdColumn!.options.length).toBe(191);
     });
 
     it('statusカラムがenum型でRegistrationStatusEnumを使用し、デフォルト値がPENDINGである', () => {

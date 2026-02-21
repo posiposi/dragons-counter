@@ -15,7 +15,7 @@ export class UserRegistrationRequestEntity {
   @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 
-  @Column({ name: 'user_id', type: 'uuid' })
+  @Column({ name: 'user_id', type: 'varchar', length: 191 })
   userId: string;
 
   @ManyToOne(() => UserEntity, (user) => user.registrationRequests)
