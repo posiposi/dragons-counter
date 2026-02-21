@@ -26,9 +26,10 @@ Dragons Counter（Dra Vincit）は中日ドラゴンズファン向けの野球�
 - **development-guidelines.md** - 開発ガイドライン
 - **glossary.md** - ユビキタス言語定義
 
-#### 実装リスト(`.claude/docs/implement-lists`)
+### 実装タスクリスト(`.claude/tmp/implement-lists`)
 
 大規模なプロジェクトタスクの場合はgithubにIssuesを細分化して作成しますが、その大本となるプロジェクト概要を保存するディレクトリです。
+セッション固有の一時的な作業ファイルとして扱うため、永続ドキュメント(`.claude/docs`)とは分離して配置しています。
 ユーザーからプロジェクトファイル作成の指示がある場合、下記定義に従って各タスクプロジェクトを保存するファイルを作成して、概要および詳細仕様を記述します。
 
 **ファイル命名規則**
@@ -189,6 +190,8 @@ docker compose exec backend npm run test -- /src/domain/value-objects/stadium-na
 │       └── SKILL.md             # worktree並列開発スキル
 ├── commands/
 │   └── issue-to-pr.md           # ワークフロー起動コマンド
+├── tmp/
+│   └── implement-lists/         # 実装タスクリスト（一時作業ファイル）
 └── docs/
     ├── product-reuirements.md
     ├── functional-design.md
