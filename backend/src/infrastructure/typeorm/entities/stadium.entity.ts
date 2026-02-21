@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { GameEntity } from './game.entity';
 
 @Entity('stadiums')
 export class StadiumEntity {
@@ -20,5 +22,6 @@ export class StadiumEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  // OneToMany リレーション（GameEntity）は後続タスク #131 で追加する
+  @OneToMany(() => GameEntity, (game) => game.stadium)
+  games: GameEntity[];
 }
