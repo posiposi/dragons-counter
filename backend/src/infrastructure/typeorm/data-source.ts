@@ -1,5 +1,11 @@
 import { DataSource } from 'typeorm';
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import {
+  GameEntity,
+  StadiumEntity,
+  UserEntity,
+  UserRegistrationRequestEntity,
+} from './entities';
 
 function parseUrl(databaseUrl: string): URL {
   try {
@@ -25,7 +31,12 @@ export function createDataSourceOptions(
     username: decodeURIComponent(parsed.username),
     password: decodeURIComponent(parsed.password),
     database: parsed.pathname.replace(/^\//, ''),
-    entities: [],
+    entities: [
+      GameEntity,
+      StadiumEntity,
+      UserEntity,
+      UserRegistrationRequestEntity,
+    ],
     synchronize: false,
     logging: false,
   };

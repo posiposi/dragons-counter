@@ -1,4 +1,10 @@
 import { createDataSourceOptions } from './data-source';
+import {
+  GameEntity,
+  StadiumEntity,
+  UserEntity,
+  UserRegistrationRequestEntity,
+} from './entities';
 
 describe('createDataSourceOptions', () => {
   const url = 'mysql://dragons_user:dragons_password@db:3306/dragons_counter';
@@ -20,10 +26,15 @@ describe('createDataSourceOptions', () => {
     expect(options.synchronize).toBe(false);
   });
 
-  it('entitiesが空配列で設定される', () => {
+  it('entitiesに全エンティティが登録される', () => {
     const options = createDataSourceOptions(url);
 
-    expect(options.entities).toEqual([]);
+    expect(options.entities).toEqual([
+      GameEntity,
+      StadiumEntity,
+      UserEntity,
+      UserRegistrationRequestEntity,
+    ]);
   });
 
   it('テスト用DATABASE_URLをパースできる', () => {
