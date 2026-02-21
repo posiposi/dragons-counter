@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { GetGamesController } from './controllers/get-games.controller';
 import { DeleteGameController } from './controllers/delete-game.controller';
 import { BulkCreateGameController } from './controllers/bulk-create-game.controller';
@@ -8,8 +9,11 @@ import { BulkCreateGameUsecase } from '../domain/usecases/bulk-create-game.useca
 import { GameAdapter } from '../infrastructure/adapters/game.adapter';
 import { BulkCreateGameAdapter } from '../infrastructure/adapters/bulk-create-game.adapter';
 import { FindGameByDateAdapter } from '../infrastructure/adapters/find-game-by-date.adapter';
+import { GameEntity } from '../infrastructure/typeorm/entities/game.entity';
+import { StadiumEntity } from '../infrastructure/typeorm/entities/stadium.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([GameEntity, StadiumEntity])],
   controllers: [
     GetGamesController,
     DeleteGameController,
