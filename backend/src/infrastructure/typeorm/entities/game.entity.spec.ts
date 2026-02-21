@@ -39,12 +39,13 @@ describe('GameEntity', () => {
       expect(generatedColumns).toHaveLength(0);
     });
 
-    it('gameDateカラムがgame_dateにマッピングされる', () => {
+    it('gameDateカラムがgame_dateにマッピングされprecision:3で定義される', () => {
       const gameDateColumn = findColumn('gameDate');
 
       expect(gameDateColumn).toBeDefined();
       expect(gameDateColumn!.options.name).toBe('game_date');
       expect(gameDateColumn!.options.type).toBe('datetime');
+      expect(gameDateColumn!.options.precision).toBe(3);
     });
 
     it('opponentカラムがvarchar型で定義される', () => {

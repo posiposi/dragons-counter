@@ -16,7 +16,7 @@ export class GameEntity {
   @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 
-  @Column({ name: 'game_date', type: 'datetime' })
+  @Column({ name: 'game_date', type: 'datetime', precision: 3 })
   gameDate: Date;
 
   @Column({ type: 'varchar' })
