@@ -26,6 +26,7 @@ describe('UserRegistrationRequestEntity', () => {
       expect(idColumn).toBeDefined();
       expect(idColumn!.options.type).toBe('varchar');
       expect(idColumn!.options.length).toBe(191);
+      expect(idColumn!.options.primary).toBe(true);
       expect(idColumn!.mode).toBe('regular');
     });
 
