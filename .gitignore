@@ -7,6 +7,7 @@ certs/
 .claude/settings.local.json
 .claude/hooks/local/
 .claude/commands/local/
+.claude/docs/implement-lists/
 .claude/logs/
 .claude/*.log
 .claude/audit-*.log
