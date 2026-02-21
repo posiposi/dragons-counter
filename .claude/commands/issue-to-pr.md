@@ -94,7 +94,7 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 #### gitコマンド実行
 
-- テストおよびlint、ユーザーのレビューをPASSした場合はコミット行う
+- テストおよびlint、ユーザーのレビューをPASSした場合はコミットを行う
   - タスク単位で`git add`および`git commit`を行うこと
 - `git commit`完了後に別のコミット単位でのタスクがある場合は**`tdd-implementer`** サブエージェント起動に戻り実装を継続する
 
