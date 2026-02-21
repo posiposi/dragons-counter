@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserRoleEnum } from '../enums/user-role.enum';
+import { UserRegistrationRequestEntity } from './user-registration-request.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -26,4 +28,7 @@ export class UserEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => UserRegistrationRequestEntity, (req) => req.user)
+  registrationRequests: UserRegistrationRequestEntity[];
 }
