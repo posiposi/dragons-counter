@@ -377,60 +377,21 @@ export class EmailAlreadyExistsException extends DomainException {
 
 # Adapter層コード例
 
-## Command Adapter
+## Mapper
+
+Mapperはドメインオブジェクトと永続化モデル間の変換ロジックを集約する。Command AdapterとQuery Adapterの両方から利用し、マッピングの重複を排除する。
 
 ```typescript
-// src/infrastructure/adapters/command/user-command-adapter.ts
+// src/infrastructure/adapters/mappers/user.mapper.ts
 
-import { Injectable } from "@nestjs/common";
-import { PrismaClient, User as PrismaUser } from "@prisma/client";
-import { UserCommandPort } from "../../../domain/ports/command/user-command-port";
 import { User } from "../../../domain/entities/user";
 import { UserId } from "../../../domain/value-objects/user-id";
 import { Email } from "../../../domain/value-objects/email";
 import { HashedPassword } from "../../../domain/value-objects/hashed-password";
+import { UserEntity } from "../../typeorm/entities/user.entity";
 
-@Injectable()
-export class UserCommandAdapter implements UserCommandPort {
-  constructor(private readonly prisma: PrismaClient) {}
-
-  async save(user: User): Promise<void> {
-    await this.prisma.user.upsert({
-      where: { id: user.id.value },
-      update: {
-        email: user.email.value,
-        hashedPassword: user.hashedPassword.value,
-        updatedAt: user.updatedAt,
-      },
-      create: {
-        id: user.id.value,
-        email: user.email.value,
-        hashedPassword: user.hashedPassword.value,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    });
-  }
-
-  async findById(id: UserId): Promise<User | null> {
-    const record = await this.prisma.user.findUnique({
-      where: { id: id.value },
-    });
-
-    if (!record) {
-      return null;
-    }
-
-    return this.toDomainEntity(record);
-  }
-
-  async delete(id: UserId): Promise<void> {
-    await this.prisma.user.delete({
-      where: { id: id.value },
-    });
-  }
-
-  private toDomainEntity(data: PrismaUser): User {
+export class UserMapper {
+  static toDomainEntity(data: UserEntity): User {
     return User.reconstruct({
       id: UserId.reconstruct(data.id),
       email: Email.create(data.email),
@@ -438,6 +399,102 @@ export class UserCommandAdapter implements UserCommandPort {
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });
+  }
+
+  static toPersistence(user: User): Partial<UserEntity> {
+    return {
+      id: user.id.value,
+      email: user.email.value,
+      hashedPassword: user.hashedPassword.value,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+}
+```
+
+enum変換が必要な場合は、Mapperクラスに静的メソッドとして追加する:
+
+```typescript
+// enum変換の例（ドメインenum ↔ 永続化enum）
+
+import { RegistrationStatus, RegistrationStatusType } from "../../../domain/enums/registration-status";
+import { RegistrationStatusEnum } from "../../typeorm/enums/registration-status.enum";
+
+export class UserMapper {
+  // ... toDomainEntity, toPersistence ...
+
+  static toRegistrationStatusEnum(status: RegistrationStatusType): RegistrationStatusEnum {
+    const map: Record<string, RegistrationStatusEnum> = {
+      [RegistrationStatus.PENDING]: RegistrationStatusEnum.PENDING,
+      [RegistrationStatus.APPROVED]: RegistrationStatusEnum.APPROVED,
+    };
+    const result = map[status];
+    if (!result) {
+      throw new Error(`Unknown RegistrationStatus: ${status}`);
+    }
+    return result;
+  }
+
+  static fromRegistrationStatusEnum(status: RegistrationStatusEnum): RegistrationStatusType {
+    const map: Record<string, RegistrationStatusType> = {
+      [RegistrationStatusEnum.PENDING]: RegistrationStatus.PENDING,
+      [RegistrationStatusEnum.APPROVED]: RegistrationStatus.APPROVED,
+    };
+    const result = map[status];
+    if (!result) {
+      throw new Error(`Unknown RegistrationStatusEnum: ${status}`);
+    }
+    return result;
+  }
+}
+```
+
+## Command Adapter
+
+Mapperに変換を委譲し、Adapter自体はデータアクセスとトランザクション制御に集中する。
+
+```typescript
+// src/infrastructure/adapters/command/user-command-adapter.ts
+
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, DataSource } from "typeorm";
+import { UserCommandPort } from "../../../domain/ports/command/user-command-port";
+import { User } from "../../../domain/entities/user";
+import { UserId } from "../../../domain/value-objects/user-id";
+import { UserEntity } from "../../typeorm/entities/user.entity";
+import { UserMapper } from "../mappers/user.mapper";
+
+@Injectable()
+export class UserCommandAdapter implements UserCommandPort {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly dataSource: DataSource,
+  ) {}
+
+  async save(user: User): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const entity = this.userRepository.create(UserMapper.toPersistence(user));
+      await manager.save(UserEntity, entity);
+    });
+  }
+
+  async findById(id: UserId): Promise<User | null> {
+    const record = await this.userRepository.findOne({
+      where: { id: id.value },
+    });
+
+    if (!record) {
+      return null;
+    }
+
+    return UserMapper.toDomainEntity(record);
+  }
+
+  async delete(id: UserId): Promise<void> {
+    await this.userRepository.delete({ id: id.value });
   }
 }
 ```
@@ -448,20 +505,21 @@ export class UserCommandAdapter implements UserCommandPort {
 // src/infrastructure/adapters/query/user-query-adapter.ts
 
 import { Injectable } from "@nestjs/common";
-import { PrismaClient, User as PrismaUser } from "@prisma/client";
-import {
-  UserQueryPort,
-  UserDto,
-  UserListQueryParams,
-  PaginatedResult,
-} from "../../../domain/ports/query/user-query-port";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { UserQueryPort, UserDto } from "../../../domain/ports/query/user-query-port";
+import { UserEntity } from "../../typeorm/entities/user.entity";
+import { UserMapper } from "../mappers/user.mapper";
 
 @Injectable()
 export class UserQueryAdapter implements UserQueryPort {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
 
   async findById(id: string): Promise<UserDto | null> {
-    const record = await this.prisma.user.findUnique({
+    const record = await this.userRepository.findOne({
       where: { id },
     });
 
@@ -469,11 +527,11 @@ export class UserQueryAdapter implements UserQueryPort {
       return null;
     }
 
-    return this.toDto(record);
+    return UserMapper.toDto(record);
   }
 
   async findByEmail(email: string): Promise<UserDto | null> {
-    const record = await this.prisma.user.findUnique({
+    const record = await this.userRepository.findOne({
       where: { email },
     });
 
@@ -481,45 +539,7 @@ export class UserQueryAdapter implements UserQueryPort {
       return null;
     }
 
-    return this.toDto(record);
-  }
-
-  async findAll(params: UserListQueryParams): Promise<PaginatedResult<UserDto>> {
-    const { page, limit, sortBy = "createdAt", sortOrder = "desc" } = params;
-    const skip = (page - 1) * limit;
-
-    const [records, total] = await Promise.all([
-      this.prisma.user.findMany({
-        skip,
-        take: limit,
-        orderBy: { [sortBy]: sortOrder },
-      }),
-      this.prisma.user.count(),
-    ]);
-
-    return {
-      items: records.map((record) => this.toDto(record)),
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  }
-
-  async existsByEmail(email: string): Promise<boolean> {
-    const count = await this.prisma.user.count({
-      where: { email },
-    });
-    return count > 0;
-  }
-
-  private toDto(data: PrismaUser): UserDto {
-    return {
-      id: data.id,
-      email: data.email,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    };
+    return UserMapper.toDto(record);
   }
 }
 ```
