@@ -17,7 +17,7 @@ echo "Starting application..."
 echo "Waiting for containers to be ready..."
 sleep 30
 
-echo "Running database schema sync..."
-/usr/local/bin/docker-compose exec -T backend npx typeorm schema:sync -d dist/infrastructure/typeorm/data-source.js
+echo "Running database migrations..."
+/usr/local/bin/docker-compose exec -T backend npx typeorm migration:run -d dist/infrastructure/typeorm/data-source.js
 
 echo "=== ApplicationStart completed at $(date) ==="

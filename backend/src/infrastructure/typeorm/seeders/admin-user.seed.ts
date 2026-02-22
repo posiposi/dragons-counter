@@ -51,5 +51,5 @@ export async function seedAdminUser(dataSource: DataSource): Promise<void> {
     await manager.save(registrationRequest);
   });
 
-  console.log(`Admin user created: ${adminEmail}`);
+  console.log('Admin user created successfully.');
 }

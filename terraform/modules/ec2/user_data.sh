@@ -65,10 +65,10 @@ docker-compose up -d
 echo "Waiting for backend container to be ready..."
 sleep 30
 
-echo "Running database schema sync..."
-docker-compose exec -T backend npx typeorm schema:sync -d dist/infrastructure/typeorm/data-source.js
+echo "Running database migrations..."
+docker-compose exec -T backend npx typeorm migration:run -d dist/infrastructure/typeorm/data-source.js
 
-echo "Database schema sync completed"
+echo "Database migrations completed"
 
 cat > /etc/systemd/system/dragons-counter.service << 'SERVICEEOF'
 [Unit]
