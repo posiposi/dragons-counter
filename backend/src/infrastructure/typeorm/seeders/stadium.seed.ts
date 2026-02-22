@@ -32,16 +32,20 @@ export async function seedStadiums(dataSource: DataSource): Promise<void> {
 
   const now = new Date();
 
-  for (const stadium of stadiumsData) {
-    await repository
-      .createQueryBuilder()
-      .insert()
-      .into(StadiumEntity)
-      .values({ ...stadium, createdAt: now, updatedAt: now })
-      .orUpdate(['name', 'updated_at'], ['id'])
-      .execute();
-    console.log(`Upserted stadium: ${stadium.name}`);
-  }
+  await repository
+    .createQueryBuilder()
+    .insert()
+    .into(StadiumEntity)
+    .values(
+      stadiumsData.map((stadium) => ({
+        ...stadium,
+        createdAt: now,
+        updatedAt: now,
+      })),
+    )
+    .orUpdate(['name', 'updated_at'], ['id'])
+    .execute();
+  console.log(`Upserted ${stadiumsData.length} stadiums.`);
 
   console.log('Stadiums seeding finished.');
 }
