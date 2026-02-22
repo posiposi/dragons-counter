@@ -170,11 +170,16 @@ describe('UserCommandAdapter 統合テスト', () => {
     adapter = module.get<UserCommandAdapter>(UserCommandAdapter);
   });
 
-  afterEach(async () => {
+  const cleanupTestData = async () => {
+    const subQuery = userRepository
+      .createQueryBuilder('u')
+      .select('u.id')
+      .where('u.email LIKE :pattern')
+      .getQuery();
     await registrationRequestRepository
       .createQueryBuilder()
       .delete()
-      .where('userId IN (SELECT id FROM users WHERE email LIKE :pattern)', {
+      .where(`userId IN (${subQuery})`, {
         pattern: `${testEmailPrefix}%`,
       })
       .execute();
@@ -183,21 +188,14 @@ describe('UserCommandAdapter 統合テスト', () => {
       .delete()
       .where('email LIKE :pattern', { pattern: `${testEmailPrefix}%` })
       .execute();
+  };
+
+  afterEach(async () => {
+    await cleanupTestData();
   });
 
   afterAll(async () => {
-    await registrationRequestRepository
-      .createQueryBuilder()
-      .delete()
-      .where('userId IN (SELECT id FROM users WHERE email LIKE :pattern)', {
-        pattern: `${testEmailPrefix}%`,
-      })
-      .execute();
-    await userRepository
-      .createQueryBuilder()
-      .delete()
-      .where('email LIKE :pattern', { pattern: `${testEmailPrefix}%` })
-      .execute();
+    await cleanupTestData();
     await module.close();
   });
 

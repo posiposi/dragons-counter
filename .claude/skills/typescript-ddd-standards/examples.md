@@ -410,6 +410,15 @@ export class UserMapper {
       updatedAt: user.updatedAt,
     };
   }
+
+  static toDto(data: UserEntity): UserDto {
+    return {
+      id: data.id,
+      email: data.email,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    };
+  }
 }
 ```
 
