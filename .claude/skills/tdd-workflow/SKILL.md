@@ -1,6 +1,6 @@
 ---
 name: tdd-workflow
-description: テスト駆動開発（TDD）のワークフロー定義。Red→Green→Refactorのサイクル手順、テストの書き方、DDD規約との統合方法を定義する。
+description: テスト駆動開発（TDD）のワークフロー定義。テスト実行はDockerコンテナ内で行う。Red→Green→Refactorのサイクル手順、テストの書き方、DDD規約との統合方法を定義する。テスト実装・実行時に使用する。
 user-invocable: false
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, TaskUpdate, TaskGet, TaskList
 ---

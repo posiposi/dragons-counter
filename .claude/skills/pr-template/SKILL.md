@@ -1,6 +1,6 @@
 ---
 name: pr-template
-description: Pull Request作成時のテンプレートとルールを定義するスキル。PRタイトル・本文の生成規則を提供する。
+description: Pull Request作成時のテンプレートとルールを定義するスキル。PRタイトル・本文の生成規則、Issue番号の扱い、GitHub MCP優先使用ルールを提供する。PR作成時に使用する。
 user-invocable: false
 allowed-tools: Read, Glob, Grep, Bash, TaskGet, TaskList
 ---
