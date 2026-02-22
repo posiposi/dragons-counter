@@ -1,71 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, QueryFailedError, DataSource } from 'typeorm';
+import { randomUUID } from 'crypto';
 import { UserCommandPort } from '../../domain/ports/user-command.port';
 import { User } from '../../domain/entities/user';
-import { UserId } from '../../domain/value-objects/user-id';
-import { Email } from '../../domain/value-objects/email';
-import { Password } from '../../domain/value-objects/password';
-import { RegistrationStatus } from '../../domain/enums/registration-status';
-import { UserRole } from '../../domain/enums/user-role';
 import { UserAlreadyExistsException } from '../../domain/exceptions/user-already-exists.exception';
+import { UserEntity } from '../typeorm/entities/user.entity';
+import { UserRegistrationRequestEntity } from '../typeorm/entities/user-registration-request.entity';
+import { UserMapper } from './mappers/user.mapper';
 
 @Injectable()
 export class UserCommandAdapter implements UserCommandPort {
-  constructor(private readonly prisma: PrismaClient) {}
-
-  async updateRegistrationStatus(user: User): Promise<User> {
-    await this.prisma.userRegistrationRequest.create({
-      data: {
-        userId: user.id.value,
-        status: RegistrationStatus.toPrisma(user.registrationStatus),
-      },
-    });
-
-    return user;
-  }
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(UserRegistrationRequestEntity)
+    private readonly registrationRequestRepository: Repository<UserRegistrationRequestEntity>,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async save(user: User): Promise<User> {
     try {
-      const savedUser = await this.prisma.user.upsert({
-        where: { id: user.id.value },
-        update: {
-          email: user.email.value,
-          password: user.password.hash,
-          role: UserRole.toPrisma(user.role),
-        },
-        create: {
-          id: user.id.value,
-          email: user.email.value,
-          password: user.password.hash,
-          role: UserRole.toPrisma(user.role),
-          registrationRequests: {
-            create: {
-              status: RegistrationStatus.toPrisma(user.registrationStatus),
-            },
-          },
-        },
-        include: {
-          registrationRequests: {
-            orderBy: { createdAt: 'desc' },
-            take: 1,
-          },
-        },
+      await this.dataSource.transaction(async (manager) => {
+        const userEntity = this.userRepository.create(
+          UserMapper.toPersistence(user),
+        );
+        await manager.save(UserEntity, userEntity);
+
+        const registrationRequestEntity =
+          this.registrationRequestRepository.create({
+            id: randomUUID(),
+            userId: user.id.value,
+            status: UserMapper.toRegistrationStatusEnum(
+              user.registrationStatus,
+            ),
+          });
+        await manager.save(
+          UserRegistrationRequestEntity,
+          registrationRequestEntity,
+        );
       });
 
-      const latestStatus = savedUser.registrationRequests[0]?.status;
+      const savedUser = await this.userRepository.findOne({
+        where: { id: user.id.value },
+        relations: { registrationRequests: true },
+        order: { registrationRequests: { createdAt: 'DESC' } },
+      });
 
-      return User.fromRepository(
-        UserId.create(savedUser.id),
-        Email.create(savedUser.email),
-        Password.fromHash(savedUser.password),
-        RegistrationStatus.fromPrisma(latestStatus),
-        UserRole.fromPrisma(savedUser.role),
-      );
+      if (!savedUser) {
+        throw new Error(`User not found after save: ${user.id.value}`);
+      }
+
+      return UserMapper.toDomainEntity(savedUser);
     } catch (error) {
       if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2002'
+        error instanceof QueryFailedError &&
+        (error.driverError as { code?: string }).code === 'ER_DUP_ENTRY'
       ) {
         throw new UserAlreadyExistsException(
           `User with email ${user.email.value} already exists`,
@@ -73,5 +63,18 @@ export class UserCommandAdapter implements UserCommandPort {
       }
       throw error;
     }
+  }
+
+  async updateRegistrationStatus(user: User): Promise<User> {
+    const registrationRequestEntity = this.registrationRequestRepository.create(
+      {
+        id: randomUUID(),
+        userId: user.id.value,
+        status: UserMapper.toRegistrationStatusEnum(user.registrationStatus),
+      },
+    );
+    await this.registrationRequestRepository.save(registrationRequestEntity);
+
+    return user;
   }
 }

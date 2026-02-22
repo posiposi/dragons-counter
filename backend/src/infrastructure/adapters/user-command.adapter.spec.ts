@@ -1,40 +1,87 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma/prisma.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import {
+  Repository,
+  QueryFailedError,
+  DataSource,
+  EntityManager,
+  Like,
+  In,
+} from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserCommandAdapter } from './user-command.adapter';
 import { User } from '../../domain/entities/user';
 import { Email } from '../../domain/value-objects/email';
 import { Password } from '../../domain/value-objects/password';
 import { RegistrationStatus } from '../../domain/enums/registration-status';
-import { PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UserAlreadyExistsException } from '../../domain/exceptions/user-already-exists.exception';
+import { UserEntity } from '../typeorm/entities/user.entity';
+import { UserRegistrationRequestEntity } from '../typeorm/entities/user-registration-request.entity';
+import { UserRoleEnum } from '../typeorm/enums/user-role.enum';
+import { RegistrationStatusEnum } from '../typeorm/enums/registration-status.enum';
+import { createDataSourceOptions } from '../typeorm/data-source';
 
-describe('UserCommandAdapter Unit Tests', () => {
+describe('UserCommandAdapter ユニットテスト', () => {
   let adapter: UserCommandAdapter;
-  let mockPrismaClient: { user: { upsert: jest.Mock } };
+  let mockUserRepository: {
+    create: jest.Mock;
+    save: jest.Mock;
+    findOne: jest.Mock;
+  };
+  let mockRegistrationRequestRepository: {
+    create: jest.Mock;
+    save: jest.Mock;
+  };
+  let mockDataSource: {
+    transaction: jest.Mock;
+  };
 
   beforeEach(() => {
-    mockPrismaClient = {
-      user: {
-        upsert: jest.fn(),
-      },
+    mockUserRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+      findOne: jest.fn(),
+    };
+    mockRegistrationRequestRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+    };
+    mockDataSource = {
+      transaction: jest.fn(),
     };
     adapter = new UserCommandAdapter(
-      mockPrismaClient as unknown as PrismaClient,
+      mockUserRepository as unknown as Repository<UserEntity>,
+      mockRegistrationRequestRepository as unknown as Repository<UserRegistrationRequestEntity>,
+      mockDataSource as unknown as DataSource,
     );
   });
 
   describe('save', () => {
-    it('should throw UserAlreadyExistsException when P2002 error occurs', async () => {
+    it('ER_DUP_ENTRYエラー時にUserAlreadyExistsExceptionをスローする', async () => {
       const email = Email.create('duplicate@example.com');
       const password = await Password.fromPlainText('password123');
       const user = User.createNew(email, password);
 
-      mockPrismaClient.user.upsert.mockRejectedValue(
-        new PrismaClientKnownRequestError('Unique constraint failed', {
-          code: 'P2002',
-          clientVersion: '5.0.0',
-        }),
+      const queryFailedError = new QueryFailedError(
+        'INSERT INTO users',
+        [],
+        new Error('ER_DUP_ENTRY'),
+      );
+      (
+        queryFailedError as unknown as { driverError: { code: string } }
+      ).driverError = {
+        code: 'ER_DUP_ENTRY',
+      };
+
+      mockUserRepository.create.mockReturnValue({});
+      mockRegistrationRequestRepository.create.mockReturnValue({});
+      mockDataSource.transaction.mockImplementation(
+        async (cb: (manager: EntityManager) => Promise<void>) => {
+          const mockManager = {
+            save: jest.fn().mockRejectedValue(queryFailedError),
+          };
+          await cb(mockManager as unknown as EntityManager);
+        },
       );
 
       await expect(adapter.save(user)).rejects.toThrow(
@@ -42,77 +89,121 @@ describe('UserCommandAdapter Unit Tests', () => {
       );
     });
 
-    it('should rethrow non-P2002 PrismaClientKnownRequestError as-is', async () => {
+    it('ER_DUP_ENTRY以外のQueryFailedErrorはそのまま再スローする', async () => {
       const email = Email.create('error@example.com');
       const password = await Password.fromPlainText('password123');
       const user = User.createNew(email, password);
 
-      const originalError = new PrismaClientKnownRequestError(
-        'Foreign key constraint failed',
-        {
-          code: 'P2003',
-          clientVersion: '5.0.0',
+      const originalError = new QueryFailedError(
+        'INSERT INTO users',
+        [],
+        new Error('OTHER_ERROR'),
+      );
+      (
+        originalError as unknown as { driverError: { code: string } }
+      ).driverError = {
+        code: 'OTHER_ERROR',
+      };
+
+      mockUserRepository.create.mockReturnValue({});
+      mockRegistrationRequestRepository.create.mockReturnValue({});
+      mockDataSource.transaction.mockImplementation(
+        async (cb: (manager: EntityManager) => Promise<void>) => {
+          const mockManager = {
+            save: jest.fn().mockRejectedValue(originalError),
+          };
+          await cb(mockManager as unknown as EntityManager);
         },
       );
-      mockPrismaClient.user.upsert.mockRejectedValue(originalError);
 
       await expect(adapter.save(user)).rejects.toThrow(originalError);
     });
 
-    it('should rethrow unexpected errors as-is', async () => {
+    it('予期しないエラーはそのまま再スローする', async () => {
       const email = Email.create('unexpected@example.com');
       const password = await Password.fromPlainText('password123');
       const user = User.createNew(email, password);
 
       const originalError = new Error('Connection lost');
-      mockPrismaClient.user.upsert.mockRejectedValue(originalError);
+
+      mockUserRepository.create.mockReturnValue({});
+      mockRegistrationRequestRepository.create.mockReturnValue({});
+      mockDataSource.transaction.mockImplementation(
+        async (cb: (manager: EntityManager) => Promise<void>) => {
+          const mockManager = {
+            save: jest.fn().mockRejectedValue(originalError),
+          };
+          await cb(mockManager as unknown as EntityManager);
+        },
+      );
 
       await expect(adapter.save(user)).rejects.toThrow(originalError);
     });
   });
 });
 
-describe('UserCommandAdapter Integration Tests', () => {
-  let prismaService: PrismaService;
+describe('UserCommandAdapter 統合テスト', () => {
   let module: TestingModule;
+  let userRepository: Repository<UserEntity>;
+  let registrationRequestRepository: Repository<UserRegistrationRequestEntity>;
   let adapter: UserCommandAdapter;
+  let dataSource: DataSource;
 
-  // テスト固有のメールアドレス（他テストスイートとの競合防止）
-  const testEmails = ['test-command@example.com', 'hash-test@example.com'];
+  const testEmailPrefix = 'user-cmd-adapter-';
 
   beforeAll(async () => {
+    const dataSourceOptions = createDataSourceOptions(
+      process.env.DATABASE_URL ?? '',
+    );
+
     module = await Test.createTestingModule({
-      providers: [
-        UserCommandAdapter,
-        PrismaService,
-        {
-          provide: PrismaClient,
-          useExisting: PrismaService,
-        },
+      imports: [
+        TypeOrmModule.forRoot(dataSourceOptions),
+        TypeOrmModule.forFeature([UserEntity, UserRegistrationRequestEntity]),
       ],
+      providers: [UserCommandAdapter],
     }).compile();
 
-    prismaService = module.get<PrismaService>(PrismaService);
+    userRepository = module.get<Repository<UserEntity>>(
+      getRepositoryToken(UserEntity),
+    );
+    registrationRequestRepository = module.get<
+      Repository<UserRegistrationRequestEntity>
+    >(getRepositoryToken(UserRegistrationRequestEntity));
     adapter = module.get<UserCommandAdapter>(UserCommandAdapter);
+    dataSource = module.get<DataSource>(DataSource);
   });
 
+  const cleanupTestData = async () => {
+    await dataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(UserEntity);
+      const rrRepo = manager.getRepository(UserRegistrationRequestEntity);
+
+      const testUsers = await userRepo.find({
+        where: { email: Like(`${testEmailPrefix}%`) },
+        select: ['id'],
+      });
+      const userIds = testUsers.map((u) => u.id);
+
+      if (userIds.length > 0) {
+        await rrRepo.delete({ userId: In(userIds) });
+      }
+      await userRepo.delete({ email: Like(`${testEmailPrefix}%`) });
+    });
+  };
+
   afterEach(async () => {
-    await prismaService.userRegistrationRequest.deleteMany({
-      where: { user: { email: { in: testEmails } } },
-    });
-    await prismaService.user.deleteMany({
-      where: { email: { in: testEmails } },
-    });
+    await cleanupTestData();
   });
 
   afterAll(async () => {
-    await prismaService.$disconnect();
+    await cleanupTestData();
     await module.close();
   });
 
   describe('save', () => {
-    it('should save a new user with PENDING registration request', async () => {
-      const email = Email.create('test-command@example.com');
+    it('新規ユーザー保存時にPENDINGステータスの登録リクエストが作成される', async () => {
+      const email = Email.create(`${testEmailPrefix}save@example.com`);
       const password = await Password.fromPlainText('password123');
       const user = User.createNew(email, password);
 
@@ -120,32 +211,70 @@ describe('UserCommandAdapter Integration Tests', () => {
 
       expect(result).toBeInstanceOf(User);
       expect(result.id.value).toBe(user.id.value);
-      expect(result.email.value).toBe('test-command@example.com');
+      expect(result.email.value).toBe(`${testEmailPrefix}save@example.com`);
       expect(result.registrationStatus).toBe(RegistrationStatus.PENDING);
 
-      // DBに保存されていることを確認
-      const savedUser = await prismaService.user.findUnique({
+      const savedUser = await userRepository.findOne({
         where: { id: user.id.value },
-        include: { registrationRequests: true },
+        relations: ['registrationRequests'],
       });
       expect(savedUser).not.toBeNull();
-      expect(savedUser?.email).toBe('test-command@example.com');
+      expect(savedUser?.email).toBe(`${testEmailPrefix}save@example.com`);
       expect(savedUser?.registrationRequests).toHaveLength(1);
-      expect(savedUser?.registrationRequests[0].status).toBe('PENDING');
+      expect(savedUser?.registrationRequests[0].status).toBe(
+        RegistrationStatusEnum.PENDING,
+      );
     });
 
-    it('should save password as hashed value', async () => {
-      const email = Email.create('hash-test@example.com');
+    it('パスワードがハッシュ化された状態で保存される', async () => {
+      const email = Email.create(`${testEmailPrefix}hash@example.com`);
       const password = await Password.fromPlainText('password123');
       const user = User.createNew(email, password);
 
       await adapter.save(user);
 
-      const savedUser = await prismaService.user.findUnique({
+      const savedUser = await userRepository.findOne({
         where: { id: user.id.value },
       });
       expect(savedUser?.password).not.toBe('password123');
       expect(savedUser?.password).toBe(password.hash);
+    });
+
+    it('ユーザーロールが正しくマッピングされる', async () => {
+      const email = Email.create(`${testEmailPrefix}role@example.com`);
+      const password = await Password.fromPlainText('password123');
+      const user = User.createNew(email, password);
+
+      await adapter.save(user);
+
+      const savedUser = await userRepository.findOne({
+        where: { id: user.id.value },
+      });
+      expect(savedUser?.role).toBe(UserRoleEnum.USER);
+    });
+  });
+
+  describe('updateRegistrationStatus', () => {
+    it('更新されたステータスで新しい登録リクエストが保存される', async () => {
+      const email = Email.create(`${testEmailPrefix}status@example.com`);
+      const password = await Password.fromPlainText('password123');
+      const user = User.createNew(email, password);
+
+      const savedUser = await adapter.save(user);
+      const approvedUser = savedUser.approve();
+
+      const result = await adapter.updateRegistrationStatus(approvedUser);
+
+      expect(result).toBeInstanceOf(User);
+      expect(result.registrationStatus).toBe(RegistrationStatus.APPROVED);
+
+      const requests = await registrationRequestRepository.find({
+        where: { userId: user.id.value },
+      });
+      expect(requests).toHaveLength(2);
+      const statuses = requests.map((r) => r.status);
+      expect(statuses).toContain(RegistrationStatusEnum.APPROVED);
+      expect(statuses).toContain(RegistrationStatusEnum.PENDING);
     });
   });
 });

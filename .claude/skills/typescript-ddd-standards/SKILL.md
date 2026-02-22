@@ -201,7 +201,7 @@ Adapter層はドメイン層で定義されたPortインターフェースの具
 - ドメイン層のPortインターフェースを実装する
 - NestJSの`@Injectable()`デコレータを付与し、DIコンテナに登録する
 - 技術的な詳細（ORM、外部API等）をこの層に閉じ込める
-- ドメインオブジェクトと永続化モデル間のマッピングはAdapter内で行う
+- ドメインオブジェクトと永続化モデル間のマッピングは**Mapperクラス**に集約する
 
 ### Command Adapter
 
@@ -214,9 +214,7 @@ Adapter層はドメイン層で定義されたPortインターフェースの具
 #### 実装規則
 
 - 1つのCommand Portに対して1つのCommand Adapterを実装する
-- `toDomainEntity`メソッドで永続化モデルからドメインオブジェクトへ変換する
-- `toPersistence`メソッドでドメインオブジェクトから永続化モデルへ変換する（必要に応じて）
-- マッピングメソッドは`private`とし、Adapter内部でのみ使用する
+- ドメインオブジェクトと永続化モデル間の変換はMapperクラスに委譲する
 - `save`の実装ではUpsert（存在すれば更新、なければ作成）を使用する
 - トランザクションが必要な場合はAdapter内で制御する
 
@@ -236,8 +234,7 @@ Adapter層はドメイン層で定義されたPortインターフェースの具
 #### 実装規則
 
 - 1つのQuery Portに対して1つのQuery Adapterを実装する
-- `toDto`メソッドで永続化モデルからDTOへ変換する
-- ドメインオブジェクト（集約・エンティティ）を経由せず、直接DTOに変換する
+- 永続化モデルからの変換はMapperクラスに委譲する
 - パフォーマンスを考慮し、必要なカラムのみを取得するクエリを記述する
 - ページネーション等の共通処理はAdapter内で実装する
 
@@ -245,6 +242,29 @@ Adapter層はドメイン層で定義されたPortインターフェースの具
 
 - クラス名は`<集約ルート名>QueryAdapter`とする（例: `UserQueryAdapter`）
 - ファイル名はケバブケースで`<集約ルート名>-query-adapter.ts`とする
+
+### Mapper
+
+#### 定義と特徴
+
+- ドメインオブジェクトと永続化モデル（ORMエンティティ）間の変換ロジックを集約するクラス
+- Command AdapterとQuery Adapterの両方から利用され、マッピングロジックの重複を排除する
+- ステートレスな静的メソッドで構成する
+
+#### 実装規則
+
+- 集約ルートごとに1つのMapperクラスを定義する
+- すべてのメソッドは`static`とする（状態を持たない）
+- `toDomainEntity`: 永続化モデルからドメインオブジェクトへの変換
+- `toPersistence`: ドメインオブジェクトから永続化モデルへの変換
+- enum変換メソッド: ドメインenumと永続化enumの相互変換
+- 変換に失敗する場合（未知のenum値等）は明示的にエラーをスローする
+
+#### 命名規則
+
+- クラス名は`<集約ルート名>Mapper`とする（例: `UserMapper`、`GameMapper`）
+- ファイル名はケバブケースで`<集約ルート名>.mapper.ts`とする
+- 配置先: `src/infrastructure/adapters/mappers/`
 
 ### ドメインサービス Adapter
 
@@ -282,8 +302,9 @@ src/infrastructure/
 ├── adapters/
 │   ├── command/            # Command Adapter
 │   ├── query/              # Query Adapter
+│   ├── mappers/            # Mapper（ドメイン⇔永続化モデル変換）
 │   └── services/           # ドメインサービスAdapter
-└── prisma/                 # Prismaクライアント設定
+└── typeorm/                # TypeORMエンティティ・設定
 ```
 
 ---
