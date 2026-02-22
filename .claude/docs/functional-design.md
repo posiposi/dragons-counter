@@ -44,7 +44,7 @@ src/
 │   └── *.module.ts       # NestJSモジュール定義
 ├── infrastructure/       # インフラストラクチャ層
 │   ├── adapters/         # ポートの実装
-│   └── prisma/           # Prismaクライアント
+│   └── typeorm/           # TypeORM設定・エンティティ
 └── main.ts               # エントリーポイント
 ```
 

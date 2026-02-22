@@ -40,7 +40,7 @@ describe('[テスト対象クラス名]', () => {
 | ドメイン層 | 値オブジェクト、エンティティ、集約 | なし（純粋なロジック） |
 | UseCase層 | UseCase | Port（Command/Query） |
 | Controller層 | Controller | UseCase |
-| Adapter層 | Adapter | Prisma Client |
+| Adapter層 | Adapter | TypeORM Repository |
 
 ### 2. Green フェーズ（最小限の実装）
 

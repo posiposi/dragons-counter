@@ -32,7 +32,7 @@ TaskGetで仕様取得タスクのdescription/metadataからIssue仕様を読み
 
 - 変更対象ファイルの依存関係を調査する
 - インポート元・インポート先を追跡する
-- データベーススキーマ（Prisma schema）の確認が必要か判断する
+- データベーススキーマ（TypeORMエンティティ）の確認が必要か判断する
 
 ### 4. 技術的制約の確認
 
@@ -50,8 +50,8 @@ TaskUpdateで自身のタスクに調査結果を記録する：
 ```json
 {
   "code_investigation": {
-    "related_files": [{"path": "...", "summary": "..."}],
-    "patterns": [{"name": "...", "description": "...", "reference": "..."}],
+    "related_files": [{ "path": "...", "summary": "..." }],
+    "patterns": [{ "name": "...", "description": "...", "reference": "..." }],
     "impact_scope": ["影響を受けるファイルやモジュール"],
     "constraints": ["技術的制約"]
   }

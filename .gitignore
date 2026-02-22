@@ -10,6 +10,7 @@ certs/
 .claude/logs/
 .claude/*.log
 .claude/audit-*.log
+.claude/tmp/
 **/.terraform/*
 *.tfstate
 *.tfstate.*
