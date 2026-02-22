@@ -17,7 +17,8 @@
     "test:watch": "dotenv -e .env.test -o -- jest --watch",
     "test:cov": "dotenv -e .env.test -o -- jest --coverage",
     "test:debug": "dotenv -e .env.test -o -- node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "dotenv -e .env.test -o -- jest --config ./test/jest-e2e.json"
+    "test:e2e": "dotenv -e .env.test -o -- jest --config ./test/jest-e2e.json",
+    "seed": "ts-node src/infrastructure/typeorm/seeders/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.987.0",
