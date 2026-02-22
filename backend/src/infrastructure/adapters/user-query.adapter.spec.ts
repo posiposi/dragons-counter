@@ -132,16 +132,15 @@ describe('UserQueryAdapter 統合テスト', () => {
         id: randomUUID(),
         userId: testUserId,
         status: RegistrationStatusEnum.APPROVED,
+        createdAt: new Date('2025-01-01T00:00:00Z'),
       });
       await registrationRequestRepository.save(olderRequest);
-
-      // 少し待ってからcreatedAtが新しいレコードを作成する
-      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const newerRequest = registrationRequestRepository.create({
         id: randomUUID(),
         userId: testUserId,
         status: RegistrationStatusEnum.REJECTED,
+        createdAt: new Date('2025-06-01T00:00:00Z'),
       });
       await registrationRequestRepository.save(newerRequest);
 

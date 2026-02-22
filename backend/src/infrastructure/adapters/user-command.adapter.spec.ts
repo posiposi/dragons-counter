@@ -1,6 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Repository, QueryFailedError } from 'typeorm';
+import {
+  Repository,
+  QueryFailedError,
+  DataSource,
+  EntityManager,
+} from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserCommandAdapter } from './user-command.adapter';
 import { User } from '../../domain/entities/user';
@@ -25,6 +30,9 @@ describe('UserCommandAdapter ユニットテスト', () => {
     create: jest.Mock;
     save: jest.Mock;
   };
+  let mockDataSource: {
+    transaction: jest.Mock;
+  };
 
   beforeEach(() => {
     mockUserRepository = {
@@ -36,9 +44,13 @@ describe('UserCommandAdapter ユニットテスト', () => {
       create: jest.fn(),
       save: jest.fn(),
     };
+    mockDataSource = {
+      transaction: jest.fn(),
+    };
     adapter = new UserCommandAdapter(
       mockUserRepository as unknown as Repository<UserEntity>,
       mockRegistrationRequestRepository as unknown as Repository<UserRegistrationRequestEntity>,
+      mockDataSource as unknown as DataSource,
     );
   });
 
@@ -60,7 +72,15 @@ describe('UserCommandAdapter ユニットテスト', () => {
       };
 
       mockUserRepository.create.mockReturnValue({});
-      mockUserRepository.save.mockRejectedValue(queryFailedError);
+      mockRegistrationRequestRepository.create.mockReturnValue({});
+      mockDataSource.transaction.mockImplementation(
+        async (cb: (manager: EntityManager) => Promise<void>) => {
+          const mockManager = {
+            save: jest.fn().mockRejectedValue(queryFailedError),
+          };
+          await cb(mockManager as unknown as EntityManager);
+        },
+      );
 
       await expect(adapter.save(user)).rejects.toThrow(
         UserAlreadyExistsException,
@@ -84,7 +104,15 @@ describe('UserCommandAdapter ユニットテスト', () => {
       };
 
       mockUserRepository.create.mockReturnValue({});
-      mockUserRepository.save.mockRejectedValue(originalError);
+      mockRegistrationRequestRepository.create.mockReturnValue({});
+      mockDataSource.transaction.mockImplementation(
+        async (cb: (manager: EntityManager) => Promise<void>) => {
+          const mockManager = {
+            save: jest.fn().mockRejectedValue(originalError),
+          };
+          await cb(mockManager as unknown as EntityManager);
+        },
+      );
 
       await expect(adapter.save(user)).rejects.toThrow(originalError);
     });
@@ -97,7 +125,15 @@ describe('UserCommandAdapter ユニットテスト', () => {
       const originalError = new Error('Connection lost');
 
       mockUserRepository.create.mockReturnValue({});
-      mockUserRepository.save.mockRejectedValue(originalError);
+      mockRegistrationRequestRepository.create.mockReturnValue({});
+      mockDataSource.transaction.mockImplementation(
+        async (cb: (manager: EntityManager) => Promise<void>) => {
+          const mockManager = {
+            save: jest.fn().mockRejectedValue(originalError),
+          };
+          await cb(mockManager as unknown as EntityManager);
+        },
+      );
 
       await expect(adapter.save(user)).rejects.toThrow(originalError);
     });

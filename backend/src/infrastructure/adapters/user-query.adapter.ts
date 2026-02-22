@@ -60,7 +60,10 @@ export class UserQueryAdapter implements UserQueryPort {
   }
 
   private toDomainEntity(data: UserEntity): User {
-    const latestStatus = data.registrationRequests[0]?.status;
+    if (!data.registrationRequests || data.registrationRequests.length === 0) {
+      throw new Error(`User ${data.id} has no registration requests`);
+    }
+    const latestStatus = data.registrationRequests[0].status;
 
     return User.fromRepository(
       UserId.create(data.id),
@@ -80,7 +83,11 @@ export class UserQueryAdapter implements UserQueryPort {
       [RegistrationStatusEnum.REJECTED]: RegistrationStatus.REJECTED,
       [RegistrationStatusEnum.BANNED]: RegistrationStatus.BANNED,
     };
-    return map[status];
+    const result = map[status];
+    if (!result) {
+      throw new Error(`Unknown RegistrationStatusEnum: ${status}`);
+    }
+    return result;
   }
 
   private fromUserRoleEnum(role: UserRoleEnum): UserRoleType {
@@ -88,6 +95,10 @@ export class UserQueryAdapter implements UserQueryPort {
       [UserRoleEnum.USER]: UserRole.USER,
       [UserRoleEnum.ADMIN]: UserRole.ADMIN,
     };
-    return map[role];
+    const result = map[role];
+    if (!result) {
+      throw new Error(`Unknown UserRoleEnum: ${role}`);
+    }
+    return result;
   }
 }

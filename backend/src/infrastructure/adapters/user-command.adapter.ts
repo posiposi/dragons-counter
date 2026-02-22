@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, QueryFailedError } from 'typeorm';
+import { Repository, QueryFailedError, DataSource } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { UserCommandPort } from '../../domain/ports/user-command.port';
 import { User } from '../../domain/entities/user';
@@ -25,20 +25,26 @@ export class UserCommandAdapter implements UserCommandPort {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(UserRegistrationRequestEntity)
     private readonly registrationRequestRepository: Repository<UserRegistrationRequestEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async save(user: User): Promise<User> {
     try {
-      const userEntity = this.userRepository.create(this.toPersistence(user));
-      await this.userRepository.save(userEntity);
+      await this.dataSource.transaction(async (manager) => {
+        const userEntity = this.userRepository.create(this.toPersistence(user));
+        await manager.save(UserEntity, userEntity);
 
-      const registrationRequestEntity =
-        this.registrationRequestRepository.create({
-          id: randomUUID(),
-          userId: user.id.value,
-          status: this.toRegistrationStatusEnum(user.registrationStatus),
-        });
-      await this.registrationRequestRepository.save(registrationRequestEntity);
+        const registrationRequestEntity =
+          this.registrationRequestRepository.create({
+            id: randomUUID(),
+            userId: user.id.value,
+            status: this.toRegistrationStatusEnum(user.registrationStatus),
+          });
+        await manager.save(
+          UserRegistrationRequestEntity,
+          registrationRequestEntity,
+        );
+      });
 
       const savedUser = await this.userRepository.findOne({
         where: { id: user.id.value },
@@ -78,7 +84,10 @@ export class UserCommandAdapter implements UserCommandPort {
   }
 
   private toDomainEntity(data: UserEntity): User {
-    const latestStatus = data.registrationRequests[0]?.status;
+    if (!data.registrationRequests || data.registrationRequests.length === 0) {
+      throw new Error(`User ${data.id} has no registration requests`);
+    }
+    const latestStatus = data.registrationRequests[0].status;
 
     return User.fromRepository(
       UserId.create(data.id),
@@ -123,7 +132,11 @@ export class UserCommandAdapter implements UserCommandPort {
       [RegistrationStatusEnum.REJECTED]: RegistrationStatus.REJECTED,
       [RegistrationStatusEnum.BANNED]: RegistrationStatus.BANNED,
     };
-    return map[status];
+    const result = map[status];
+    if (!result) {
+      throw new Error(`Unknown RegistrationStatusEnum: ${status}`);
+    }
+    return result;
   }
 
   private toUserRoleEnum(role: UserRoleType): UserRoleEnum {
@@ -143,6 +156,10 @@ export class UserCommandAdapter implements UserCommandPort {
       [UserRoleEnum.USER]: UserRole.USER,
       [UserRoleEnum.ADMIN]: UserRole.ADMIN,
     };
-    return map[role];
+    const result = map[role];
+    if (!result) {
+      throw new Error(`Unknown UserRoleEnum: ${role}`);
+    }
+    return result;
   }
 }
