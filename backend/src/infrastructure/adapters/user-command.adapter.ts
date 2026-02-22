@@ -4,19 +4,10 @@ import { Repository, QueryFailedError, DataSource } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { UserCommandPort } from '../../domain/ports/user-command.port';
 import { User } from '../../domain/entities/user';
-import { UserId } from '../../domain/value-objects/user-id';
-import { Email } from '../../domain/value-objects/email';
-import { Password } from '../../domain/value-objects/password';
-import {
-  RegistrationStatus,
-  RegistrationStatusType,
-} from '../../domain/enums/registration-status';
-import { UserRole, UserRoleType } from '../../domain/enums/user-role';
 import { UserAlreadyExistsException } from '../../domain/exceptions/user-already-exists.exception';
 import { UserEntity } from '../typeorm/entities/user.entity';
 import { UserRegistrationRequestEntity } from '../typeorm/entities/user-registration-request.entity';
-import { RegistrationStatusEnum } from '../typeorm/enums/registration-status.enum';
-import { UserRoleEnum } from '../typeorm/enums/user-role.enum';
+import { UserMapper } from './mappers/user.mapper';
 
 @Injectable()
 export class UserCommandAdapter implements UserCommandPort {
@@ -31,14 +22,18 @@ export class UserCommandAdapter implements UserCommandPort {
   async save(user: User): Promise<User> {
     try {
       await this.dataSource.transaction(async (manager) => {
-        const userEntity = this.userRepository.create(this.toPersistence(user));
+        const userEntity = this.userRepository.create(
+          UserMapper.toPersistence(user),
+        );
         await manager.save(UserEntity, userEntity);
 
         const registrationRequestEntity =
           this.registrationRequestRepository.create({
             id: randomUUID(),
             userId: user.id.value,
-            status: this.toRegistrationStatusEnum(user.registrationStatus),
+            status: UserMapper.toRegistrationStatusEnum(
+              user.registrationStatus,
+            ),
           });
         await manager.save(
           UserRegistrationRequestEntity,
@@ -56,7 +51,7 @@ export class UserCommandAdapter implements UserCommandPort {
         throw new Error(`User not found after save: ${user.id.value}`);
       }
 
-      return this.toDomainEntity(savedUser);
+      return UserMapper.toDomainEntity(savedUser);
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
@@ -75,91 +70,11 @@ export class UserCommandAdapter implements UserCommandPort {
       {
         id: randomUUID(),
         userId: user.id.value,
-        status: this.toRegistrationStatusEnum(user.registrationStatus),
+        status: UserMapper.toRegistrationStatusEnum(user.registrationStatus),
       },
     );
     await this.registrationRequestRepository.save(registrationRequestEntity);
 
     return user;
-  }
-
-  private toDomainEntity(data: UserEntity): User {
-    if (!data.registrationRequests || data.registrationRequests.length === 0) {
-      throw new Error(`User ${data.id} has no registration requests`);
-    }
-    const latestStatus = data.registrationRequests[0].status;
-
-    return User.fromRepository(
-      UserId.create(data.id),
-      Email.create(data.email),
-      Password.fromHash(data.password),
-      this.fromRegistrationStatusEnum(latestStatus),
-      this.fromUserRoleEnum(data.role),
-    );
-  }
-
-  private toPersistence(user: User): Partial<UserEntity> {
-    return {
-      id: user.id.value,
-      email: user.email.value,
-      password: user.password.hash,
-      role: this.toUserRoleEnum(user.role),
-    };
-  }
-
-  private toRegistrationStatusEnum(
-    status: RegistrationStatusType,
-  ): RegistrationStatusEnum {
-    const map: Record<string, RegistrationStatusEnum> = {
-      [RegistrationStatus.PENDING]: RegistrationStatusEnum.PENDING,
-      [RegistrationStatus.APPROVED]: RegistrationStatusEnum.APPROVED,
-      [RegistrationStatus.REJECTED]: RegistrationStatusEnum.REJECTED,
-      [RegistrationStatus.BANNED]: RegistrationStatusEnum.BANNED,
-    };
-    const result = map[status];
-    if (!result) {
-      throw new Error(`Unknown RegistrationStatus: ${status}`);
-    }
-    return result;
-  }
-
-  private fromRegistrationStatusEnum(
-    status: RegistrationStatusEnum,
-  ): RegistrationStatusType {
-    const map: Record<string, RegistrationStatusType> = {
-      [RegistrationStatusEnum.PENDING]: RegistrationStatus.PENDING,
-      [RegistrationStatusEnum.APPROVED]: RegistrationStatus.APPROVED,
-      [RegistrationStatusEnum.REJECTED]: RegistrationStatus.REJECTED,
-      [RegistrationStatusEnum.BANNED]: RegistrationStatus.BANNED,
-    };
-    const result = map[status];
-    if (!result) {
-      throw new Error(`Unknown RegistrationStatusEnum: ${status}`);
-    }
-    return result;
-  }
-
-  private toUserRoleEnum(role: UserRoleType): UserRoleEnum {
-    const map: Record<string, UserRoleEnum> = {
-      [UserRole.USER]: UserRoleEnum.USER,
-      [UserRole.ADMIN]: UserRoleEnum.ADMIN,
-    };
-    const result = map[role];
-    if (!result) {
-      throw new Error(`Unknown UserRole: ${role}`);
-    }
-    return result;
-  }
-
-  private fromUserRoleEnum(role: UserRoleEnum): UserRoleType {
-    const map: Record<string, UserRoleType> = {
-      [UserRoleEnum.USER]: UserRole.USER,
-      [UserRoleEnum.ADMIN]: UserRole.ADMIN,
-    };
-    const result = map[role];
-    if (!result) {
-      throw new Error(`Unknown UserRoleEnum: ${role}`);
-    }
-    return result;
   }
 }
