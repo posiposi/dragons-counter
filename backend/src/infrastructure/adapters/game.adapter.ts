@@ -32,7 +32,11 @@ export class GameAdapter implements GamePort {
       relations: ['stadium'],
     });
 
-    return this.toDomainEntity(savedGame!);
+    if (!savedGame) {
+      throw new Error(`Game not found after save: ${game.id.value}`);
+    }
+
+    return this.toDomainEntity(savedGame);
   }
 
   async findAll(): Promise<Game[]> {
