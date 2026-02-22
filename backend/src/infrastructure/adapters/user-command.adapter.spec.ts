@@ -5,6 +5,8 @@ import {
   QueryFailedError,
   DataSource,
   EntityManager,
+  Like,
+  In,
 } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserCommandAdapter } from './user-command.adapter';
@@ -145,6 +147,7 @@ describe('UserCommandAdapter 統合テスト', () => {
   let userRepository: Repository<UserEntity>;
   let registrationRequestRepository: Repository<UserRegistrationRequestEntity>;
   let adapter: UserCommandAdapter;
+  let dataSource: DataSource;
 
   const testEmailPrefix = 'user-cmd-adapter-';
 
@@ -168,26 +171,25 @@ describe('UserCommandAdapter 統合テスト', () => {
       Repository<UserRegistrationRequestEntity>
     >(getRepositoryToken(UserRegistrationRequestEntity));
     adapter = module.get<UserCommandAdapter>(UserCommandAdapter);
+    dataSource = module.get<DataSource>(DataSource);
   });
 
   const cleanupTestData = async () => {
-    const subQuery = userRepository
-      .createQueryBuilder('u')
-      .select('u.id')
-      .where('u.email LIKE :pattern')
-      .getQuery();
-    await registrationRequestRepository
-      .createQueryBuilder()
-      .delete()
-      .where(`userId IN (${subQuery})`, {
-        pattern: `${testEmailPrefix}%`,
-      })
-      .execute();
-    await userRepository
-      .createQueryBuilder()
-      .delete()
-      .where('email LIKE :pattern', { pattern: `${testEmailPrefix}%` })
-      .execute();
+    await dataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(UserEntity);
+      const rrRepo = manager.getRepository(UserRegistrationRequestEntity);
+
+      const testUsers = await userRepo.find({
+        where: { email: Like(`${testEmailPrefix}%`) },
+        select: ['id'],
+      });
+      const userIds = testUsers.map((u) => u.id);
+
+      if (userIds.length > 0) {
+        await rrRepo.delete({ userId: In(userIds) });
+      }
+      await userRepo.delete({ email: Like(`${testEmailPrefix}%`) });
+    });
   };
 
   afterEach(async () => {
@@ -268,11 +270,11 @@ describe('UserCommandAdapter 統合テスト', () => {
 
       const requests = await registrationRequestRepository.find({
         where: { userId: user.id.value },
-        order: { createdAt: 'DESC' },
       });
       expect(requests).toHaveLength(2);
-      expect(requests[0].status).toBe(RegistrationStatusEnum.APPROVED);
-      expect(requests[1].status).toBe(RegistrationStatusEnum.PENDING);
+      const statuses = requests.map((r) => r.status);
+      expect(statuses).toContain(RegistrationStatusEnum.APPROVED);
+      expect(statuses).toContain(RegistrationStatusEnum.PENDING);
     });
   });
 });

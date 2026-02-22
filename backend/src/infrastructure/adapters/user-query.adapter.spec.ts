@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, Like, In } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { UserQueryAdapter } from './user-query.adapter';
@@ -19,6 +19,7 @@ describe('UserQueryAdapter 統合テスト', () => {
   let userRepository: Repository<UserEntity>;
   let registrationRequestRepository: Repository<UserRegistrationRequestEntity>;
   let adapter: UserQueryAdapter;
+  let dataSource: DataSource;
 
   const testEmailPrefix = 'user-query-adapter-';
 
@@ -42,26 +43,25 @@ describe('UserQueryAdapter 統合テスト', () => {
       Repository<UserRegistrationRequestEntity>
     >(getRepositoryToken(UserRegistrationRequestEntity));
     adapter = module.get<UserQueryAdapter>(UserQueryAdapter);
+    dataSource = module.get<DataSource>(DataSource);
   });
 
   const cleanupTestData = async () => {
-    const subQuery = userRepository
-      .createQueryBuilder('u')
-      .select('u.id')
-      .where('u.email LIKE :pattern')
-      .getQuery();
-    await registrationRequestRepository
-      .createQueryBuilder()
-      .delete()
-      .where(`userId IN (${subQuery})`, {
-        pattern: `${testEmailPrefix}%`,
-      })
-      .execute();
-    await userRepository
-      .createQueryBuilder()
-      .delete()
-      .where('email LIKE :pattern', { pattern: `${testEmailPrefix}%` })
-      .execute();
+    await dataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(UserEntity);
+      const rrRepo = manager.getRepository(UserRegistrationRequestEntity);
+
+      const testUsers = await userRepo.find({
+        where: { email: Like(`${testEmailPrefix}%`) },
+        select: ['id'],
+      });
+      const userIds = testUsers.map((u) => u.id);
+
+      if (userIds.length > 0) {
+        await rrRepo.delete({ userId: In(userIds) });
+      }
+      await userRepo.delete({ email: Like(`${testEmailPrefix}%`) });
+    });
   };
 
   afterEach(async () => {
@@ -130,17 +130,27 @@ describe('UserQueryAdapter 統合テスト', () => {
         id: randomUUID(),
         userId: testUserId,
         status: RegistrationStatusEnum.APPROVED,
-        createdAt: new Date('2025-01-01T00:00:00Z'),
       });
       await registrationRequestRepository.save(olderRequest);
+      await registrationRequestRepository
+        .createQueryBuilder()
+        .update(UserRegistrationRequestEntity)
+        .set({ createdAt: new Date('2025-01-01T00:00:00Z') })
+        .where('id = :id', { id: olderRequest.id })
+        .execute();
 
       const newerRequest = registrationRequestRepository.create({
         id: randomUUID(),
         userId: testUserId,
         status: RegistrationStatusEnum.REJECTED,
-        createdAt: new Date('2025-06-01T00:00:00Z'),
       });
       await registrationRequestRepository.save(newerRequest);
+      await registrationRequestRepository
+        .createQueryBuilder()
+        .update(UserRegistrationRequestEntity)
+        .set({ createdAt: new Date('2025-06-01T00:00:00Z') })
+        .where('id = :id', { id: newerRequest.id })
+        .execute();
 
       const email = Email.create(testEmail);
       const result = await adapter.findByEmail(email);
