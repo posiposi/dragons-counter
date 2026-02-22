@@ -66,8 +66,7 @@ echo "Waiting for backend container to be ready..."
 sleep 30
 
 echo "Running database migrations..."
-docker-compose exec -T backend npx prisma migrate deploy || \
-  docker-compose exec -T backend npx prisma db push
+docker-compose exec -T backend npx typeorm migration:run -d dist/infrastructure/typeorm/data-source.js
 
 echo "Database migrations completed"
 

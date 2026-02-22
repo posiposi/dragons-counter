@@ -9,7 +9,7 @@
 | Node.js | 24.6.0 |
 | NestJS | 11.x |
 | TypeScript | 5.9.x |
-| Prisma | 6.13.x |
+| TypeORM | 0.3.x |
 | MySQL | 8.0 |
 | Jest | 30.x |
 | bcrypt | 6.x |
@@ -182,6 +182,6 @@ docker compose up
 - `.env` - 開発環境設定
 - `.env.test` - テスト環境設定
 - `ALLOWED_ORIGINS` - CORS許可オリジン（カンマ区切り）
-- `DATABASE_URL` - Prisma接続URL
+- `DATABASE_URL` - データベース接続URL
 - `API_GATEWAY_URL` - スクレイピングAPI Gateway URL（バックエンド用）
 - `API_GATEWAY_API_KEY` - スクレイピングAPI Gatewayキー（バックエンド用）

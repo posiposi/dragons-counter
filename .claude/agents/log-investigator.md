@@ -47,7 +47,7 @@ docker compose logs backend --tail=100
 docker compose exec backend npm run test
 
 # マイグレーション状況確認
-docker compose exec backend npx prisma migrate status
+docker compose exec backend npx typeorm migration:show -d src/infrastructure/typeorm/typeorm.config.ts
 ```
 
 ## 結果の記録

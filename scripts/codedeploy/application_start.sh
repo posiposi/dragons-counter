@@ -18,7 +18,6 @@ echo "Waiting for containers to be ready..."
 sleep 30
 
 echo "Running database migrations..."
-/usr/local/bin/docker-compose exec -T backend npx prisma migrate deploy || \
-    /usr/local/bin/docker-compose exec -T backend npx prisma db push
+/usr/local/bin/docker-compose exec -T backend npx typeorm migration:run -d dist/infrastructure/typeorm/data-source.js
 
 echo "=== ApplicationStart completed at $(date) ==="

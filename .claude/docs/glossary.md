@@ -94,6 +94,6 @@
 | 等価性判定 | `equals` | `gameId.equals(other)` |
 | 状態判定 | `is{状態}`, `can{動詞}` | `isVictory()`, `canLogin()`, `isEmpty()` |
 | 値取得 | getter (`get value()`) | `gameDate.value` |
-| 変換 | `format`, `toPrisma`, `fromPrisma` | `gameDate.format()` |
+| 変換 | `format` | `gameDate.format()` |
 | ポートメソッド | `save`, `findAll`, `findById`, `findByEmail`, `findByDate`, `softDelete` | |
 | ユースケース | `execute` | `usecase.execute()` |

@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { PrismaClient } from '@prisma/client';
-import { PrismaModule } from '../prisma/prisma.module';
-import { PrismaService } from '../prisma/prisma.service';
 import {
   GameEntity,
   StadiumEntity,
@@ -11,7 +8,7 @@ import {
 } from './entities';
 import { createDataSourceOptions } from './data-source';
 
-describe('TypeORMとPrismaの並行動作', () => {
+describe('TypeORM DataSource設定', () => {
   let module: TestingModule;
 
   const mockDataSource = {
@@ -28,24 +25,15 @@ describe('TypeORMとPrismaの並行動作', () => {
     destroy: jest.fn(),
   };
 
-  const prismaServiceMock = {
-    $connect: jest.fn(),
-    $disconnect: jest.fn(),
-  };
-
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      imports: [PrismaModule],
       providers: [
         {
           provide: DataSource,
           useValue: mockDataSource,
         },
       ],
-    })
-      .overrideProvider(PrismaService)
-      .useValue(prismaServiceMock)
-      .compile();
+    }).compile();
   });
 
   afterEach(async () => {
@@ -62,19 +50,6 @@ describe('TypeORMとPrismaの並行動作', () => {
     const dataSource = module.get<DataSource>(DataSource);
     expect(dataSource).toBeDefined();
     expect(dataSource.isInitialized).toBe(true);
-  });
-
-  it('PrismaClientが正常に解決されること', () => {
-    const prismaClient = module.get<PrismaClient>(PrismaClient);
-    expect(prismaClient).toBeDefined();
-  });
-
-  it('DataSourceとPrismaClientが同時に解決できること', () => {
-    const dataSource = module.get<DataSource>(DataSource);
-    const prismaClient = module.get<PrismaClient>(PrismaClient);
-
-    expect(dataSource).toBeDefined();
-    expect(prismaClient).toBeDefined();
   });
 });
 
