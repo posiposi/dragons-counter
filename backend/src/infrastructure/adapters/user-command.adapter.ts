@@ -42,7 +42,8 @@ export class UserCommandAdapter implements UserCommandPort {
 
       const savedUser = await this.userRepository.findOne({
         where: { id: user.id.value },
-        relations: ['registrationRequests'],
+        relations: { registrationRequests: true },
+        order: { registrationRequests: { createdAt: 'DESC' } },
       });
 
       if (!savedUser) {
@@ -77,10 +78,7 @@ export class UserCommandAdapter implements UserCommandPort {
   }
 
   private toDomainEntity(data: UserEntity): User {
-    const sortedRequests = [...data.registrationRequests].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
-    const latestStatus = sortedRequests[0]?.status;
+    const latestStatus = data.registrationRequests[0]?.status;
 
     return User.fromRepository(
       UserId.create(data.id),
