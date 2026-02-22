@@ -10,9 +10,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-COPY prisma ./prisma/
-RUN npx prisma generate
-
 COPY . .
 
 RUN npm run build
@@ -45,9 +42,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-COPY prisma ./prisma/
-RUN npx prisma generate
-
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
@@ -65,9 +59,6 @@ WORKDIR /app
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/package*.json ./
-
-COPY prisma ./prisma/
-RUN npx prisma generate
 
 COPY --from=builder /app/dist ./dist
 
