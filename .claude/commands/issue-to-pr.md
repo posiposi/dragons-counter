@@ -85,6 +85,7 @@ git switch -c "{#issue_no.}_{issue_name}"
     - コマンド実行後にlintエラーがある場合はfrontendコンテナ内で`npm run format`を実行してlintエラー修正を行う
   - **バックエンドのlint実行**
     - backendコンテナ内で`npm run format`を実行する
+    - backendコンテナ内で`npx prettier --write`を実行する
 
 #### ユーザーへレビュー依頼
 
