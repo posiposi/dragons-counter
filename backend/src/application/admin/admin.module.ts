@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   GetUsersController,
   GetUserController,
@@ -11,8 +12,13 @@ import { ApproveUserUsecase } from '../../domain/usecases/approve-user.usecase';
 import { RejectUserUsecase } from '../../domain/usecases/reject-user.usecase';
 import { UserQueryAdapter } from '../../infrastructure/adapters/user-query.adapter';
 import { UserCommandAdapter } from '../../infrastructure/adapters/user-command.adapter';
+import { UserEntity } from '../../infrastructure/typeorm/entities/user.entity';
+import { UserRegistrationRequestEntity } from '../../infrastructure/typeorm/entities/user-registration-request.entity';
 
 @Module({
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, UserRegistrationRequestEntity]),
+  ],
   controllers: [
     GetUsersController,
     GetUserController,

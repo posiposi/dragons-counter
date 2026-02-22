@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SignupController } from './controllers/signup.controller';
 import { SigninController } from './controllers/signin.controller';
 import { SignoutController } from './controllers/signout.controller';
@@ -13,6 +14,8 @@ import { UserQueryAdapter } from '../../infrastructure/adapters/user-query.adapt
 import { JwtTokenServiceAdapter } from '../../infrastructure/adapters/services/jwt-token-service.adapter';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { UserEntity } from '../../infrastructure/typeorm/entities/user.entity';
+import { UserRegistrationRequestEntity } from '../../infrastructure/typeorm/entities/user-registration-request.entity';
 
 const jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {
@@ -26,6 +29,7 @@ if (!jwtSecret) {
       secret: jwtSecret,
       signOptions: { expiresIn: '7d' },
     }),
+    TypeOrmModule.forFeature([UserEntity, UserRegistrationRequestEntity]),
   ],
   controllers: [
     SignupController,
