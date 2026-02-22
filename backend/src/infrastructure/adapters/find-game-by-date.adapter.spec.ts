@@ -1,15 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma/prisma.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { FindGameByDateAdapter } from './find-game-by-date.adapter';
 import { GameDate } from '../../domain/value-objects/game-date';
-import { GameResultValue } from '../../domain/value-objects/game-result';
-import { PrismaClient } from '@prisma/client';
+import { GameEntity } from '../typeorm/entities/game.entity';
+import { StadiumEntity } from '../typeorm/entities/stadium.entity';
+import { GameResultEnum } from '../typeorm/enums/game-result.enum';
+import { createDataSourceOptions } from '../typeorm/data-source';
 import { randomUUID } from 'crypto';
 
 describe('FindGameByDateAdapter Integration Tests', () => {
-  let prismaService: PrismaService;
   let module: TestingModule;
   let adapter: FindGameByDateAdapter;
+  let gameRepository: Repository<GameEntity>;
+  let stadiumRepository: Repository<StadiumEntity>;
 
   // 固定のスタジアムID（find-game-by-date専用）
   const testStadiums = {
@@ -20,49 +25,58 @@ describe('FindGameByDateAdapter Integration Tests', () => {
   };
 
   beforeAll(async () => {
+    const dataSourceOptions = createDataSourceOptions(
+      process.env.DATABASE_URL ?? '',
+    );
+
     module = await Test.createTestingModule({
-      providers: [
-        FindGameByDateAdapter,
-        PrismaService,
-        {
-          provide: PrismaClient,
-          useExisting: PrismaService,
-        },
+      imports: [
+        TypeOrmModule.forRoot(dataSourceOptions),
+        TypeOrmModule.forFeature([GameEntity, StadiumEntity]),
       ],
+      providers: [FindGameByDateAdapter],
     }).compile();
 
-    prismaService = module.get<PrismaService>(PrismaService);
     adapter = module.get<FindGameByDateAdapter>(FindGameByDateAdapter);
+    gameRepository = module.get<Repository<GameEntity>>(
+      getRepositoryToken(GameEntity),
+    );
+    stadiumRepository = module.get<Repository<StadiumEntity>>(
+      getRepositoryToken(StadiumEntity),
+    );
 
     // スタジアムをupsertで作成（並列実行でもCIエラーにならないように）
     for (const stadium of Object.values(testStadiums)) {
-      await prismaService.stadium.upsert({
-        where: { id: stadium.id },
-        update: { name: stadium.name },
-        create: {
+      await stadiumRepository.save(
+        stadiumRepository.create({
           id: stadium.id,
           name: stadium.name,
-        },
-      });
+        }),
+      );
     }
   });
 
   afterEach(async () => {
     const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-    await prismaService.game.deleteMany({
-      where: { stadiumId: { in: stadiumIds } },
-    });
+    await gameRepository
+      .createQueryBuilder()
+      .delete()
+      .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+      .execute();
   });
 
   afterAll(async () => {
     const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-    await prismaService.game.deleteMany({
-      where: { stadiumId: { in: stadiumIds } },
-    });
-    await prismaService.stadium.deleteMany({
-      where: { id: { in: stadiumIds } },
-    });
-    await prismaService.$disconnect();
+    await gameRepository
+      .createQueryBuilder()
+      .delete()
+      .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+      .execute();
+    await stadiumRepository
+      .createQueryBuilder()
+      .delete()
+      .where('id IN (:...ids)', { ids: stadiumIds })
+      .execute();
     await module.close();
   });
 
@@ -71,17 +85,17 @@ describe('FindGameByDateAdapter Integration Tests', () => {
       const testGameId = randomUUID();
       const testDate = new Date('2024-07-01');
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        gameRepository.create({
           id: testGameId,
           gameDate: testDate,
           opponent: '阪神タイガース',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
           opponentScore: 3,
-          result: GameResultValue.WIN,
-        },
-      });
+          result: GameResultEnum.WIN,
+        }),
+      );
 
       const result = await adapter.findByDate(new GameDate(testDate));
 
@@ -99,17 +113,17 @@ describe('FindGameByDateAdapter Integration Tests', () => {
     });
 
     it('should return null when date does not match', async () => {
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        gameRepository.create({
           id: randomUUID(),
           gameDate: new Date('2024-07-01'),
           opponent: '阪神タイガース',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
           opponentScore: 3,
-          result: GameResultValue.WIN,
-        },
-      });
+          result: GameResultEnum.WIN,
+        }),
+      );
 
       const result = await adapter.findByDate(
         new GameDate(new Date('2024-07-02')),
@@ -121,18 +135,18 @@ describe('FindGameByDateAdapter Integration Tests', () => {
     it('should exclude soft-deleted games', async () => {
       const testDate = new Date('2024-07-01');
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        gameRepository.create({
           id: randomUUID(),
           gameDate: testDate,
           opponent: '阪神タイガース',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
           opponentScore: 3,
-          result: GameResultValue.WIN,
+          result: GameResultEnum.WIN,
           deletedAt: new Date(),
-        },
-      });
+        }),
+      );
 
       const result = await adapter.findByDate(new GameDate(testDate));
 

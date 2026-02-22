@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma/prisma.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { GameAdapter } from './game.adapter';
 import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
@@ -11,13 +13,16 @@ import { StadiumName } from '../../domain/value-objects/stadium-name';
 import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
 import { GameResultValue } from '../../domain/value-objects/game-result';
-import { PrismaClient } from '@prisma/client';
+import { GameEntity } from '../typeorm/entities/game.entity';
+import { StadiumEntity } from '../typeorm/entities/stadium.entity';
+import { GameResultEnum } from '../typeorm/enums/game-result.enum';
+import { createDataSourceOptions } from '../typeorm/data-source';
 import { randomUUID } from 'crypto';
 
 describe('GameAdapter Integration Tests', () => {
-  let prismaService: PrismaService;
   let module: TestingModule;
-  let prismaClient: PrismaClient;
+  let gameRepository: Repository<GameEntity>;
+  let stadiumRepository: Repository<StadiumEntity>;
 
   // 固定のスタジアムID（game.adapter専用）
   const testStadiums = {
@@ -35,208 +40,219 @@ describe('GameAdapter Integration Tests', () => {
     },
   };
 
+  const createTestGame = (
+    overrides: Partial<GameEntity> & { id: string; stadiumId: string },
+  ): GameEntity => {
+    const now = new Date();
+    return gameRepository.create({
+      gameDate: now,
+      opponent: 'テスト対戦相手',
+      dragonsScore: 0,
+      opponentScore: 0,
+      result: GameResultEnum.DRAW,
+      notes: null,
+      ...overrides,
+    });
+  };
+
   beforeAll(async () => {
+    const dataSourceOptions = createDataSourceOptions(
+      process.env.DATABASE_URL ?? '',
+    );
+
     module = await Test.createTestingModule({
-      providers: [
-        GameAdapter,
-        PrismaService,
-        {
-          provide: PrismaClient,
-          useExisting: PrismaService,
-        },
+      imports: [
+        TypeOrmModule.forRoot(dataSourceOptions),
+        TypeOrmModule.forFeature([GameEntity, StadiumEntity]),
       ],
+      providers: [GameAdapter],
     }).compile();
 
-    prismaService = module.get<PrismaService>(PrismaService);
-    prismaClient = prismaService;
+    gameRepository = module.get<Repository<GameEntity>>(
+      getRepositoryToken(GameEntity),
+    );
+    stadiumRepository = module.get<Repository<StadiumEntity>>(
+      getRepositoryToken(StadiumEntity),
+    );
 
     // スタジアムをupsertで作成（並列実行でもCIエラーにならないように）
     for (const stadium of Object.values(testStadiums)) {
-      await prismaService.stadium.upsert({
-        where: { id: stadium.id },
-        update: { name: stadium.name },
-        create: {
+      await stadiumRepository.save(
+        stadiumRepository.create({
           id: stadium.id,
           name: stadium.name,
-        },
-      });
+        }),
+      );
     }
   });
 
   afterAll(async () => {
     const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-    await prismaService.game.deleteMany({
-      where: { stadiumId: { in: stadiumIds } },
-    });
-    await prismaService.stadium.deleteMany({
-      where: { id: { in: stadiumIds } },
-    });
-    await prismaService.$disconnect();
+    await gameRepository
+      .createQueryBuilder()
+      .delete()
+      .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+      .execute();
+    await stadiumRepository
+      .createQueryBuilder()
+      .delete()
+      .where('id IN (:...ids)', { ids: stadiumIds })
+      .execute();
     await module.close();
   });
 
   describe('save', () => {
+    afterEach(async () => {
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
+    });
+
     it('should save a game with WIN result and notes', async () => {
-      try {
-        await prismaClient.$transaction(
-          async (tx) => {
-            const gameId = new GameId(randomUUID());
-            const stadium = Stadium.create(
-              StadiumId.create(testStadiums.vantelin.id),
-              StadiumName.create(testStadiums.vantelin.name),
-            );
-            const game = new Game(
-              gameId,
-              new GameDate(new Date('2024-04-01')),
-              new Opponent('横浜DeNAベイスターズ'),
-              new Score(5),
-              new Score(3),
-              stadium,
-              new Notes('開幕戦で勝利！'),
-              new Date('2024-04-01'),
-              new Date('2024-04-01'),
-            );
+      const gameId = new GameId(randomUUID());
+      const stadium = Stadium.create(
+        StadiumId.create(testStadiums.vantelin.id),
+        StadiumName.create(testStadiums.vantelin.name),
+      );
+      const game = new Game(
+        gameId,
+        new GameDate(new Date('2024-04-01')),
+        new Opponent('横浜DeNAベイスターズ'),
+        new Score(5),
+        new Score(3),
+        stadium,
+        new Notes('開幕戦で勝利！'),
+        new Date('2024-04-01'),
+        new Date('2024-04-01'),
+      );
 
-            const adapter = new GameAdapter(tx as PrismaClient);
-            const result = await adapter.save(game);
+      const adapter = module.get<GameAdapter>(GameAdapter);
+      const result = await adapter.save(game);
 
-            expect(result).toBeInstanceOf(Game);
-            expect(result.id.value).toBe(gameId.value);
-            expect(result.stadium.id.value).toBe(testStadiums.vantelin.id);
-            expect(result.stadium.name.value).toBe(testStadiums.vantelin.name);
-            expect(result.result.value).toBe(GameResultValue.WIN);
+      expect(result).toBeInstanceOf(Game);
+      expect(result.id.value).toBe(gameId.value);
+      expect(result.stadium.id.value).toBe(testStadiums.vantelin.id);
+      expect(result.stadium.name.value).toBe(testStadiums.vantelin.name);
+      expect(result.result.value).toBe(GameResultValue.WIN);
 
-            const savedGame = await tx.game.findUnique({
-              where: { id: gameId.value },
-            });
+      const savedGame = await gameRepository.findOne({
+        where: { id: gameId.value },
+      });
 
-            expect(savedGame).not.toBeNull();
-            expect(savedGame?.stadiumId).toBe(testStadiums.vantelin.id);
-
-            throw new Error('Rollback transaction');
-          },
-          { maxWait: 5000, timeout: 10000 },
-        );
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Rollback transaction');
-      }
+      expect(savedGame).not.toBeNull();
+      expect(savedGame?.stadiumId).toBe(testStadiums.vantelin.id);
     });
 
     it('should save a game with LOSE result', async () => {
-      try {
-        await prismaClient.$transaction(
-          async (tx) => {
-            const gameId = new GameId(randomUUID());
-            const stadium = Stadium.create(
-              StadiumId.create(testStadiums.koshien.id),
-              StadiumName.create(testStadiums.koshien.name),
-            );
-            const game = new Game(
-              gameId,
-              new GameDate(new Date('2024-04-02')),
-              new Opponent('阪神タイガース'),
-              new Score(2),
-              new Score(7),
-              stadium,
-              new Notes('大敗'),
-              new Date('2024-04-02'),
-              new Date('2024-04-02'),
-            );
+      const gameId = new GameId(randomUUID());
+      const stadium = Stadium.create(
+        StadiumId.create(testStadiums.koshien.id),
+        StadiumName.create(testStadiums.koshien.name),
+      );
+      const game = new Game(
+        gameId,
+        new GameDate(new Date('2024-04-02')),
+        new Opponent('阪神タイガース'),
+        new Score(2),
+        new Score(7),
+        stadium,
+        new Notes('大敗'),
+        new Date('2024-04-02'),
+        new Date('2024-04-02'),
+      );
 
-            const adapter = new GameAdapter(tx as PrismaClient);
-            const result = await adapter.save(game);
+      const adapter = module.get<GameAdapter>(GameAdapter);
+      const result = await adapter.save(game);
 
-            expect(result.stadium.id.value).toBe(testStadiums.koshien.id);
-            expect(result.stadium.name.value).toBe(testStadiums.koshien.name);
-            expect(result.result.value).toBe(GameResultValue.LOSE);
-
-            throw new Error('Rollback transaction');
-          },
-          { maxWait: 5000, timeout: 10000 },
-        );
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Rollback transaction');
-      }
+      expect(result.stadium.id.value).toBe(testStadiums.koshien.id);
+      expect(result.stadium.name.value).toBe(testStadiums.koshien.name);
+      expect(result.result.value).toBe(GameResultValue.LOSE);
     });
 
     it('should save a game with DRAW result', async () => {
-      try {
-        await prismaClient.$transaction(
-          async (tx) => {
-            const gameId = new GameId(randomUUID());
-            const stadium = Stadium.create(
-              StadiumId.create(testStadiums.mazda.id),
-              StadiumName.create(testStadiums.mazda.name),
-            );
-            const game = new Game(
-              gameId,
-              new GameDate(new Date('2024-04-03')),
-              new Opponent('広島東洋カープ'),
-              new Score(4),
-              new Score(4),
-              stadium,
-              new Notes('引き分け'),
-              new Date('2024-04-03'),
-              new Date('2024-04-03'),
-            );
+      const gameId = new GameId(randomUUID());
+      const stadium = Stadium.create(
+        StadiumId.create(testStadiums.mazda.id),
+        StadiumName.create(testStadiums.mazda.name),
+      );
+      const game = new Game(
+        gameId,
+        new GameDate(new Date('2024-04-03')),
+        new Opponent('広島東洋カープ'),
+        new Score(4),
+        new Score(4),
+        stadium,
+        new Notes('引き分け'),
+        new Date('2024-04-03'),
+        new Date('2024-04-03'),
+      );
 
-            const adapter = new GameAdapter(tx as PrismaClient);
-            const result = await adapter.save(game);
+      const adapter = module.get<GameAdapter>(GameAdapter);
+      const result = await adapter.save(game);
 
-            expect(result.stadium.id.value).toBe(testStadiums.mazda.id);
-            expect(result.stadium.name.value).toBe(testStadiums.mazda.name);
-            expect(result.result.value).toBe(GameResultValue.DRAW);
-
-            throw new Error('Rollback transaction');
-          },
-          { maxWait: 5000, timeout: 10000 },
-        );
-      } catch (error: unknown) {
-        expect((error as Error).message).toBe('Rollback transaction');
-      }
+      expect(result.stadium.id.value).toBe(testStadiums.mazda.id);
+      expect(result.stadium.name.value).toBe(testStadiums.mazda.name);
+      expect(result.result.value).toBe(GameResultValue.DRAW);
     });
   });
 
   describe('findAll', () => {
-    it('should return all games ordered by gameDate desc with stadium info', async () => {
+    beforeEach(async () => {
       const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-      await prismaService.game.deleteMany({
-        where: { stadiumId: { in: stadiumIds } },
-      });
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
+    });
 
+    afterEach(async () => {
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
+    });
+
+    it('should return all games ordered by gameDate desc with stadium info', async () => {
       const game1Id = randomUUID();
       const game2Id = randomUUID();
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        createTestGame({
           id: game1Id,
           gameDate: new Date('2024-04-01'),
           opponent: '横浜DeNAベイスターズ',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
           opponentScore: 3,
-          result: GameResultValue.WIN,
+          result: GameResultEnum.WIN,
           notes: '開幕戦で勝利！',
-        },
-      });
+        }),
+      );
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        createTestGame({
           id: game2Id,
           gameDate: new Date('2024-04-03'),
           opponent: '阪神タイガース',
           stadiumId: testStadiums.koshien.id,
           dragonsScore: 2,
           opponentScore: 7,
-          result: GameResultValue.LOSE,
+          result: GameResultEnum.LOSE,
           notes: '大敗',
-        },
-      });
+        }),
+      );
 
-      const adapter = new GameAdapter(prismaClient);
+      const adapter = module.get<GameAdapter>(GameAdapter);
       const result = await adapter.findAll();
 
       // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
       const ownGames = result.filter((g) =>
         stadiumIds.includes(g.stadium.id.value),
       );
@@ -262,15 +278,11 @@ describe('GameAdapter Integration Tests', () => {
     });
 
     it('should return empty array when no games exist', async () => {
-      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-      await prismaService.game.deleteMany({
-        where: { stadiumId: { in: stadiumIds } },
-      });
-
-      const adapter = new GameAdapter(prismaClient);
+      const adapter = module.get<GameAdapter>(GameAdapter);
       const result = await adapter.findAll();
 
       // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
       const ownGames = result.filter((g) =>
         stadiumIds.includes(g.stadium.id.value),
       );
@@ -279,45 +291,41 @@ describe('GameAdapter Integration Tests', () => {
     });
 
     it('should exclude soft-deleted games', async () => {
-      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-      await prismaService.game.deleteMany({
-        where: { stadiumId: { in: stadiumIds } },
-      });
-
       const activeGameId = randomUUID();
       const deletedGameId = randomUUID();
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        createTestGame({
           id: activeGameId,
           gameDate: new Date('2024-04-01'),
           opponent: '横浜DeNAベイスターズ',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
           opponentScore: 3,
-          result: GameResultValue.WIN,
+          result: GameResultEnum.WIN,
           notes: 'アクティブな試合',
-        },
-      });
+        }),
+      );
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        createTestGame({
           id: deletedGameId,
           gameDate: new Date('2024-04-02'),
           opponent: '阪神タイガース',
           stadiumId: testStadiums.koshien.id,
           dragonsScore: 2,
           opponentScore: 7,
-          result: GameResultValue.LOSE,
+          result: GameResultEnum.LOSE,
           notes: '削除された試合',
           deletedAt: new Date(),
-        },
-      });
+        }),
+      );
 
-      const adapter = new GameAdapter(prismaClient);
+      const adapter = module.get<GameAdapter>(GameAdapter);
       const result = await adapter.findAll();
 
       // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
       const ownGames = result.filter((g) =>
         stadiumIds.includes(g.stadium.id.value),
       );
@@ -337,27 +345,38 @@ describe('GameAdapter Integration Tests', () => {
 
     beforeEach(async () => {
       const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-      await prismaService.game.deleteMany({
-        where: { stadiumId: { in: stadiumIds } },
-      });
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
 
       testGameId = '33333333-game-test-0001-000000000001';
       testGameIdVO = new GameId(testGameId);
       nonExistentGameIdVO = new GameId('123e4567-e89b-12d3-a456-426614174999');
-      adapter = new GameAdapter(prismaClient);
+      adapter = module.get<GameAdapter>(GameAdapter);
 
-      await prismaService.game.create({
-        data: {
+      await gameRepository.save(
+        createTestGame({
           id: testGameId,
           gameDate: new Date('2024-04-01'),
           opponent: '横浜DeNAベイスターズ',
           stadiumId: testStadiums.vantelin.id,
           dragonsScore: 5,
           opponentScore: 3,
-          result: GameResultValue.WIN,
+          result: GameResultEnum.WIN,
           notes: 'テスト試合',
-        },
-      });
+        }),
+      );
+    });
+
+    afterEach(async () => {
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
     });
 
     describe('findById', () => {
@@ -386,8 +405,9 @@ describe('GameAdapter Integration Tests', () => {
 
         expect(result).toBe(true);
 
-        const deletedGame = await prismaService.game.findUnique({
+        const deletedGame = await gameRepository.findOne({
           where: { id: testGameId },
+          withDeleted: true,
         });
         expect(deletedGame?.deletedAt).not.toBeNull();
       });
@@ -399,11 +419,11 @@ describe('GameAdapter Integration Tests', () => {
         expect(result).toBeNull();
       });
 
-      it('should return true when soft-deleting already deleted game', async () => {
+      it('should return false when soft-deleting already deleted game', async () => {
         await adapter.softDelete(testGameIdVO);
 
         const result = await adapter.softDelete(testGameIdVO);
-        expect(result).toBe(true);
+        expect(result).toBe(false);
       });
 
       it('should return false when game does not exist', async () => {

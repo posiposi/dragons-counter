@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma/prisma.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { BulkCreateGameAdapter } from './bulk-create-game.adapter';
 import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
@@ -11,13 +13,16 @@ import { StadiumName } from '../../domain/value-objects/stadium-name';
 import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
 import { GameResultValue } from '../../domain/value-objects/game-result';
-import { PrismaClient } from '@prisma/client';
+import { GameEntity } from '../typeorm/entities/game.entity';
+import { StadiumEntity } from '../typeorm/entities/stadium.entity';
+import { createDataSourceOptions } from '../typeorm/data-source';
 import { randomUUID } from 'crypto';
 
 describe('BulkCreateGameAdapter Integration Tests', () => {
-  let prismaService: PrismaService;
   let module: TestingModule;
   let adapter: BulkCreateGameAdapter;
+  let gameRepository: Repository<GameEntity>;
+  let stadiumRepository: Repository<StadiumEntity>;
 
   // 固定のスタジアムID（bulk-create-game専用）
   const testStadiums = {
@@ -32,49 +37,58 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
   };
 
   beforeAll(async () => {
+    const dataSourceOptions = createDataSourceOptions(
+      process.env.DATABASE_URL ?? '',
+    );
+
     module = await Test.createTestingModule({
-      providers: [
-        BulkCreateGameAdapter,
-        PrismaService,
-        {
-          provide: PrismaClient,
-          useExisting: PrismaService,
-        },
+      imports: [
+        TypeOrmModule.forRoot(dataSourceOptions),
+        TypeOrmModule.forFeature([GameEntity, StadiumEntity]),
       ],
+      providers: [BulkCreateGameAdapter],
     }).compile();
 
-    prismaService = module.get<PrismaService>(PrismaService);
     adapter = module.get<BulkCreateGameAdapter>(BulkCreateGameAdapter);
+    gameRepository = module.get<Repository<GameEntity>>(
+      getRepositoryToken(GameEntity),
+    );
+    stadiumRepository = module.get<Repository<StadiumEntity>>(
+      getRepositoryToken(StadiumEntity),
+    );
 
     // スタジアムをupsertで作成（並列実行でもCIエラーにならないように）
     for (const stadium of Object.values(testStadiums)) {
-      await prismaService.stadium.upsert({
-        where: { id: stadium.id },
-        update: { name: stadium.name },
-        create: {
+      await stadiumRepository.save(
+        stadiumRepository.create({
           id: stadium.id,
           name: stadium.name,
-        },
-      });
+        }),
+      );
     }
   });
 
   afterEach(async () => {
     const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-    await prismaService.game.deleteMany({
-      where: { stadiumId: { in: stadiumIds } },
-    });
+    await gameRepository
+      .createQueryBuilder()
+      .delete()
+      .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+      .execute();
   });
 
   afterAll(async () => {
     const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-    await prismaService.game.deleteMany({
-      where: { stadiumId: { in: stadiumIds } },
-    });
-    await prismaService.stadium.deleteMany({
-      where: { id: { in: stadiumIds } },
-    });
-    await prismaService.$disconnect();
+    await gameRepository
+      .createQueryBuilder()
+      .delete()
+      .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+      .execute();
+    await stadiumRepository
+      .createQueryBuilder()
+      .delete()
+      .where('id IN (:...ids)', { ids: stadiumIds })
+      .execute();
     await module.close();
   });
 
@@ -99,7 +113,7 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
 
       await adapter.save(game);
 
-      const savedGame = await prismaService.game.findUnique({
+      const savedGame = await gameRepository.findOne({
         where: { id: gameId.value },
       });
 
@@ -108,7 +122,7 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
       expect(savedGame?.dragonsScore).toBe(5);
       expect(savedGame?.opponentScore).toBe(3);
       expect(savedGame?.stadiumId).toBe(testStadiums.vantelin.id);
-      expect(savedGame?.result).toBe(GameResultValue.WIN);
+      expect(savedGame?.result).toBe(GameResultValue.WIN.toLowerCase());
     });
 
     it('should save a game with notes', async () => {
@@ -131,7 +145,7 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
 
       await adapter.save(game);
 
-      const savedGame = await prismaService.game.findUnique({
+      const savedGame = await gameRepository.findOne({
         where: { id: gameId.value },
       });
 

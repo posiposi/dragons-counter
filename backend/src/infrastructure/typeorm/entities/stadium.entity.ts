@@ -20,7 +20,7 @@ export class StadiumEntity {
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 
   @OneToMany(() => GameEntity, (game) => game.stadium)
   games: GameEntity[];

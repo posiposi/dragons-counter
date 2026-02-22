@@ -45,7 +45,7 @@ export class GameEntity {
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;

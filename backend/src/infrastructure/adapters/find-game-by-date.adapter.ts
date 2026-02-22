@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { FindGameByDatePort } from '../../domain/ports/find-game-by-date.port';
-import {
-  PrismaClient,
-  Game as PrismaGame,
-  Stadium as PrismaStadium,
-} from '@prisma/client';
 import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
 import { Score } from '../../domain/value-objects/score';
@@ -14,22 +11,22 @@ import { StadiumId } from '../../domain/value-objects/stadium-id';
 import { StadiumName } from '../../domain/value-objects/stadium-name';
 import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
-
-type PrismaGameWithStadium = PrismaGame & { stadium: PrismaStadium };
+import { GameEntity } from '../typeorm/entities/game.entity';
 
 @Injectable()
 export class FindGameByDateAdapter implements FindGameByDatePort {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    @InjectRepository(GameEntity)
+    private readonly gameRepository: Repository<GameEntity>,
+  ) {}
 
   async findByDate(gameDate: GameDate): Promise<Game | null> {
-    const game = await this.prisma.game.findFirst({
+    const game = await this.gameRepository.findOne({
       where: {
         gameDate: gameDate.value,
-        deletedAt: null,
+        deletedAt: IsNull(),
       },
-      include: {
-        stadium: true,
-      },
+      relations: ['stadium'],
     });
 
     if (!game) {
@@ -39,7 +36,7 @@ export class FindGameByDateAdapter implements FindGameByDatePort {
     return this.toDomainEntity(game);
   }
 
-  private toDomainEntity(data: PrismaGameWithStadium): Game {
+  private toDomainEntity(data: GameEntity): Game {
     const stadium = Stadium.create(
       StadiumId.create(data.stadium.id),
       StadiumName.create(data.stadium.name),

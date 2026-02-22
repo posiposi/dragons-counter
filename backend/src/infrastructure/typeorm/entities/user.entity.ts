@@ -27,7 +27,7 @@ export class UserEntity {
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 
   @OneToMany(() => UserRegistrationRequestEntity, (req) => req.user)
   registrationRequests: UserRegistrationRequestEntity[];
