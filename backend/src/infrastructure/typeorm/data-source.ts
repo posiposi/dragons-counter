@@ -37,6 +37,7 @@ export function createDataSourceOptions(
       UserEntity,
       UserRegistrationRequestEntity,
     ],
+    migrations: [],
     synchronize: false,
     logging: false,
   };
