@@ -5,10 +5,29 @@ import { seedStadiums } from './stadium.seed';
 describe('seedStadiums', () => {
   let mockDataSource: Partial<DataSource>;
   let mockRepository: Partial<Repository<StadiumEntity>>;
+  let mockQueryBuilder: Record<string, jest.Mock>;
+  let executeResults: Array<{ values: Record<string, unknown> }>;
 
   beforeEach(() => {
+    executeResults = [];
+
+    mockQueryBuilder = {
+      insert: jest.fn().mockReturnThis(),
+      into: jest.fn().mockReturnThis(),
+      values: jest.fn().mockImplementation((data: Record<string, unknown>) => {
+        executeResults.push({ values: data });
+        return mockQueryBuilder;
+      }),
+      orUpdate: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
+
     mockRepository = {
-      upsert: jest.fn().mockResolvedValue(undefined),
+      createQueryBuilder: jest
+        .fn()
+        .mockReturnValue(
+          mockQueryBuilder,
+        ) as unknown as Repository<StadiumEntity>['createQueryBuilder'],
     };
 
     mockDataSource = {
@@ -16,36 +35,42 @@ describe('seedStadiums', () => {
     };
   });
 
-  it('should upsert 12 stadiums', async () => {
+  it('12件のスタジアムをupsertすること', async () => {
     await seedStadiums(mockDataSource as DataSource);
 
     expect(mockDataSource.getRepository).toHaveBeenCalledWith(StadiumEntity);
-    expect(mockRepository.upsert).toHaveBeenCalledTimes(12);
+    expect(mockQueryBuilder.execute).toHaveBeenCalledTimes(12);
   });
 
-  it('should upsert with conflictPaths on name and include timestamps', async () => {
+  it('idを衝突キーとしてnameとupdated_atのみ更新対象とすること', async () => {
     await seedStadiums(mockDataSource as DataSource);
 
-    expect(mockRepository.upsert).toHaveBeenCalledWith(
+    expect(mockQueryBuilder.orUpdate).toHaveBeenCalledWith(
+      ['name', 'updated_at'],
+      ['id'],
+    );
+  });
+
+  it('タイムスタンプを含むデータをinsertすること', async () => {
+    await seedStadiums(mockDataSource as DataSource);
+
+    expect(executeResults[0].values).toEqual(
       expect.objectContaining({
         name: 'バンテリンドーム ナゴヤ',
         createdAt: expect.any(Date) as Date,
         updatedAt: expect.any(Date) as Date,
       }),
-      { conflictPaths: ['name'] },
     );
   });
 
-  it('should include all expected stadium names', async () => {
+  it('全スタジアム名が含まれること', async () => {
     await seedStadiums(mockDataSource as DataSource);
 
-    const upsertedNames = (mockRepository.upsert as jest.Mock).mock.calls.map(
-      (call: [{ name: string }, unknown]) => call[0].name,
-    );
+    const insertedNames = executeResults.map((r) => r.values.name);
 
-    expect(upsertedNames).toContain('バンテリンドーム ナゴヤ');
-    expect(upsertedNames).toContain('神宮球場');
-    expect(upsertedNames).toContain('甲子園球場');
-    expect(upsertedNames).toContain('エスコンフィールド北海道');
+    expect(insertedNames).toContain('バンテリンドーム ナゴヤ');
+    expect(insertedNames).toContain('神宮球場');
+    expect(insertedNames).toContain('甲子園球場');
+    expect(insertedNames).toContain('エスコンフィールド北海道');
   });
 });

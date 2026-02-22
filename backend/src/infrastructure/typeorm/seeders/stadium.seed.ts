@@ -33,10 +33,13 @@ export async function seedStadiums(dataSource: DataSource): Promise<void> {
   const now = new Date();
 
   for (const stadium of stadiumsData) {
-    await repository.upsert(
-      { ...stadium, createdAt: now, updatedAt: now },
-      { conflictPaths: ['name'] },
-    );
+    await repository
+      .createQueryBuilder()
+      .insert()
+      .into(StadiumEntity)
+      .values({ ...stadium, createdAt: now, updatedAt: now })
+      .orUpdate(['name', 'updated_at'], ['id'])
+      .execute();
     console.log(`Upserted stadium: ${stadium.name}`);
   }
 

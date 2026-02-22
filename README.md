@@ -28,7 +28,7 @@ dra-vincit/
 ### バックエンド
 
 - NestJS / TypeScript
-- Prisma ORM
+- TypeORM
 - MySQL 8.0
 - Domain-Driven Design (DDD)
 

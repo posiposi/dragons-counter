@@ -48,7 +48,7 @@ describe('seedAdminUser', () => {
     process.env = originalEnv;
   });
 
-  it('should skip when ADMIN_EMAIL is not set', async () => {
+  it('ADMIN_EMAILが未設定の場合はスキップすること', async () => {
     delete process.env.ADMIN_EMAIL;
 
     await seedAdminUser(mockDataSource as DataSource);
@@ -56,7 +56,7 @@ describe('seedAdminUser', () => {
     expect(mockDataSource.getRepository).not.toHaveBeenCalled();
   });
 
-  it('should skip when ADMIN_DEFAULT_PASSWORD is not set', async () => {
+  it('ADMIN_DEFAULT_PASSWORDが未設定の場合はスキップすること', async () => {
     delete process.env.ADMIN_DEFAULT_PASSWORD;
 
     await seedAdminUser(mockDataSource as DataSource);
@@ -64,7 +64,7 @@ describe('seedAdminUser', () => {
     expect(mockDataSource.getRepository).not.toHaveBeenCalled();
   });
 
-  it('should skip when admin user already exists', async () => {
+  it('管理者ユーザーが既に存在する場合はスキップすること', async () => {
     (mockUserRepository.findOne as jest.Mock).mockResolvedValue({
       id: 'existing-id',
       email: 'admin@example.com',
@@ -75,7 +75,7 @@ describe('seedAdminUser', () => {
     expect(mockDataSource.transaction).not.toHaveBeenCalled();
   });
 
-  it('should create admin user with ADMIN role', async () => {
+  it('ADMINロールで管理者ユーザーを作成すること', async () => {
     await seedAdminUser(mockDataSource as DataSource);
 
     expect(mockManager.create).toHaveBeenCalledWith(
@@ -88,7 +88,7 @@ describe('seedAdminUser', () => {
     );
   });
 
-  it('should create registration request with APPROVED status', async () => {
+  it('APPROVEDステータスで登録申請を作成すること', async () => {
     await seedAdminUser(mockDataSource as DataSource);
 
     expect(mockManager.create).toHaveBeenCalledWith(
@@ -99,7 +99,7 @@ describe('seedAdminUser', () => {
     );
   });
 
-  it('should save user and registration request in transaction', async () => {
+  it('トランザクション内でユーザーと登録申請を保存すること', async () => {
     await seedAdminUser(mockDataSource as DataSource);
 
     expect(mockDataSource.transaction).toHaveBeenCalled();
