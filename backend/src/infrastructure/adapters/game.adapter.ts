@@ -64,7 +64,7 @@ export class GameAdapter implements GamePort {
 
   async softDelete(gameId: GameId): Promise<boolean> {
     const result = await this.gameRepository.update(
-      { id: gameId.value },
+      { id: gameId.value, deletedAt: IsNull() },
       { deletedAt: new Date() },
     );
 

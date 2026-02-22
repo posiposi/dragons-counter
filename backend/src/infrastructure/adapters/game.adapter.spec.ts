@@ -419,11 +419,11 @@ describe('GameAdapter Integration Tests', () => {
         expect(result).toBeNull();
       });
 
-      it('should return true when soft-deleting already deleted game', async () => {
+      it('should return false when soft-deleting already deleted game', async () => {
         await adapter.softDelete(testGameIdVO);
 
         const result = await adapter.softDelete(testGameIdVO);
-        expect(result).toBe(true);
+        expect(result).toBe(false);
       });
 
       it('should return false when game does not exist', async () => {
