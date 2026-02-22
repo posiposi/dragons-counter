@@ -46,6 +46,12 @@ describe('createDataSourceOptions', () => {
     expect(options.database).toBe('dragons_counter_test');
   });
 
+  it('migrationsが空配列に設定される', () => {
+    const options = createDataSourceOptions(url);
+
+    expect(options.migrations).toEqual([]);
+  });
+
   it('loggingがfalseに設定される', () => {
     const options = createDataSourceOptions(url);
 

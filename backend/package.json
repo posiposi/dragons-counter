@@ -18,7 +18,12 @@
     "test:cov": "dotenv -e .env.test -o -- jest --coverage",
     "test:debug": "dotenv -e .env.test -o -- node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "dotenv -e .env.test -o -- jest --config ./test/jest-e2e.json",
-    "seed": "ts-node src/infrastructure/typeorm/seeders/seed.ts"
+    "seed": "ts-node src/infrastructure/typeorm/seeders/seed.ts",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:run": "npm run typeorm migration:run -- -d src/infrastructure/typeorm/data-source.ts",
+    "migration:revert": "npm run typeorm migration:revert -- -d src/infrastructure/typeorm/data-source.ts",
+    "migration:generate": "npm run typeorm migration:generate -- -d src/infrastructure/typeorm/data-source.ts",
+    "migration:show": "npm run typeorm migration:show -- -d src/infrastructure/typeorm/data-source.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.987.0",
