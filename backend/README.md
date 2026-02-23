@@ -57,6 +57,38 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Database Migrations
+
+TypeORMのマイグレーション機能でDBスキーマを管理しています。`synchronize: false` のため、エンティティを変更しただけではDBに反映されません。
+
+### スキーマ変更時のフロー
+
+1. エンティティファイル（`src/infrastructure/typeorm/entities/`）を修正する
+2. マイグレーションファイルを生成する
+3. `data-source.ts` の `migrations` 配列に生成されたクラスを登録する
+4. マイグレーションを実行してDBに反映する
+
+### よく使うコマンド
+
+```bash
+# マイグレーションファイルの生成（エンティティとDB差分から自動生成）
+docker compose exec backend npm run migration:generate -- src/infrastructure/typeorm/migrations/<マイグレーション名>
+
+# マイグレーションの実行（未実行分のみDBに適用）
+docker compose exec backend npm run migration:run
+
+# 直近1件のマイグレーションを取り消す
+docker compose exec backend npm run migration:revert
+
+# マイグレーションの実行状況を確認する
+docker compose exec backend npm run migration:show
+```
+
+### 注意事項
+
+- マイグレーションファイル生成後、`data-source.ts` の `migrations` 配列へのクラス登録を忘れないこと
+- `migration:generate` はエンティティと現在のDB状態を比較して差分を生成するため、DBが最新の状態であることを確認してから実行すること
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
