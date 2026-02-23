@@ -4,8 +4,10 @@ import {
   StadiumEntity,
   UserEntity,
   UserRegistrationRequestEntity,
+  UserGameEntity,
 } from './entities';
 import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
+import { AddUsersGamesTable1771816990589 } from './migrations/1771816990589-AddUsersGamesTable';
 
 describe('createDataSourceOptions', () => {
   const url = 'mysql://dragons_user:dragons_password@db:3306/dragons_counter';
@@ -30,11 +32,14 @@ describe('createDataSourceOptions', () => {
   it('entitiesに全エンティティが登録される', () => {
     const options = createDataSourceOptions(url);
 
+    expect(options.entities).toHaveLength(5);
+    expect(options.entities).toContain(UserGameEntity);
     expect(options.entities).toEqual([
       GameEntity,
       StadiumEntity,
       UserEntity,
       UserRegistrationRequestEntity,
+      UserGameEntity,
     ]);
   });
 
@@ -47,10 +52,13 @@ describe('createDataSourceOptions', () => {
     expect(options.database).toBe('dragons_counter_test');
   });
 
-  it('migrationsに初期マイグレーションが登録される', () => {
+  it('migrationsに全マイグレーションが登録される', () => {
     const options = createDataSourceOptions(url);
 
-    expect(options.migrations).toEqual([InitialSchema1771806609856]);
+    expect(options.migrations).toEqual([
+      InitialSchema1771806609856,
+      AddUsersGamesTable1771816990589,
+    ]);
   });
 
   it('loggingがfalseに設定される', () => {

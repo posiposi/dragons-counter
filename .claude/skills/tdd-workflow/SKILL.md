@@ -93,6 +93,23 @@ docker compose exec backend npm run test
 4. テストを再実行する
 5. 3回修正しても通らない場合は、テストの前提条件を見直す
 
+## マイグレーション作成手順
+
+エンティティ変更を伴うタスクでは、以下の手順でマイグレーションを作成する。
+
+1. エンティティファイル（`*.entity.ts`）を変更・作成する
+2. `data-source.ts` の `entities` 配列にエンティティを登録する
+3. `migration:generate` コマンドでマイグレーションを自動生成する
+
+```bash
+docker compose exec backend npm run migration:generate -- src/infrastructure/typeorm/migrations/<MigrationName>
+```
+
+4. 生成されたマイグレーションクラスを `data-source.ts` の `migrations` 配列に登録する
+5. `data-source.spec.ts` のテストを更新する
+
+**注意**: マイグレーションファイルは手動作成しない。必ず `migration:generate` で自動生成する。
+
 ## テストのアンチパターン
 
 - テストが実装の詳細に依存している（privateメソッドのテスト等）
