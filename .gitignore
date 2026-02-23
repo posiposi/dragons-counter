@@ -28,3 +28,4 @@ terraform.rc
 .github/templates/
 lambda/*.zip
 .worktrees/
+.vscode/
