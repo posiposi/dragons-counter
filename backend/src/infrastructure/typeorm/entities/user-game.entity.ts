@@ -14,7 +14,7 @@ import { GameEntity } from './game.entity';
 
 @Entity('users_games')
 @Unique('UQ_users_games_user_game', ['userId', 'gameId'])
-export class UsersGamesEntity {
+export class UserGameEntity {
   @PrimaryColumn({ type: 'varchar', length: 191 })
   id: string;
 

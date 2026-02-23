@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { UserRoleEnum } from '../enums/user-role.enum';
 import { UserRegistrationRequestEntity } from './user-registration-request.entity';
-import { UsersGamesEntity } from './user-game.entity';
+import { UserGameEntity } from './user-game.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -33,6 +33,6 @@ export class UserEntity {
   @OneToMany(() => UserRegistrationRequestEntity, (req) => req.user)
   registrationRequests: UserRegistrationRequestEntity[];
 
-  @OneToMany(() => UsersGamesEntity, (usersGames) => usersGames.user)
-  usersGames: UsersGamesEntity[];
+  @OneToMany(() => UserGameEntity, (usersGames) => usersGames.user)
+  usersGames: UserGameEntity[];
 }

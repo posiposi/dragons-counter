@@ -2,7 +2,7 @@ import { getMetadataArgsStorage } from 'typeorm';
 import { GameEntity } from './game.entity';
 import { GameResultEnum } from '../enums/game-result.enum';
 import { StadiumEntity } from './stadium.entity';
-import { UsersGamesEntity } from './user-game.entity';
+import { UserGameEntity } from './user-game.entity';
 
 function findColumn(propertyName: string) {
   return getMetadataArgsStorage()
@@ -161,7 +161,7 @@ describe('GameEntity', () => {
       expect(usersGamesRelation!.relationType).toBe('one-to-many');
     });
 
-    it('usersGamesプロパティのリレーション先がUsersGamesEntityである', () => {
+    it('usersGamesプロパティのリレーション先がUserGameEntityである', () => {
       const relations = getMetadataArgsStorage().relations.filter(
         (relation) => relation.target === GameEntity,
       );
@@ -171,7 +171,7 @@ describe('GameEntity', () => {
 
       expect(usersGamesRelation).toBeDefined();
       const relationType = (usersGamesRelation!.type as () => unknown)();
-      expect(relationType).toBe(UsersGamesEntity);
+      expect(relationType).toBe(UserGameEntity);
     });
 
     it('StadiumEntityにOneToManyリレーションが定義される', () => {

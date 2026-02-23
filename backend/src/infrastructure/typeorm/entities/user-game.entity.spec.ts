@@ -1,19 +1,19 @@
 import { getMetadataArgsStorage } from 'typeorm';
-import { UsersGamesEntity } from './user-game.entity';
+import { UserGameEntity } from './user-game.entity';
 import { UserEntity } from './user.entity';
 import { GameEntity } from './game.entity';
 
 function findColumn(propertyName: string) {
   return getMetadataArgsStorage()
-    .columns.filter((c) => c.target === UsersGamesEntity)
+    .columns.filter((c) => c.target === UserGameEntity)
     .find((c) => c.propertyName === propertyName);
 }
 
-describe('UsersGamesEntity', () => {
+describe('UserGameEntity', () => {
   describe('テーブル定義', () => {
     it('users_gamesテーブルにマッピングされる', () => {
       const tableMetadata = getMetadataArgsStorage().tables.find(
-        (table) => table.target === UsersGamesEntity,
+        (table) => table.target === UserGameEntity,
       );
 
       expect(tableMetadata).toBeDefined();
@@ -22,7 +22,7 @@ describe('UsersGamesEntity', () => {
 
     it('ユニーク制約が設定される', () => {
       const uniques = getMetadataArgsStorage().uniques.filter(
-        (u) => u.target === UsersGamesEntity,
+        (u) => u.target === UserGameEntity,
       );
       const userGameUnique = uniques.find(
         (u) => u.name === 'UQ_users_games_user_game',
@@ -46,7 +46,7 @@ describe('UsersGamesEntity', () => {
 
     it('idカラムに自動生成が設定されていない', () => {
       const generatedColumns = getMetadataArgsStorage().generations.filter(
-        (gen) => gen.target === UsersGamesEntity,
+        (gen) => gen.target === UserGameEntity,
       );
 
       expect(generatedColumns).toHaveLength(0);
@@ -107,7 +107,7 @@ describe('UsersGamesEntity', () => {
   describe('リレーション定義', () => {
     it('userプロパティにManyToOneリレーションが定義される', () => {
       const relations = getMetadataArgsStorage().relations.filter(
-        (relation) => relation.target === UsersGamesEntity,
+        (relation) => relation.target === UserGameEntity,
       );
       const userRelation = relations.find(
         (relation) => relation.propertyName === 'user',
@@ -119,7 +119,7 @@ describe('UsersGamesEntity', () => {
 
     it('userプロパティにJoinColumnが設定される', () => {
       const joinColumns = getMetadataArgsStorage().joinColumns.filter(
-        (jc) => jc.target === UsersGamesEntity,
+        (jc) => jc.target === UserGameEntity,
       );
       const userJoinColumn = joinColumns.find(
         (jc) => jc.propertyName === 'user',
@@ -131,7 +131,7 @@ describe('UsersGamesEntity', () => {
 
     it('gameプロパティにManyToOneリレーションが定義される', () => {
       const relations = getMetadataArgsStorage().relations.filter(
-        (relation) => relation.target === UsersGamesEntity,
+        (relation) => relation.target === UserGameEntity,
       );
       const gameRelation = relations.find(
         (relation) => relation.propertyName === 'game',
@@ -143,7 +143,7 @@ describe('UsersGamesEntity', () => {
 
     it('gameプロパティにJoinColumnが設定される', () => {
       const joinColumns = getMetadataArgsStorage().joinColumns.filter(
-        (jc) => jc.target === UsersGamesEntity,
+        (jc) => jc.target === UserGameEntity,
       );
       const gameJoinColumn = joinColumns.find(
         (jc) => jc.propertyName === 'game',
@@ -155,7 +155,7 @@ describe('UsersGamesEntity', () => {
 
     it('UserEntityへのリレーションがUserEntityを参照する', () => {
       const relations = getMetadataArgsStorage().relations.filter(
-        (relation) => relation.target === UsersGamesEntity,
+        (relation) => relation.target === UserGameEntity,
       );
       const userRelation = relations.find(
         (relation) => relation.propertyName === 'user',
@@ -168,7 +168,7 @@ describe('UsersGamesEntity', () => {
 
     it('GameEntityへのリレーションがGameEntityを参照する', () => {
       const relations = getMetadataArgsStorage().relations.filter(
-        (relation) => relation.target === UsersGamesEntity,
+        (relation) => relation.target === UserGameEntity,
       );
       const gameRelation = relations.find(
         (relation) => relation.propertyName === 'game',
@@ -182,7 +182,7 @@ describe('UsersGamesEntity', () => {
 
   describe('インスタンス生成', () => {
     it('プロパティに値を設定できる', () => {
-      const entity = new UsersGamesEntity();
+      const entity = new UserGameEntity();
       entity.id = '550e8400-e29b-41d4-a716-446655440000';
       entity.userId = '660e8400-e29b-41d4-a716-446655440001';
       entity.gameId = '770e8400-e29b-41d4-a716-446655440002';
@@ -199,7 +199,7 @@ describe('UsersGamesEntity', () => {
     });
 
     it('impressionにnullを設定できる', () => {
-      const entity = new UsersGamesEntity();
+      const entity = new UserGameEntity();
       entity.impression = null;
 
       expect(entity.impression).toBeNull();

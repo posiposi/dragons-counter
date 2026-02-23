@@ -4,7 +4,7 @@ import {
   StadiumEntity,
   UserEntity,
   UserRegistrationRequestEntity,
-  UsersGamesEntity,
+  UserGameEntity,
 } from './entities';
 import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
 import { AddUsersGamesTable1771816990589 } from './migrations/1771816990589-AddUsersGamesTable';
@@ -33,13 +33,13 @@ describe('createDataSourceOptions', () => {
     const options = createDataSourceOptions(url);
 
     expect(options.entities).toHaveLength(5);
-    expect(options.entities).toContain(UsersGamesEntity);
+    expect(options.entities).toContain(UserGameEntity);
     expect(options.entities).toEqual([
       GameEntity,
       StadiumEntity,
       UserEntity,
       UserRegistrationRequestEntity,
-      UsersGamesEntity,
+      UserGameEntity,
     ]);
   });
 

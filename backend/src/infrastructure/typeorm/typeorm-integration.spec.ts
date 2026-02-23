@@ -5,7 +5,7 @@ import {
   StadiumEntity,
   UserEntity,
   UserRegistrationRequestEntity,
-  UsersGamesEntity,
+  UserGameEntity,
 } from './entities';
 import { createDataSourceOptions } from './data-source';
 
@@ -21,7 +21,7 @@ describe('TypeORM DataSource設定', () => {
         StadiumEntity,
         UserEntity,
         UserRegistrationRequestEntity,
-        UsersGamesEntity,
+        UserGameEntity,
       ],
     },
     destroy: jest.fn(),
@@ -66,7 +66,7 @@ describe('createDataSourceOptions', () => {
     expect(options.entities).toContain(StadiumEntity);
     expect(options.entities).toContain(UserEntity);
     expect(options.entities).toContain(UserRegistrationRequestEntity);
-    expect(options.entities).toContain(UsersGamesEntity);
+    expect(options.entities).toContain(UserGameEntity);
     expect(options.entities).toHaveLength(5);
   });
 });
