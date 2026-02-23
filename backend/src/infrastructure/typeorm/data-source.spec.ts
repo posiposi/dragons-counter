@@ -5,6 +5,7 @@ import {
   UserEntity,
   UserRegistrationRequestEntity,
 } from './entities';
+import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
 
 describe('createDataSourceOptions', () => {
   const url = 'mysql://dragons_user:dragons_password@db:3306/dragons_counter';
@@ -46,10 +47,10 @@ describe('createDataSourceOptions', () => {
     expect(options.database).toBe('dragons_counter_test');
   });
 
-  it('migrationsが空配列に設定される', () => {
+  it('migrationsに初期マイグレーションが登録される', () => {
     const options = createDataSourceOptions(url);
 
-    expect(options.migrations).toEqual([]);
+    expect(options.migrations).toEqual([InitialSchema1771806609856]);
   });
 
   it('loggingがfalseに設定される', () => {
