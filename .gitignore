@@ -27,6 +27,7 @@ override.tf.json
 terraform.rc
 .github/templates/
 lambda/*.zip
+**/dist/*.zip
 __pycache__/
 *.pyc
 .pytest_cache/
