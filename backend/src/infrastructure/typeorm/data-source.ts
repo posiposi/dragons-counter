@@ -6,6 +6,7 @@ import {
   UserEntity,
   UserRegistrationRequestEntity,
 } from './entities';
+import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
 
 function parseUrl(databaseUrl: string): URL {
   try {
@@ -37,7 +38,7 @@ export function createDataSourceOptions(
       UserEntity,
       UserRegistrationRequestEntity,
     ],
-    migrations: [],
+    migrations: [InitialSchema1771806609856],
     synchronize: false,
     logging: false,
   };

@@ -1,98 +1,145 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Dragons Counter（Dra Vincit）のバックエンドAPIサーバー。
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 技術スタック
 
-## Description
+- **フレームワーク**: NestJS v11
+- **言語**: TypeScript
+- **ORM**: TypeORM v0.3
+- **DB**: MySQL 8.0
+- **認証**: Passport（JWT + Local Strategy）
+- **テスト**: Jest
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## アーキテクチャ
 
-## Project setup
+ドメイン駆動設計（DDD）のレイヤードアーキテクチャを採用しています。
 
-```bash
-$ npm install
+```
+src/
+├── domain/                  # ドメイン層（ビジネスロジック）
+│   ├── entities/            #   ドメインエンティティ（Game, User）
+│   ├── value-objects/       #   値オブジェクト（Email, Score, GameDate 等）
+│   ├── enums/               #   ドメインEnum（UserRole, RegistrationStatus）
+│   ├── exceptions/          #   ドメイン例外
+│   ├── ports/               #   ポート（リポジトリインターフェース）
+│   └── usecases/            #   ユースケース
+├── application/             # アプリケーション層（API・認証）
+│   ├── controllers/         #   コントローラー（Game CRUD）
+│   ├── admin/               #   管理者用コントローラー・ガード
+│   ├── auth/                #   認証（JWT, Local, CSRF）
+│   ├── dto/                 #   リクエスト/レスポンスDTO
+│   └── filters/             #   例外フィルター
+├── infrastructure/          # インフラ層（外部接続）
+│   ├── adapters/            #   ポート実装（リポジトリ・外部サービス）
+│   └── typeorm/             #   TypeORM設定
+│       ├── entities/        #     DBエンティティ
+│       ├── enums/           #     DB用Enum
+│       ├── migrations/      #     マイグレーションファイル
+│       └── seeders/         #     シードデータ
+├── app.module.ts            # ルートモジュール
+└── main.ts                  # エントリーポイント
 ```
 
-## Compile and run the project
+## 開発環境のセットアップ
+
+開発環境はDocker Composeで構築されています。プロジェクトルートで以下を実行してください。
 
 ```bash
-# development
-$ npm run start
+# コンテナの起動
+docker compose up -d
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# コンテナの停止
+docker compose down
 ```
 
-## Run tests
+| サービス | ポート | 用途 |
+|---------|-------|------|
+| backend | 3443 (HTTPS) | APIサーバー |
+| db | 3306 | 開発用MySQL |
+| test-db | 3307 | テスト用MySQL |
+
+開発環境では自己署名証明書によるHTTPSで起動します。`certs/` ディレクトリに証明書を配置してください。
+
+## コマンド一覧
+
+すべてのコマンドはDockerコンテナ内で実行します。
+
+### アプリケーション
 
 ```bash
-# unit tests
-$ npm run test
+# 開発サーバー起動（watchモード、コンテナ起動時に自動実行）
+docker compose exec backend npm run start:dev
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# ビルド
+docker compose exec backend npm run build
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### テスト
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# ユニットテスト実行
+docker compose exec backend npm run test
+
+# watchモードでテスト実行
+docker compose exec backend npm run test:watch
+
+# カバレッジ付きテスト
+docker compose exec backend npm run test:cov
+
+# E2Eテスト
+docker compose exec backend npm run test:e2e
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### コード品質
 
-## Resources
+```bash
+# フォーマット（Prettier）
+docker compose exec backend npm run format
 
-Check out a few resources that may come in handy when working with NestJS:
+# リント（ESLint）
+docker compose exec backend npm run lint
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### シード
 
-## Support
+```bash
+# 初期データ投入（スタジアム・管理者ユーザー）
+docker compose exec backend npm run seed
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## データベースマイグレーション
 
-## Stay in touch
+TypeORMのマイグレーション機能でDBスキーマを管理しています。`synchronize: false` のため、エンティティを変更しただけではDBに反映されません。
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### スキーマ変更時のフロー
 
-## License
+1. エンティティファイル（`src/infrastructure/typeorm/entities/`）を修正する
+2. マイグレーションファイルを生成する
+3. 生成されたクラスを `src/infrastructure/typeorm/data-source.ts` の `migrations` 配列にimport・登録する
+4. マイグレーションを実行してDBに反映する
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### よく使うコマンド
+
+```bash
+# マイグレーションファイルの生成（エンティティとDB差分から自動生成）
+docker compose exec backend npm run migration:generate -- src/infrastructure/typeorm/migrations/<マイグレーション名>
+
+# マイグレーションの実行（未実行分のみDBに適用）
+docker compose exec backend npm run migration:run
+
+# 直近1件のマイグレーションを取り消す
+docker compose exec backend npm run migration:revert
+
+# マイグレーションの実行状況を確認する
+docker compose exec backend npm run migration:show
+```
+
+### 注意事項
+
+- マイグレーションファイル生成後、`data-source.ts` の `migrations` 配列へのクラス登録を忘れないこと
+- `migration:generate` はエンティティと現在のDB状態を比較して差分を生成するため、DBが最新の状態であることを確認してから実行すること
+
+## 環境変数
+
+プロジェクトルートの `.env` で設定します。必要な環境変数については `.env` のテンプレートまたはプロジェクト管理者に確認してください。
