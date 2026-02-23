@@ -6,10 +6,12 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { GameResultEnum } from '../enums/game-result.enum';
 import { StadiumEntity } from './stadium.entity';
+import { UsersGamesEntity } from './user-game.entity';
 
 @Entity('games')
 export class GameEntity {
@@ -49,4 +51,7 @@ export class GameEntity {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
+
+  @OneToMany(() => UsersGamesEntity, (usersGames) => usersGames.game)
+  usersGames: UsersGamesEntity[];
 }

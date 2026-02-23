@@ -1,6 +1,7 @@
 import { getMetadataArgsStorage } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { UserRoleEnum } from '../enums/user-role.enum';
+import { UsersGamesEntity } from './user-game.entity';
 
 function findColumn(propertyName: string) {
   return getMetadataArgsStorage()
@@ -61,6 +62,33 @@ describe('UserEntity', () => {
       expect(updatedAtColumn).toBeDefined();
       expect(updatedAtColumn!.options.name).toBe('updated_at');
       expect(updatedAtColumn!.mode).toBe('updateDate');
+    });
+  });
+
+  describe('リレーション定義', () => {
+    it('usersGamesプロパティにOneToManyリレーションが定義される', () => {
+      const relations = getMetadataArgsStorage().relations.filter(
+        (relation) => relation.target === UserEntity,
+      );
+      const usersGamesRelation = relations.find(
+        (relation) => relation.propertyName === 'usersGames',
+      );
+
+      expect(usersGamesRelation).toBeDefined();
+      expect(usersGamesRelation!.relationType).toBe('one-to-many');
+    });
+
+    it('usersGamesプロパティのリレーション先がUsersGamesEntityである', () => {
+      const relations = getMetadataArgsStorage().relations.filter(
+        (relation) => relation.target === UserEntity,
+      );
+      const usersGamesRelation = relations.find(
+        (relation) => relation.propertyName === 'usersGames',
+      );
+
+      expect(usersGamesRelation).toBeDefined();
+      const relationType = (usersGamesRelation!.type as () => unknown)();
+      expect(relationType).toBe(UsersGamesEntity);
     });
   });
 

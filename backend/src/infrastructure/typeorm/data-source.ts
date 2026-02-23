@@ -5,6 +5,7 @@ import {
   StadiumEntity,
   UserEntity,
   UserRegistrationRequestEntity,
+  UsersGamesEntity,
 } from './entities';
 import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
 
@@ -37,6 +38,7 @@ export function createDataSourceOptions(
       StadiumEntity,
       UserEntity,
       UserRegistrationRequestEntity,
+      UsersGamesEntity,
     ],
     migrations: [InitialSchema1771806609856],
     synchronize: false,

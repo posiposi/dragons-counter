@@ -4,6 +4,7 @@ import {
   StadiumEntity,
   UserEntity,
   UserRegistrationRequestEntity,
+  UsersGamesEntity,
 } from './entities';
 import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
 
@@ -30,11 +31,14 @@ describe('createDataSourceOptions', () => {
   it('entitiesに全エンティティが登録される', () => {
     const options = createDataSourceOptions(url);
 
+    expect(options.entities).toHaveLength(5);
+    expect(options.entities).toContain(UsersGamesEntity);
     expect(options.entities).toEqual([
       GameEntity,
       StadiumEntity,
       UserEntity,
       UserRegistrationRequestEntity,
+      UsersGamesEntity,
     ]);
   });
 
