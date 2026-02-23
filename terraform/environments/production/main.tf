@@ -82,20 +82,20 @@ module "rds" {
 module "ec2" {
   source = "../../modules/ec2"
 
-  project_name              = var.project_name
-  environment               = var.environment
-  aws_region                = var.aws_region
-  subnet_id                 = module.networking.private_subnet_1_id
-  ec2_security_group_id     = module.security.ec2_security_group_id
-  github_repo_url           = var.github_repo_url
-  frontend_target_group_arn = module.alb.frontend_target_group_arn
-  backend_target_group_arn  = module.alb.backend_target_group_arn
-  db_host                   = module.rds.db_instance_address
-  db_name                   = module.rds.db_name
-  db_user                   = module.rds.db_username
-  rds_secret_arn            = module.rds.db_password_secret_arn
-  enable_codedeploy         = true
-  deploy_bucket_arn         = module.s3_deploy.bucket_arn
+  project_name               = var.project_name
+  environment                = var.environment
+  aws_region                 = var.aws_region
+  subnet_id                  = module.networking.private_subnet_1_id
+  ec2_security_group_id      = module.security.ec2_security_group_id
+  github_repo_url            = var.github_repo_url
+  frontend_target_group_arn  = module.alb.frontend_target_group_arn
+  backend_target_group_arn   = module.alb.backend_target_group_arn
+  db_host                    = module.rds.db_instance_address
+  db_name                    = module.rds.db_name
+  db_user                    = module.rds.db_username
+  rds_secret_arn             = module.rds.db_password_secret_arn
+  enable_codedeploy          = true
+  deploy_bucket_arn          = module.s3_deploy.bucket_arn
   api_gateway_url            = module.api_gateway.stage_invoke_url
   scraper_api_key_secret_arn = module.api_gateway.scraper_api_key_secret_arn
   scraper_api_key_secret_id  = module.api_gateway.scraper_api_key_secret_id
@@ -139,6 +139,17 @@ module "github_oidc" {
   aws_account_id      = data.aws_caller_identity.current.account_id
   s3_bucket_arn       = module.s3_deploy.bucket_arn
   codedeploy_app_name = module.codedeploy.app_name
+}
+
+module "instance_scheduler" {
+  source = "../../modules/instance-scheduler"
+
+  project_name     = var.project_name
+  environment      = var.environment
+  ec2_instance_id  = module.ec2.instance_id
+  ec2_instance_arn = module.ec2.instance_arn
+  rds_instance_id  = module.rds.db_instance_id
+  rds_instance_arn = module.rds.db_instance_arn
 }
 
 module "lambda_scraper" {

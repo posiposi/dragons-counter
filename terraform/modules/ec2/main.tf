@@ -35,14 +35,14 @@ resource "aws_instance" "app" {
   }
 
   user_data_base64 = base64encode(templatefile("${path.module}/user_data.sh", {
-    aws_region      = var.aws_region
-    github_repo_url = var.github_repo_url
-    db_host         = var.db_host
-    db_name         = var.db_name
-    db_user         = var.db_user
-    db_secret_arn   = var.rds_secret_arn
-    frontend_port   = var.frontend_port
-    backend_port    = var.backend_port
+    aws_region                = var.aws_region
+    github_repo_url           = var.github_repo_url
+    db_host                   = var.db_host
+    db_name                   = var.db_name
+    db_user                   = var.db_user
+    db_secret_arn             = var.rds_secret_arn
+    frontend_port             = var.frontend_port
+    backend_port              = var.backend_port
     api_gateway_url           = var.api_gateway_url
     scraper_api_key_secret_id = var.scraper_api_key_secret_id
   }))

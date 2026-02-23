@@ -13,6 +13,11 @@ output "db_instance_port" {
   value       = aws_db_instance.main.port
 }
 
+output "db_instance_id" {
+  description = "RDSインスタンスの識別子"
+  value       = aws_db_instance.main.identifier
+}
+
 output "db_instance_arn" {
   description = "RDSインスタンスのARN"
   value       = aws_db_instance.main.arn
