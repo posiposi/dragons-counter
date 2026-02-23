@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: coderabbit CLIによるレビュー実行と、プロジェクト固有のDDD/CQRS観点での補足レビューを定義するスキル。
+description: coderabbit CLIによるコードレビュー実行と、プロジェクト固有のDDD/CQRS観点での補足レビューを定義するスキル。コードレビュー・品質検証時に使用する。
 user-invocable: false
 allowed-tools: Read, Glob, Grep, Bash, TaskUpdate, TaskGet, TaskList
 ---

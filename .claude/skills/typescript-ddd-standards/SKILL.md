@@ -1,6 +1,6 @@
 ---
 name: typescript-ddd-standards
-description: ドメイン駆動設計(以下DDD)におけるTypeScriptの開発規約。バックエンドでのTypescriptコード作成時に使用する。各レイヤーでの実装パターンを定義。
+description: ドメイン駆動設計(以下DDD)におけるTypeScriptの開発規約。バックエンドでのTypescriptコード作成時に使用する。各レイヤーでの実装パターンを定義。DDD実装・コードレビュー・リファクタリング時に使用する。
 allowed-tools: Read, Grep, Glob
 ---
 
