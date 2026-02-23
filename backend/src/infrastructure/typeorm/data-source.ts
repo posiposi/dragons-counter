@@ -8,6 +8,7 @@ import {
   UsersGamesEntity,
 } from './entities';
 import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
+import { AddUsersGamesTable1771816990589 } from './migrations/1771816990589-AddUsersGamesTable';
 
 function parseUrl(databaseUrl: string): URL {
   try {
@@ -40,7 +41,7 @@ export function createDataSourceOptions(
       UserRegistrationRequestEntity,
       UsersGamesEntity,
     ],
-    migrations: [InitialSchema1771806609856],
+    migrations: [InitialSchema1771806609856, AddUsersGamesTable1771816990589],
     synchronize: false,
     logging: false,
   };

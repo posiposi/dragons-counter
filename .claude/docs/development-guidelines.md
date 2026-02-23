@@ -113,6 +113,33 @@
 - ポートインターフェース名をそのまま文字列トークンとして使用する
 - 例: `'GamePort'`, `'UserCommandPort'`, `'UserQueryPort'`
 
+## マイグレーション規約
+
+### マイグレーションファイルの作成
+
+**重要**: マイグレーションファイルは手動作成せず、必ず `migration:generate` コマンドで自動生成する。
+
+```bash
+# Dockerコンテナ内で実行
+docker compose exec backend npm run migration:generate -- src/infrastructure/typeorm/migrations/<MigrationName>
+```
+
+- エンティティ定義（`entities/*.entity.ts`）の変更内容からTypeORMが差分を検出し、SQLを自動生成する
+- 生成後、`data-source.ts` の `migrations` 配列に新しいマイグレーションクラスを登録する
+- `data-source.spec.ts` のテストも合わせて更新する
+
+### マイグレーションの適用
+
+```bash
+docker compose exec backend npm run migration:run
+```
+
+### マイグレーションの巻き戻し
+
+```bash
+docker compose exec backend npm run migration:revert
+```
+
 ## テスト規約
 
 ### テスト実行
