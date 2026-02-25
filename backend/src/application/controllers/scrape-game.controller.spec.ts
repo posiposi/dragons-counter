@@ -86,10 +86,11 @@ describe('ScrapeGameController', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('JwtAuthGuardとAdminGuardが適用されている', () => {
-    const guards = Reflect.getMetadata(GUARDS_METADATA, scrapeMethod) as Array<
-      new (...args: unknown[]) => unknown
-    >;
+  it('JwtAuthGuardとAdminGuardがクラスレベルで適用されている', () => {
+    const guards = Reflect.getMetadata(
+      GUARDS_METADATA,
+      ScrapeGameController,
+    ) as Array<new (...args: unknown[]) => unknown>;
 
     expect(guards).toBeDefined();
     expect(guards).toHaveLength(2);

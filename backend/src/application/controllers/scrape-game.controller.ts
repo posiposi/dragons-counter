@@ -6,11 +6,11 @@ import { ScrapeGameRequestDto } from '../dto/request/scrape-game-request.dto';
 import type { ScrapeResult } from '../../domain/ports/scraping.port';
 
 @Controller('scrape')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class ScrapeGameController {
   constructor(private readonly scrapeGameUsecase: ScrapeGameUsecase) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, AdminGuard)
   async scrape(@Body() body: ScrapeGameRequestDto): Promise<ScrapeResult> {
     return await this.scrapeGameUsecase.execute(body.date);
   }
