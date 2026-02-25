@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { BulkCreateGameController } from './bulk-create-game.controller';
 import {
   BulkCreateGameUsecase,
@@ -6,6 +7,8 @@ import {
 } from '../../domain/usecases/bulk-create-game.usecase';
 import { BulkCreateGameDto } from '../dto/request/bulk-create-game.dto';
 import { InternalServerErrorException } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../admin/guards/admin.guard';
 
 describe('BulkCreateGameController', () => {
   let controller: BulkCreateGameController;
@@ -98,5 +101,17 @@ describe('BulkCreateGameController', () => {
         InternalServerErrorException,
       );
     });
+  });
+
+  it('JwtAuthGuardとAdminGuardがクラスレベルで適用されている', () => {
+    const guards = Reflect.getMetadata(
+      GUARDS_METADATA,
+      BulkCreateGameController,
+    ) as Array<new (...args: unknown[]) => unknown>;
+
+    expect(guards).toBeDefined();
+    expect(guards).toHaveLength(2);
+    expect(guards[0]).toBe(JwtAuthGuard);
+    expect(guards[1]).toBe(AdminGuard);
   });
 });

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Post,
@@ -6,14 +5,18 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   BulkCreateGameUsecase,
   BulkCreateGameResult,
 } from '../../domain/usecases/bulk-create-game.usecase';
 import { BulkCreateGameDto } from '../dto/request/bulk-create-game.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../admin/guards/admin.guard';
 
 @Controller('games')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class BulkCreateGameController {
   constructor(private readonly bulkCreateGameUsecase: BulkCreateGameUsecase) {}
 
@@ -24,7 +27,7 @@ export class BulkCreateGameController {
   ): Promise<BulkCreateGameResult> {
     try {
       return await this.bulkCreateGameUsecase.execute(dto.games);
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to bulk create games');
     }
   }

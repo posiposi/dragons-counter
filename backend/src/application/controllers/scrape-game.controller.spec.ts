@@ -6,6 +6,7 @@ import { plainToInstance } from 'class-transformer';
 import { ScrapeGameController } from './scrape-game.controller';
 import { ScrapeGameUsecase } from '../../domain/usecases/scrape-game.usecase';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../admin/guards/admin.guard';
 import { ScrapeGameRequestDto } from '../dto/request/scrape-game-request.dto';
 import type { ScrapeResult } from '../../domain/ports/scraping.port';
 
@@ -85,14 +86,15 @@ describe('ScrapeGameController', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('JwtAuthGuardが適用されている', () => {
+  it('JwtAuthGuardとAdminGuardが適用されている', () => {
     const guards = Reflect.getMetadata(GUARDS_METADATA, scrapeMethod) as Array<
       new (...args: unknown[]) => unknown
     >;
 
     expect(guards).toBeDefined();
-    expect(guards).toHaveLength(1);
+    expect(guards).toHaveLength(2);
     expect(guards[0]).toBe(JwtAuthGuard);
+    expect(guards[1]).toBe(AdminGuard);
   });
 
   it('POSTメソッドでscrapeパスにマッピングされている', () => {
