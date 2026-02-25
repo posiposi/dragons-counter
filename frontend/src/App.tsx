@@ -7,6 +7,7 @@ import SignupPage from "@/pages/SignupPage";
 import HomePage from "@/pages/HomePage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminUserDetailPage from "@/pages/admin/AdminUserDetailPage";
+import AdminGamesPage from "@/pages/admin/AdminGamesPage";
 
 function App() {
   return (
@@ -36,6 +37,14 @@ function App() {
             element={
               <AdminRoute>
                 <AdminUserDetailPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/games"
+            element={
+              <AdminRoute>
+                <AdminGamesPage />
               </AdminRoute>
             }
           />
