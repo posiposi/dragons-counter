@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, Database } from "lucide-react";
 import { AdminUser, RegistrationStatus } from "@/types/admin";
 import { fetchAdminUsers } from "@/lib/api/admin";
 import UserStatusBadge from "@/components/admin/UserStatusBadge";
@@ -65,10 +65,19 @@ export default function AdminUsersPage() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <h1 className={styles.title}>ユーザー管理</h1>
-          <button className={styles.backLink} onClick={() => navigate("/")}>
-            <ArrowLeft size={18} />
-            <span>ホームへ戻る</span>
-          </button>
+          <div className={styles.headerActions}>
+            <button
+              className={styles.navLink}
+              onClick={() => navigate("/admin/games")}
+            >
+              <Database size={18} />
+              <span>試合データ管理</span>
+            </button>
+            <button className={styles.backLink} onClick={() => navigate("/")}>
+              <ArrowLeft size={18} />
+              <span>ホームへ戻る</span>
+            </button>
+          </div>
         </div>
       </header>
 
