@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { UserGame } from "@/types/game";
+import { UserGame, GameResult } from "@/types/game";
 import { fetchUserGames } from "@/lib/api/games";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut, Settings } from "lucide-react";
@@ -41,7 +41,7 @@ export default function GameList() {
     });
   };
 
-  const getResultBadgeClass = (result: string) => {
+  const getResultBadgeClass = (result: GameResult) => {
     switch (result) {
       case "win":
         return styles.resultWin;
@@ -54,7 +54,7 @@ export default function GameList() {
     }
   };
 
-  const getResultText = (result: string) => {
+  const getResultText = (result: GameResult) => {
     switch (result) {
       case "win":
         return "勝利";
