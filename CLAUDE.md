@@ -62,7 +62,7 @@ GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します�
 | --------------------- | ------------------------------- | ------------------------------------------------------------ |
 | 1. 仕様取得           | GitHub Issueから仕様を取得      | `orchestrator`                                               |
 | 2. タスク分解         | 並列調査 + 1コミット粒度に分解  | `code-investigator` + `log-investigator` → `task-decomposer` |
-| 3. TDD+DDD実装        | テスト駆動 + ドメイン駆動で実装 | `tdd-implementer`                                            |
+| 3. TDD+DDD実装        | テスト駆動 + ドメイン駆動で実装 | `implementer`                                                |
 | 4. 実装レビュー       | コードレビュー                  | `code-reviewer`                                              |
 | 4-b. レビュー指摘修正 | レビュー指摘をTDDで修正         | `review-fixer`                                               |
 | 5. PR作成             | Pull Requestを作成              | `pr-creator`                                                 |

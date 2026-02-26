@@ -40,7 +40,7 @@ skills:
 
 ### Phase 3: TDD + DDD実装
 
-`tdd-implementer` サブエージェントの起動を指示する。
+`implementer` サブエージェントの起動を指示する。
 
 実装は以下の2つの原則に従って行う：
 

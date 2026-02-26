@@ -1,24 +1,14 @@
 ---
-name: issue-to-pr
+name: implement-task
 description: GitHub IssueからPR作成までの開発ワークフローを実行する。Issue番号を引数として受け取る。
 argument-hint: "[Issue番号]"
-disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
-# Issue to PR ワークフロー
+# 概要
 
 GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番に実行する。
 各フェーズ間の情報連携はClaude CodeのTasks機能を使用する。
-
-## 並列開発セットアップ
-
-下記に従い環境をセットアップする。
-ただしユーザーから並列開発を**しないように**指示がある場合は、下記をスキップしてPhase1の仕様取得に進み実装を開始する。
-
-### skill読み込み
-
-- `worktree-setup`スキルを読み込み、並列開発環境をセットアップしてから実装を進める
 
 ## Phase 1: 仕様取得
 
@@ -67,24 +57,10 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 ### Phase 3-2: 実装エージェント起動
 
-**`tdd-implementer`** サブエージェントを起動する。
+**`implementer`** サブエージェントを起動して実装を行う。
 
-- TaskListから未着手の実装タスクを取得して順番に実装する
-- Red→Green→Refactorのサイクルを厳守する
-- `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
-- テストは必ずDockerコンテナ内で実行する（`docker compose exec backend npm run test`）
-
-#### linter実行
-
-- テストがPASSした後に**コンテナ内で**コマンドを実行してlint確認を行うこと
-  - **フロントエンドのlint実行**
-    - frontendコンテナ内で下記コマンドを順に実行する
-      1. `npm run lint`
-      2. `npm run typecheck`
-      3. `npm run format:check`
-    - コマンド実行後にlintエラーがある場合はfrontendコンテナ内で`npm run format`を実行してlintエラー修正を行う
-  - **バックエンドのlint実行**
-    - backendコンテナ内で`npm run format`を実行する
+- TaskListから未着手の実装タスクを取得して実装する
+- TDDサイクルおよびlint確認はimplementerがプリロードするスキル（`tdd-workflow`、`typescript-ddd-standards`、`linter-execute`）に従う
 
 #### ユーザーへレビュー依頼
 
@@ -96,7 +72,7 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 - テストおよびlint、ユーザーのレビューをPASSした場合はコミットを行う
   - タスク単位で`git add`および`git commit`を行うこと
-- `git commit`完了後に別のコミット単位でのタスクがある場合は**`tdd-implementer`** サブエージェント起動に戻り実装を継続する
+- `git commit`完了後に別のコミット単位でのタスクがある場合は**`implementer`** サブエージェント起動に戻り実装を継続する
 
 ## Phase 4: 実装レビュー
 
