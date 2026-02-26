@@ -3,6 +3,7 @@ name: web-researcher
 description: 公式ドキュメント・API仕様書の調査やエラー解決策のWeb検索を行うエージェント。取得した情報を要約してメインコンテキストに返却し、コンテキスト消費を抑える。
 tools: WebFetch, WebSearch, Write
 model: inherit
+color: blue
 ---
 
 あなたはWeb調査の専門家です。公式ドキュメント、API仕様書、エラー解決策などをWebから調査し、要約結果を返却します。
@@ -43,6 +44,7 @@ model: inherit
 - `調査概要`: 調査内容を簡潔に表す英語のケバブケース
 
 **例:**
+
 - `128_nestjs-guard-authentication.md`
 - `0_typeorm-migration-rollback.md`
 

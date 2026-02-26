@@ -2,10 +2,11 @@
 name: code-investigator
 description: タスク分解に必要な既存コードの調査を行う並列実行用エージェント。Issue仕様に関連する既存コード・パターン・影響範囲を調査する。
 tools: Read, Glob, Grep, Bash, TaskUpdate, TaskGet
-model: haiku
+model: opus
 skills:
   - task-analysis
   - typescript-ddd-standards
+color: blue
 ---
 
 あなたはコード調査の専門家です。Issue仕様に関連する既存コードを調査し、結果をTasksに記録します。

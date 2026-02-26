@@ -121,6 +121,18 @@ docker compose exec backend npm run migration:generate -- src/infrastructure/typ
 
 **注意**: マイグレーションファイルは手動作成しない。必ず `migration:generate` で自動生成する。
 
+## テストケースの原則
+
+- テストケースは**そのクラス固有の振る舞い（ドメインロジック・バリデーション・状態遷移等）のみ**を検証する
+- 言語機能そのもの（getter/setterの動作、`===` 演算子の挙動、型キャストの結果等）はテストしない
+  - 例: `value` getterが値を返すだけのテストは不要（createテストで既に検証される）
+  - 例: `equals()` の実装が単純な `===` 比較の場合、同値/非同値の基本テストは `===` のテストに過ぎない
+  - 例: TypeScriptの型契約を `as unknown as string` でバイパスしたnull/undefinedのテストはクラスの責務外
+- クラス固有のロジックが絡むケースのみテストする
+  - 例: 正規化（トリム、null→undefined変換等）が等価性比較に影響するケース
+  - 例: バリデーションルール（文字数制限、フォーマット検証等）
+  - 例: ファクトリメソッドでの入力変換ロジック
+
 ## テストのアンチパターン
 
 - テストが実装の詳細に依存している（privateメソッドのテスト等）
@@ -130,3 +142,4 @@ docker compose exec backend npm run migration:generate -- src/infrastructure/typ
 - モックが多すぎる（設計の問題のサイン）
 - テスト名が意味のない名前になっている
 - テスト名が過剰な説明文を反映したものになっている
+- 言語機能のテスト（上記「テストケースの原則」参照）

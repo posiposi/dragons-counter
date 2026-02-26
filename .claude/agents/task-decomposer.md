@@ -6,6 +6,7 @@ model: inherit
 skills:
   - task-analysis
   - typescript-ddd-standards
+color: magenta
 ---
 
 あなたはタスク分解の専門家です。Issue仕様と調査結果を入力として受け取り、実装タスクを作成します。
