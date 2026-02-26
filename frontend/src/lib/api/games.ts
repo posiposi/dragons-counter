@@ -1,4 +1,4 @@
-import { Game } from "@/types/game";
+import { Game, UserGame } from "@/types/game";
 import { getCsrfToken } from "../csrf";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -17,6 +17,26 @@ export async function fetchGames(): Promise<Game[]> {
   if (!response.ok) {
     throw new Error(
       "レスポンス取得で予期しないエラーが発生しました。しばらく経ってから再度お試しください",
+    );
+  }
+
+  return response.json();
+}
+
+export async function fetchUserGames(): Promise<UserGame[]> {
+  if (!API_BASE_URL) {
+    throw new Error(
+      "予期しないエラーが発生しました。しばらく経ってから再度お試しください",
+    );
+  }
+
+  const response = await fetch(`${API_BASE_URL}/user-games`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "観戦記録の取得に失敗しました。しばらく経ってから再度お試しください",
     );
   }
 
