@@ -77,6 +77,10 @@ GitHub Issueからの実装には `/implement-task` コマンドを使用しま�
 - TaskUpdateのmetadataに成果物（調査結果、設計情報等）を格納する
 - 各サブエージェントはTaskGet/TaskListで前フェーズの情報を取得する
 
+## gitコマンドの実行ルール
+
+`git add`、`git commit`、`git push`を実行する際は、**必ずユーザーに実行許可を確認**してから実行する。
+
 ## Agent Teams使用規約
 
 複雑かつ大規模なタスクに対してはAgent Teamsを[公式ドキュメント](https://code.claude.com/docs/en/agent-teams)を参考に使用する。

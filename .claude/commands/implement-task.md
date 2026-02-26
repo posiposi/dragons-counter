@@ -47,7 +47,7 @@ GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番�
 
 ### Phase 3-1: ブランチ切り替え
 
-- `main`ブランチから実装用のブランチを作成し、スイッチする
+- `main`ブランチから実装用のブランチを作成する（**ユーザーに実行許可を確認**する）
   - issueNo.の前には`#`を入れること
   - ブランチ名は簡潔な**英語**で記述すること
 
@@ -70,9 +70,8 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 #### gitコマンド実行
 
-- テストおよびlint、ユーザーのレビューをPASSした場合はコミットを行う
-  - タスク単位で`git add`および`git commit`を行うこと
-- `git commit`完了後に別のコミット単位でのタスクがある場合は**`implementer`** サブエージェント起動に戻り実装を継続する
+- テストおよびlint、ユーザーのレビューをPASSした場合は、タスク単位で`git add`および`git commit`を行う（**ユーザーに実行許可を確認**する）
+- コミット完了後、別のコミット単位でのタスクがある場合は**`implementer`** サブエージェント起動に戻り実装を継続する
 
 ## Phase 4: 実装レビュー
 
@@ -90,7 +89,7 @@ Phase 3までの全タスクを消化した段階で、**`code-reviewer`** サ�
 - code-reviewerのレビュー結果をTasksから取得する
 - TDDサイクル（Red→Green→Refactor）で指摘事項を修正する
 - `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
-- 指摘**1つの修正毎**に`git add`および`git commit`を行うこと
+- 指摘**1つの修正毎**に`git add`および`git commit`を行うこと（**ユーザーに実行許可を確認**する）
 - 修正完了後、必要に応じてPhase 4のレビューを再実行する
 
 ## Phase 5: PR作成

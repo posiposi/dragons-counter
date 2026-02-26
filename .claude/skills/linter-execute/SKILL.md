@@ -34,9 +34,13 @@ docker compose exec frontend npm run format
 
 ## バックエンドのlint実行
 
-backendコンテナ内でフォーマットを実行する。
+backendコンテナ内で下記コマンドを順に実行する。
 
 ```bash
+# 1. lint確認（ESLint）
+docker compose exec backend npm run lint
+
+# 2. フォーマット（Prettier）
 docker compose exec backend npm run format
 ```
 
