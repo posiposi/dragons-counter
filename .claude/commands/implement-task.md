@@ -101,6 +101,21 @@ Phase 3までの全タスクを消化した段階で、**`code-reviewer`** サ�
 - PRタイトルにIssue番号を含めない
 - GitHub MCPサーバーを優先してPRを作成する（フォールバック: ghコマンド）
 
+## タスク構造
+
+各フェーズのタスクは以下の構造でTasksに作成・管理する。
+タスクの依存関係はaddBlocks/addBlockedByで管理する。
+
+```
+[Phase 1] 仕様取得 (metadata: issue_spec)
+  → [Phase 2-a] コード調査 (metadata: code_investigation)
+  → [Phase 2-b] ログ調査 (metadata: log_investigation)
+  → [Phase 2-c] タスク分解 (blockedBy: 2-a, 2-b)
+    → [Phase 3] 実装タスク群 (blockedBy: 2-c)
+      → [Phase 4] レビュータスク群
+        → [Phase 5] PR作成
+```
+
 ## 制約事項
 
 - テストコードは必ずDockerコンテナ内で実行する

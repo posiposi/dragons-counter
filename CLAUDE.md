@@ -50,24 +50,24 @@ Dragons Counter（Dra Vincit）は中日ドラゴンズファン向けの野球�
 
 ### タスク実装コマンド
 
-GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します。
+GitHub Issueからの実装には `/implement-task` コマンドを使用します。
 
 ```
-/issue-to-pr <Issue番号>
+/implement-task <Issue番号>
 ```
 
 このコマンドは以下のフェーズを自動で実行します：
 
 | Phase                 | 内容                            | サブエージェント                                             |
 | --------------------- | ------------------------------- | ------------------------------------------------------------ |
-| 1. 仕様取得           | GitHub Issueから仕様を取得      | `orchestrator`                                               |
+| 1. 仕様取得           | GitHub Issueから仕様を取得      | （コマンド自身が実行）                                       |
 | 2. タスク分解         | 並列調査 + 1コミット粒度に分解  | `code-investigator` + `log-investigator` → `task-decomposer` |
 | 3. TDD+DDD実装        | テスト駆動 + ドメイン駆動で実装 | `implementer`                                                |
 | 4. 実装レビュー       | コードレビュー                  | `code-reviewer`                                              |
 | 4-b. レビュー指摘修正 | レビュー指摘をTDDで修正         | `review-fixer`                                               |
 | 5. PR作成             | Pull Requestを作成              | `pr-creator`                                                 |
 
-詳細は `.claude/commands/issue-to-pr.md` を参照してください。
+詳細は `.claude/commands/implement-task.md` を参照してください。
 
 ### 情報管理
 
