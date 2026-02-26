@@ -77,16 +77,6 @@ GitHub Issueからの実装には `/implement-task` コマンドを使用しま�
 - TaskUpdateのmetadataに成果物（調査結果、設計情報等）を格納する
 - 各サブエージェントはTaskGet/TaskListで前フェーズの情報を取得する
 
-## Worktree並列開発
-
-git worktreeを使用して複数のIssueを並列で開発できる。
-
-- ワークツリーは `.worktrees/` 配下に配置（git管理外）
-- ブランチは基本的に `main` から切り出し、ディレクトリ名はブランチ名と同名
-- 各ワークツリーで独立したDockerコンテナを起動（ポートオフセットで競合回避）
-
-詳細は `worktree-setup` スキル（`.claude/skills/worktree-setup/SKILL.md`）を参照
-
 ## Agent Teams使用規約
 
 複雑かつ大規模なタスクに対してはAgent Teamsを[公式ドキュメント](https://code.claude.com/docs/en/agent-teams)を参考に使用する。
