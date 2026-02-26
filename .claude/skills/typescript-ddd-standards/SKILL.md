@@ -176,6 +176,15 @@ allowed-tools: Read, Grep, Glob
 - クラス名は`<エラー内容>Exception`とする（例: `InvalidEmailException`、`InsufficientBalanceException`）
 - ファイル名はケバブケースで`<例外名>.ts`とする
 
+### DDD層別の実装順序
+
+新機能の実装やリファクタリングでは、以下の順序で実装を進める。
+
+1. **ドメイン層**: 値オブジェクト → エンティティ → 集約 → Port → ドメインサービス → ドメイン例外
+2. **Adapter層**: Command Adapter → Query Adapter → サービスAdapter
+3. **UseCase層**: Command UseCase → Query UseCase
+4. **Controller層**: リクエストDTO → Controller → モジュール定義
+
 ### ドメイン層ディレクトリ構成
 
 ```

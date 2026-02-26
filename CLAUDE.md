@@ -50,24 +50,24 @@ Dragons Counter（Dra Vincit）は中日ドラゴンズファン向けの野球�
 
 ### タスク実装コマンド
 
-GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します。
+GitHub Issueからの実装には `/implement-task` コマンドを使用します。
 
 ```
-/issue-to-pr <Issue番号>
+/implement-task <Issue番号>
 ```
 
 このコマンドは以下のフェーズを自動で実行します：
 
 | Phase                 | 内容                            | サブエージェント                                             |
 | --------------------- | ------------------------------- | ------------------------------------------------------------ |
-| 1. 仕様取得           | GitHub Issueから仕様を取得      | `orchestrator`                                               |
+| 1. 仕様取得           | GitHub Issueから仕様を取得      | （コマンド自身が実行）                                       |
 | 2. タスク分解         | 並列調査 + 1コミット粒度に分解  | `code-investigator` + `log-investigator` → `task-decomposer` |
-| 3. TDD+DDD実装        | テスト駆動 + ドメイン駆動で実装 | `tdd-implementer`                                            |
+| 3. TDD+DDD実装        | テスト駆動 + ドメイン駆動で実装 | `implementer`                                                |
 | 4. 実装レビュー       | コードレビュー                  | `code-reviewer`                                              |
 | 4-b. レビュー指摘修正 | レビュー指摘をTDDで修正         | `review-fixer`                                               |
 | 5. PR作成             | Pull Requestを作成              | `pr-creator`                                                 |
 
-詳細は `.claude/commands/issue-to-pr.md` を参照してください。
+詳細は `.claude/commands/implement-task.md` を参照してください。
 
 ### 情報管理
 
@@ -77,15 +77,9 @@ GitHub Issueからの実装には `/issue-to-pr` コマンドを使用します�
 - TaskUpdateのmetadataに成果物（調査結果、設計情報等）を格納する
 - 各サブエージェントはTaskGet/TaskListで前フェーズの情報を取得する
 
-## Worktree並列開発
+## gitコマンドの実行ルール
 
-git worktreeを使用して複数のIssueを並列で開発できる。
-
-- ワークツリーは `.worktrees/` 配下に配置（git管理外）
-- ブランチは基本的に `main` から切り出し、ディレクトリ名はブランチ名と同名
-- 各ワークツリーで独立したDockerコンテナを起動（ポートオフセットで競合回避）
-
-詳細は `worktree-setup` スキル（`.claude/skills/worktree-setup/SKILL.md`）を参照
+`git add`、`git commit`、`git push`を実行する際は、**必ずユーザーに実行許可を確認**してから実行する。
 
 ## Agent Teams使用規約
 

@@ -1,24 +1,14 @@
 ---
-name: issue-to-pr
+name: implement-task
 description: GitHub IssueからPR作成までの開発ワークフローを実行する。Issue番号を引数として受け取る。
 argument-hint: "[Issue番号]"
-disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
-# Issue to PR ワークフロー
+# 概要
 
 GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番に実行する。
 各フェーズ間の情報連携はClaude CodeのTasks機能を使用する。
-
-## 並列開発セットアップ
-
-下記に従い環境をセットアップする。
-ただしユーザーから並列開発を**しないように**指示がある場合は、下記をスキップしてPhase1の仕様取得に進み実装を開始する。
-
-### skill読み込み
-
-- `worktree-setup`スキルを読み込み、並列開発環境をセットアップしてから実装を進める
 
 ## Phase 1: 仕様取得
 
@@ -57,7 +47,7 @@ GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番�
 
 ### Phase 3-1: ブランチ切り替え
 
-- `main`ブランチから実装用のブランチを作成し、スイッチする
+- `main`ブランチから実装用のブランチを作成する（**ユーザーに実行許可を確認**する）
   - issueNo.の前には`#`を入れること
   - ブランチ名は簡潔な**英語**で記述すること
 
@@ -67,24 +57,10 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 ### Phase 3-2: 実装エージェント起動
 
-**`tdd-implementer`** サブエージェントを起動する。
+**`implementer`** サブエージェントを起動して実装を行う。
 
-- TaskListから未着手の実装タスクを取得して順番に実装する
-- Red→Green→Refactorのサイクルを厳守する
-- `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
-- テストは必ずDockerコンテナ内で実行する（`docker compose exec backend npm run test`）
-
-#### linter実行
-
-- テストがPASSした後に**コンテナ内で**コマンドを実行してlint確認を行うこと
-  - **フロントエンドのlint実行**
-    - frontendコンテナ内で下記コマンドを順に実行する
-      1. `npm run lint`
-      2. `npm run typecheck`
-      3. `npm run format:check`
-    - コマンド実行後にlintエラーがある場合はfrontendコンテナ内で`npm run format`を実行してlintエラー修正を行う
-  - **バックエンドのlint実行**
-    - backendコンテナ内で`npm run format`を実行する
+- TaskListから未着手の実装タスクを取得して実装する
+- TDDサイクルおよびlint確認はimplementerがプリロードするスキル（`tdd-workflow`、`typescript-ddd-standards`、`linter-execute`）に従う
 
 #### ユーザーへレビュー依頼
 
@@ -94,9 +70,8 @@ git switch -c "{#issue_no.}_{issue_name}"
 
 #### gitコマンド実行
 
-- テストおよびlint、ユーザーのレビューをPASSした場合はコミットを行う
-  - タスク単位で`git add`および`git commit`を行うこと
-- `git commit`完了後に別のコミット単位でのタスクがある場合は**`tdd-implementer`** サブエージェント起動に戻り実装を継続する
+- テストおよびlint、ユーザーのレビューをPASSした場合は、タスク単位で`git add`および`git commit`を行う（**ユーザーに実行許可を確認**する）
+- コミット完了後、別のコミット単位でのタスクがある場合は**`implementer`** サブエージェント起動に戻り実装を継続する
 
 ## Phase 4: 実装レビュー
 
@@ -114,7 +89,7 @@ Phase 3までの全タスクを消化した段階で、**`code-reviewer`** サ�
 - code-reviewerのレビュー結果をTasksから取得する
 - TDDサイクル（Red→Green→Refactor）で指摘事項を修正する
 - `.claude/skills/typescript-ddd-standards/SKILL.md` のDDD規約に準拠する
-- 指摘**1つの修正毎**に`git add`および`git commit`を行うこと
+- 指摘**1つの修正毎**に`git add`および`git commit`を行うこと（**ユーザーに実行許可を確認**する）
 - 修正完了後、必要に応じてPhase 4のレビューを再実行する
 
 ## Phase 5: PR作成
@@ -125,8 +100,24 @@ Phase 3までの全タスクを消化した段階で、**`code-reviewer`** サ�
 - PRタイトルにIssue番号を含めない
 - GitHub MCPサーバーを優先してPRを作成する（フォールバック: ghコマンド）
 
+## タスク構造
+
+各フェーズのタスクは以下の構造でTasksに作成・管理する。
+タスクの依存関係はaddBlocks/addBlockedByで管理する。
+
+```
+[Phase 1] 仕様取得 (metadata: issue_spec)
+  → [Phase 2-a] コード調査 (metadata: code_investigation)
+  → [Phase 2-b] ログ調査 (metadata: log_investigation)
+  → [Phase 2-c] タスク分解 (blockedBy: 2-a, 2-b)
+    → [Phase 3] 実装タスク群 (blockedBy: 2-c)
+      → [Phase 4] レビュータスク群
+        → [Phase 5] PR作成
+```
+
 ## 制約事項
 
 - テストコードは必ずDockerコンテナ内で実行する
 - CLIコマンド実行は必ずDockerコンテナ内で実行する
 - 各フェーズの完了時にユーザーに進捗を報告する
+- Web調査（公式ドキュメント参照、API仕様確認、エラー解決策検索）が必要な場合は **`web-researcher`** サブエージェントを使用する（メインコンテキストで直接WebFetch/WebSearchを実行しない）
