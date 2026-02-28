@@ -77,8 +77,8 @@ describe('UserGame', () => {
       expect(userGame.userId.equals(userId)).toBe(true);
       expect(userGame.gameId.equals(gameId)).toBe(true);
       expect(userGame.impression!.equals(impression)).toBe(true);
-      expect(userGame.createdAt).toBe(createdAt);
-      expect(userGame.updatedAt).toBe(updatedAt);
+      expect(userGame.createdAt).toEqual(createdAt);
+      expect(userGame.updatedAt).toEqual(updatedAt);
     });
   });
 

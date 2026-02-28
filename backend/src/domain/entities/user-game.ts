@@ -66,11 +66,11 @@ export class UserGame {
   }
 
   get createdAt(): Date {
-    return this._createdAt;
+    return new Date(this._createdAt);
   }
 
   get updatedAt(): Date {
-    return this._updatedAt;
+    return new Date(this._updatedAt);
   }
 
   equals(other: UserGame): boolean {

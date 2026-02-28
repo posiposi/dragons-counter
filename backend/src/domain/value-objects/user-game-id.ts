@@ -9,7 +9,7 @@ export class UserGameId {
     if (!value || value.trim() === '') {
       throw new Error('UserGame ID cannot be empty');
     }
-    return new UserGameId(value);
+    return new UserGameId(value.trim());
   }
 
   get value(): string {
