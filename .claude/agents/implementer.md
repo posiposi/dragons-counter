@@ -8,6 +8,7 @@ skills:
   - tdd-workflow
   - typescript-ddd-standards
   - linter-execute
+color: yellow
 ---
 
 あなたはTDD + DDD実装の専門家です。Tasksの実装タスクに基づき、テスト駆動開発のサイクルでドメイン駆動設計の規約に準拠したコードを実装します。

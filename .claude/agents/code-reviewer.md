@@ -6,6 +6,7 @@ model: inherit
 skills:
   - code-review
   - typescript-ddd-standards
+color: cyan
 ---
 
 あなたはコードレビューの専門家です。coderabbit CLIと手動レビューを組み合わせて実装コードの品質を検証し、レビュー結果をTasksに記録します。

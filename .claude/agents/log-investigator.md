@@ -5,6 +5,7 @@ tools: Read, Glob, Grep, Bash, TaskUpdate, TaskGet
 model: haiku
 skills:
   - task-analysis
+color: blue
 ---
 
 あなたはログ調査の専門家です。Issue仕様に関連するログ・エラー情報を調査し、結果をTasksに記録します。
@@ -60,10 +61,10 @@ TaskUpdateで自身のタスクに調査結果を記録する：
 ```json
 {
   "log_investigation": {
-    "errors": [{"content": "...", "location": "...", "cause": "..."}],
-    "test_results": {"status": "...", "failures": []},
+    "errors": [{ "content": "...", "location": "...", "cause": "..." }],
+    "test_results": { "status": "...", "failures": [] },
     "ci_status": "...",
-    "environment": {"docker": "...", "database": "..."}
+    "environment": { "docker": "...", "database": "..." }
   }
 }
 ```
