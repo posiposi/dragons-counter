@@ -2,7 +2,7 @@
 name: pr-template
 description: Pull Request作成時のテンプレートとルールを定義するスキル。PRタイトル・本文の生成規則、Issue番号の扱い、GitHub MCP優先使用ルールを提供する。PR作成時に使用する。
 user-invocable: false
-allowed-tools: Read, Glob, Grep, Bash, TaskGet, TaskList
+allowed-tools: Read, Glob, Grep, Bash, TaskGet, TaskList, mcp__github__create_pull_request
 ---
 
 # PR作成テンプレートスキル
@@ -73,13 +73,27 @@ origin  git@github.com:posiposi/dragons-counter.git (push)
 
 ### 許可ルール
 
-- `git add` はユーザーの許諾不要で実行してよい
-- `git commit` と `git push` はユーザーの許可を求める
-  - 許可された場合は併せて実行する
+- 下記コマンドはユーザーに実行許可を求める
+  - `git add`
+  - `git commit` `git push`
+    - 許可された場合は一連のコマンドを併せて実行する
 - push先はローカルブランチと同名のリモートブランチとする
   - `git push origin HEAD` でプッシュする
 
+### コマンド例
+
+```bash
+# ステージング
+git add <対象ファイル>
+
+# コミット＋プッシュ（許可後に併せて実行）
+git commit -m "コミットメッセージ" && git push origin HEAD
+```
+
 ## PR作成の実行
+
+- MCPサーバーの利用を優先する
+- MCPサーバーが利用できない場合はユーザーにその理由を伝えてから、`gh`コマンドの利用を宣言する
 
 ### 優先: GitHub MCPサーバー
 
