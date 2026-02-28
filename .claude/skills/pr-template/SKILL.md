@@ -66,7 +66,7 @@ Closes #[Issue番号]
 
 ### リポジトリ情報
 
-```
+```text
 origin  git@github.com:posiposi/dragons-counter.git (fetch)
 origin  git@github.com:posiposi/dragons-counter.git (push)
 ```
