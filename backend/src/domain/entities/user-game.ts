@@ -24,8 +24,8 @@ export class UserGame {
     this._userId = userId;
     this._gameId = gameId;
     this._impression = impression;
-    this._createdAt = createdAt;
-    this._updatedAt = updatedAt;
+    this._createdAt = new Date(createdAt.getTime());
+    this._updatedAt = new Date(updatedAt.getTime());
   }
 
   static createNew(
