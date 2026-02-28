@@ -62,6 +62,23 @@ Closes #[Issue番号]
 - 実装の詳細なコード説明
 - スクリーンショット（必要な場合を除く）
 
+## gitコマンドの実行ルール
+
+### リポジトリ情報
+
+```
+origin  git@github.com:posiposi/dragons-counter.git (fetch)
+origin  git@github.com:posiposi/dragons-counter.git (push)
+```
+
+### 許可ルール
+
+- `git add` はユーザーの許諾不要で実行してよい
+- `git commit` と `git push` はユーザーの許可を求める
+  - 許可された場合は併せて実行する
+- push先はローカルブランチと同名のリモートブランチとする
+  - `git push origin HEAD` でプッシュする
+
 ## PR作成の実行
 
 ### 優先: GitHub MCPサーバー
