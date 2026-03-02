@@ -6,7 +6,6 @@ export interface GameResponseDto {
   opponentScore: number;
   result: string;
   stadium: string;
-  notes: string | null;
   createdAt: string;
   updatedAt: string;
 }

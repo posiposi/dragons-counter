@@ -22,7 +22,7 @@ export class DeleteGameUsecase {
       throw new NotFoundException('Game not found');
     }
 
-    const result = await this.gamePort.softDelete(gameIdVO);
+    const result = await this.gamePort.delete(gameIdVO);
 
     if (!result) {
       throw new InternalServerErrorException('Failed to delete game');

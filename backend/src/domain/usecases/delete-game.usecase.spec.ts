@@ -16,7 +16,7 @@ describe('DeleteGameUsecase', () => {
       save: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
-      softDelete: jest.fn(),
+      delete: jest.fn(),
     } as unknown as jest.Mocked<GamePort>;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -39,24 +39,21 @@ describe('DeleteGameUsecase', () => {
           description: '存在する試合IDで削除に成功する',
           gameId: '123e4567-e89b-12d3-a456-426614174000',
           findByIdResult: true,
-          softDeleteResult: true,
+          deleteResult: true,
         },
-      ])(
-        '$description',
-        async ({ gameId, findByIdResult, softDeleteResult }) => {
-          const findByIdSpy = jest
-            .spyOn(mockGamePort, 'findById')
-            .mockResolvedValue(findByIdResult ? ({} as Game) : null);
-          const softDeleteSpy = jest
-            .spyOn(mockGamePort, 'softDelete')
-            .mockResolvedValue(softDeleteResult);
+      ])('$description', async ({ gameId, findByIdResult, deleteResult }) => {
+        const findByIdSpy = jest
+          .spyOn(mockGamePort, 'findById')
+          .mockResolvedValue(findByIdResult ? ({} as Game) : null);
+        const deleteSpy = jest
+          .spyOn(mockGamePort, 'delete')
+          .mockResolvedValue(deleteResult);
 
-          await expect(usecase.execute(gameId)).resolves.not.toThrow();
+        await expect(usecase.execute(gameId)).resolves.not.toThrow();
 
-          expect(findByIdSpy).toHaveBeenCalledTimes(1);
-          expect(softDeleteSpy).toHaveBeenCalledTimes(1);
-        },
-      );
+        expect(findByIdSpy).toHaveBeenCalledTimes(1);
+        expect(deleteSpy).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('異常系', () => {
@@ -71,17 +68,17 @@ describe('DeleteGameUsecase', () => {
           description: '削除処理に失敗した場合500エラーが発生する',
           gameId: '123e4567-e89b-12d3-a456-426614174000',
           findByIdResult: {},
-          softDeleteResult: false,
+          deleteResult: false,
           expectedError: InternalServerErrorException,
         },
       ])(
         '$description',
-        async ({ gameId, findByIdResult, softDeleteResult, expectedError }) => {
+        async ({ gameId, findByIdResult, deleteResult, expectedError }) => {
           mockGamePort.findById.mockResolvedValue(
             findByIdResult ? ({} as Game) : null,
           );
-          if (softDeleteResult !== undefined) {
-            mockGamePort.softDelete.mockResolvedValue(softDeleteResult);
+          if (deleteResult !== undefined) {
+            mockGamePort.delete.mockResolvedValue(deleteResult);
           }
 
           await expect(usecase.execute(gameId)).rejects.toThrow(expectedError);
