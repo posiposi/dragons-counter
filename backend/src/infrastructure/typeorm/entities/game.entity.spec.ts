@@ -90,15 +90,6 @@ describe('GameEntity', () => {
       expect(stadiumIdColumn!.options.length).toBe(191);
     });
 
-    it('notesカラムがvarchar(191)型でnullableとして定義される', () => {
-      const notesColumn = findColumn('notes');
-
-      expect(notesColumn).toBeDefined();
-      expect(notesColumn!.options.type).toBe('varchar');
-      expect(notesColumn!.options.length).toBe(191);
-      expect(notesColumn!.options.nullable).toBe(true);
-    });
-
     it('createdAtカラムがcreated_atにマッピングされる', () => {
       const createdAtColumn = findColumn('createdAt');
 
@@ -113,14 +104,6 @@ describe('GameEntity', () => {
       expect(updatedAtColumn).toBeDefined();
       expect(updatedAtColumn!.options.name).toBe('updated_at');
       expect(updatedAtColumn!.mode).toBe('updateDate');
-    });
-
-    it('deletedAtカラムがdeleted_atにマッピングされソフトデリート用に定義される', () => {
-      const deletedAtColumn = findColumn('deletedAt');
-
-      expect(deletedAtColumn).toBeDefined();
-      expect(deletedAtColumn!.options.name).toBe('deleted_at');
-      expect(deletedAtColumn!.mode).toBe('deleteDate');
     });
   });
 
@@ -197,10 +180,8 @@ describe('GameEntity', () => {
       entity.opponentScore = 3;
       entity.result = GameResultEnum.WIN;
       entity.stadiumId = '660e8400-e29b-41d4-a716-446655440001';
-      entity.notes = '逆転勝利';
       entity.createdAt = new Date('2026-04-01');
       entity.updatedAt = new Date('2026-04-01');
-      entity.deletedAt = null;
 
       expect(entity.id).toBe('550e8400-e29b-41d4-a716-446655440000');
       expect(entity.gameDate).toEqual(new Date('2026-04-01'));
@@ -209,15 +190,6 @@ describe('GameEntity', () => {
       expect(entity.opponentScore).toBe(3);
       expect(entity.result).toBe(GameResultEnum.WIN);
       expect(entity.stadiumId).toBe('660e8400-e29b-41d4-a716-446655440001');
-      expect(entity.notes).toBe('逆転勝利');
-      expect(entity.deletedAt).toBeNull();
-    });
-
-    it('notesにnullを設定できる', () => {
-      const entity = new GameEntity();
-      entity.notes = null;
-
-      expect(entity.notes).toBeNull();
     });
   });
 });
