@@ -3,7 +3,6 @@ import { GameDate } from '../value-objects/game-date';
 import { Opponent } from '../value-objects/opponent';
 import { Score } from '../value-objects/score';
 import { Stadium } from '../value-objects/stadium';
-import { Notes } from '../value-objects/notes';
 import { GameResult } from '../value-objects/game-result';
 
 export class Game {
@@ -13,7 +12,6 @@ export class Game {
   private readonly _dragonsScore: Score;
   private readonly _opponentScore: Score;
   private readonly _stadium: Stadium;
-  private readonly _notes: Notes | undefined;
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
   private readonly _result: GameResult;
@@ -25,7 +23,6 @@ export class Game {
     dragonsScore: Score,
     opponentScore: Score,
     stadium: Stadium,
-    notes: Notes | undefined,
     createdAt: Date,
     updatedAt: Date,
   ) {
@@ -35,7 +32,6 @@ export class Game {
     this._dragonsScore = dragonsScore;
     this._opponentScore = opponentScore;
     this._stadium = stadium;
-    this._notes = notes;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
     this.validateGameDate();
@@ -75,10 +71,6 @@ export class Game {
 
   get stadium(): Stadium {
     return this._stadium;
-  }
-
-  get notes(): Notes | undefined {
-    return this._notes;
   }
 
   get createdAt(): Date {
