@@ -10,7 +10,6 @@ import { Opponent } from '../../domain/value-objects/opponent';
 import { Stadium } from '../../domain/value-objects/stadium';
 import { StadiumId } from '../../domain/value-objects/stadium-id';
 import { StadiumName } from '../../domain/value-objects/stadium-name';
-import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
 import { GameResultValue } from '../../domain/value-objects/game-result';
 import { GameEntity } from '../typeorm/entities/game.entity';
@@ -50,7 +49,6 @@ describe('GameAdapter Integration Tests', () => {
       dragonsScore: 0,
       opponentScore: 0,
       result: GameResultEnum.DRAW,
-      notes: null,
       ...overrides,
     });
   };
@@ -111,7 +109,7 @@ describe('GameAdapter Integration Tests', () => {
         .execute();
     });
 
-    it('should save a game with WIN result and notes', async () => {
+    it('WINの試合を保存できる', async () => {
       const gameId = new GameId(randomUUID());
       const stadium = Stadium.create(
         StadiumId.create(testStadiums.vantelin.id),
@@ -124,7 +122,6 @@ describe('GameAdapter Integration Tests', () => {
         new Score(5),
         new Score(3),
         stadium,
-        new Notes('開幕戦で勝利！'),
         new Date('2024-04-01'),
         new Date('2024-04-01'),
       );
@@ -146,7 +143,7 @@ describe('GameAdapter Integration Tests', () => {
       expect(savedGame?.stadiumId).toBe(testStadiums.vantelin.id);
     });
 
-    it('should save a game with LOSE result', async () => {
+    it('LOSEの試合を保存できる', async () => {
       const gameId = new GameId(randomUUID());
       const stadium = Stadium.create(
         StadiumId.create(testStadiums.koshien.id),
@@ -159,7 +156,6 @@ describe('GameAdapter Integration Tests', () => {
         new Score(2),
         new Score(7),
         stadium,
-        new Notes('大敗'),
         new Date('2024-04-02'),
         new Date('2024-04-02'),
       );
@@ -172,7 +168,7 @@ describe('GameAdapter Integration Tests', () => {
       expect(result.result.value).toBe(GameResultValue.LOSE);
     });
 
-    it('should save a game with DRAW result', async () => {
+    it('DRAWの試合を保存できる', async () => {
       const gameId = new GameId(randomUUID());
       const stadium = Stadium.create(
         StadiumId.create(testStadiums.mazda.id),
@@ -185,7 +181,6 @@ describe('GameAdapter Integration Tests', () => {
         new Score(4),
         new Score(4),
         stadium,
-        new Notes('引き分け'),
         new Date('2024-04-03'),
         new Date('2024-04-03'),
       );
@@ -218,7 +213,7 @@ describe('GameAdapter Integration Tests', () => {
         .execute();
     });
 
-    it('should return all games ordered by gameDate desc with stadium info', async () => {
+    it('全試合を日付降順でスタジアム情報付きで取得できる', async () => {
       const game1Id = randomUUID();
       const game2Id = randomUUID();
 
@@ -231,7 +226,6 @@ describe('GameAdapter Integration Tests', () => {
           dragonsScore: 5,
           opponentScore: 3,
           result: GameResultEnum.WIN,
-          notes: '開幕戦で勝利！',
         }),
       );
 
@@ -244,7 +238,6 @@ describe('GameAdapter Integration Tests', () => {
           dragonsScore: 2,
           opponentScore: 7,
           result: GameResultEnum.LOSE,
-          notes: '大敗',
         }),
       );
 
@@ -268,7 +261,6 @@ describe('GameAdapter Integration Tests', () => {
       expect(ownGames[0].dragonsScore.value).toBe(2);
       expect(ownGames[0].opponentScore.value).toBe(7);
       expect(ownGames[0].result.value).toBe(GameResultValue.LOSE);
-      expect(ownGames[0].notes?.value).toBe('大敗');
 
       expect(ownGames[1].gameDate.value).toEqual(new Date('2024-04-01'));
       expect(ownGames[1].opponent.value).toBe('横浜DeNAベイスターズ');
@@ -277,7 +269,7 @@ describe('GameAdapter Integration Tests', () => {
       expect(ownGames[1].result.value).toBe(GameResultValue.WIN);
     });
 
-    it('should return empty array when no games exist', async () => {
+    it('試合が存在しない場合は空配列を返す', async () => {
       const adapter = module.get<GameAdapter>(GameAdapter);
       const result = await adapter.findAll();
 
@@ -289,55 +281,9 @@ describe('GameAdapter Integration Tests', () => {
 
       expect(ownGames).toEqual([]);
     });
-
-    it('should exclude soft-deleted games', async () => {
-      const activeGameId = randomUUID();
-      const deletedGameId = randomUUID();
-
-      await gameRepository.save(
-        createTestGame({
-          id: activeGameId,
-          gameDate: new Date('2024-04-01'),
-          opponent: '横浜DeNAベイスターズ',
-          stadiumId: testStadiums.vantelin.id,
-          dragonsScore: 5,
-          opponentScore: 3,
-          result: GameResultEnum.WIN,
-          notes: 'アクティブな試合',
-        }),
-      );
-
-      await gameRepository.save(
-        createTestGame({
-          id: deletedGameId,
-          gameDate: new Date('2024-04-02'),
-          opponent: '阪神タイガース',
-          stadiumId: testStadiums.koshien.id,
-          dragonsScore: 2,
-          opponentScore: 7,
-          result: GameResultEnum.LOSE,
-          notes: '削除された試合',
-          deletedAt: new Date(),
-        }),
-      );
-
-      const adapter = module.get<GameAdapter>(GameAdapter);
-      const result = await adapter.findAll();
-
-      // 他テストスイートのデータが混入する可能性があるため、自テストのデータのみフィルタして検証
-      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
-      const ownGames = result.filter((g) =>
-        stadiumIds.includes(g.stadium.id.value),
-      );
-
-      expect(ownGames).toHaveLength(1);
-      expect(ownGames[0].id.value).toBe(activeGameId);
-      expect(ownGames[0].opponent.value).toBe('横浜DeNAベイスターズ');
-      expect(ownGames[0].stadium.id.value).toBe(testStadiums.vantelin.id);
-    });
   });
 
-  describe('findById and softDelete', () => {
+  describe('findById and delete', () => {
     let testGameId: string;
     let testGameIdVO: GameId;
     let nonExistentGameIdVO: GameId;
@@ -365,7 +311,6 @@ describe('GameAdapter Integration Tests', () => {
           dragonsScore: 5,
           opponentScore: 3,
           result: GameResultEnum.WIN,
-          notes: 'テスト試合',
         }),
       );
     });
@@ -380,7 +325,7 @@ describe('GameAdapter Integration Tests', () => {
     });
 
     describe('findById', () => {
-      it('should return a game with stadium info when it exists', async () => {
+      it('存在する試合をスタジアム情報付きで取得できる', async () => {
         const result = await adapter.findById(testGameIdVO);
 
         expect(result).not.toBeNull();
@@ -392,42 +337,34 @@ describe('GameAdapter Integration Tests', () => {
         expect(result?.stadium.name.value).toBe(testStadiums.vantelin.name);
       });
 
-      it('should return null when game does not exist', async () => {
+      it('存在しない試合の場合はnullを返す', async () => {
         const result = await adapter.findById(nonExistentGameIdVO);
 
         expect(result).toBeNull();
       });
     });
 
-    describe('softDelete', () => {
-      it('should soft-delete an existing game', async () => {
-        const result = await adapter.softDelete(testGameIdVO);
+    describe('delete', () => {
+      it('存在する試合を物理削除できる', async () => {
+        const result = await adapter.delete(testGameIdVO);
 
         expect(result).toBe(true);
 
         const deletedGame = await gameRepository.findOne({
           where: { id: testGameId },
-          withDeleted: true,
         });
-        expect(deletedGame?.deletedAt).not.toBeNull();
+        expect(deletedGame).toBeNull();
       });
 
-      it('should return null for soft-deleted game in findById', async () => {
-        await adapter.softDelete(testGameIdVO);
+      it('削除済みの試合はfindByIdで取得できない', async () => {
+        await adapter.delete(testGameIdVO);
 
         const result = await adapter.findById(testGameIdVO);
         expect(result).toBeNull();
       });
 
-      it('should return false when soft-deleting already deleted game', async () => {
-        await adapter.softDelete(testGameIdVO);
-
-        const result = await adapter.softDelete(testGameIdVO);
-        expect(result).toBe(false);
-      });
-
-      it('should return false when game does not exist', async () => {
-        const result = await adapter.softDelete(nonExistentGameIdVO);
+      it('存在しない試合を削除するとfalseを返す', async () => {
+        const result = await adapter.delete(nonExistentGameIdVO);
 
         expect(result).toBe(false);
       });
