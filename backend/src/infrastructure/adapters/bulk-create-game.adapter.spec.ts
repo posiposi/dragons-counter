@@ -10,7 +10,6 @@ import { Opponent } from '../../domain/value-objects/opponent';
 import { Stadium } from '../../domain/value-objects/stadium';
 import { StadiumId } from '../../domain/value-objects/stadium-id';
 import { StadiumName } from '../../domain/value-objects/stadium-name';
-import { Notes } from '../../domain/value-objects/notes';
 import { GameDate } from '../../domain/value-objects/game-date';
 import { GameResultValue } from '../../domain/value-objects/game-result';
 import { GameEntity } from '../typeorm/entities/game.entity';
@@ -106,7 +105,6 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
         new Score(5),
         new Score(3),
         stadium,
-        undefined,
         new Date('2024-04-01'),
         new Date('2024-04-01'),
       );
@@ -123,33 +121,6 @@ describe('BulkCreateGameAdapter Integration Tests', () => {
       expect(savedGame?.opponentScore).toBe(3);
       expect(savedGame?.stadiumId).toBe(testStadiums.vantelin.id);
       expect(savedGame?.result).toBe(GameResultValue.WIN.toLowerCase());
-    });
-
-    it('should save a game with notes', async () => {
-      const gameId = new GameId(randomUUID());
-      const stadium = Stadium.create(
-        StadiumId.create(testStadiums.vantelin.id),
-        StadiumName.create(testStadiums.vantelin.name),
-      );
-      const game = new Game(
-        gameId,
-        new GameDate(new Date('2024-04-01')),
-        new Opponent('阪神タイガース'),
-        new Score(5),
-        new Score(3),
-        stadium,
-        new Notes('開幕戦勝利！'),
-        new Date('2024-04-01'),
-        new Date('2024-04-01'),
-      );
-
-      await adapter.save(game);
-
-      const savedGame = await gameRepository.findOne({
-        where: { id: gameId.value },
-      });
-
-      expect(savedGame?.notes).toBe('開幕戦勝利！');
     });
   });
 });
