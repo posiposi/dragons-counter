@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DeleteGameUsecase } from './delete-game.usecase';
 import { GamePort } from '../ports/game.port';
 import { Game } from '../entities/game';
+import { GameId } from '../value-objects/game-id';
 import {
   NotFoundException,
   InternalServerErrorException,
@@ -51,8 +52,8 @@ describe('DeleteGameUsecase', () => {
 
         await expect(usecase.execute(gameId)).resolves.not.toThrow();
 
-        expect(findByIdSpy).toHaveBeenCalledTimes(1);
-        expect(deleteSpy).toHaveBeenCalledTimes(1);
+        expect(findByIdSpy).toHaveBeenCalledWith(expect.any(GameId));
+        expect(deleteSpy).toHaveBeenCalledWith(expect.any(GameId));
       });
     });
 

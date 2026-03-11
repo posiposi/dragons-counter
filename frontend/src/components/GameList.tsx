@@ -230,7 +230,6 @@ export default function GameList() {
                   </div>
                   <div className={styles.stadium}>📍 {game.stadium}</div>
                 </div>
-                {game.notes && <div className={styles.notes}>{game.notes}</div>}
               </div>
             ))}
           </div>

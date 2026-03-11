@@ -176,14 +176,6 @@
   gap: 4px;
 }
 
-.notes {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  line-height: 1.5;
-}
-
 .loading {
   text-align: center;
   padding: 60px 20px;
