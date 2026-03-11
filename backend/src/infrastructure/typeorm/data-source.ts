@@ -9,6 +9,7 @@ import {
 } from './entities';
 import { InitialSchema1771806609856 } from './migrations/1771806609856-InitialSchema';
 import { AddUsersGamesTable1771816990589 } from './migrations/1771816990589-AddUsersGamesTable';
+import { DropNotesAndDeletedAtFromGames1771900000000 } from './migrations/1771900000000-DropNotesAndDeletedAtFromGames';
 
 function parseUrl(databaseUrl: string): URL {
   try {
@@ -41,7 +42,11 @@ export function createDataSourceOptions(
       UserRegistrationRequestEntity,
       UserGameEntity,
     ],
-    migrations: [InitialSchema1771806609856, AddUsersGamesTable1771816990589],
+    migrations: [
+      InitialSchema1771806609856,
+      AddUsersGamesTable1771816990589,
+      DropNotesAndDeletedAtFromGames1771900000000,
+    ],
     synchronize: false,
     logging: false,
   };
