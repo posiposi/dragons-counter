@@ -16,7 +16,7 @@ export class UserGameCommandAdapter implements UserGameCommandPort {
   ) {}
 
   async save(userGame: UserGame): Promise<UserGame> {
-    const softDeleted = await this.userGameRepository.findOne({
+    const existing = await this.userGameRepository.findOne({
       where: {
         userId: userGame.userId.value,
         gameId: userGame.gameId.value,
@@ -24,11 +24,13 @@ export class UserGameCommandAdapter implements UserGameCommandPort {
       withDeleted: true,
     });
 
-    if (softDeleted?.deletedAt) {
-      softDeleted.impression = userGame.impression?.value ?? null;
-      softDeleted.deletedAt = null;
-      const restoredUserGame = await this.userGameRepository.save(softDeleted);
-      return UserGameMapper.toDomainEntity(restoredUserGame);
+    if (existing) {
+      existing.impression = userGame.impression?.value ?? null;
+      if (existing.deletedAt) {
+        existing.deletedAt = null;
+      }
+      const updatedUserGame = await this.userGameRepository.save(existing);
+      return UserGameMapper.toDomainEntity(updatedUserGame);
     }
 
     const entity = this.userGameRepository.create(
