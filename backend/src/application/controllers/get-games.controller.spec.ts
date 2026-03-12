@@ -35,7 +35,6 @@ describe('GetGamesController', () => {
           opponentScore: 3,
           result: 'win',
           stadium: 'バンテリンドーム',
-          notes: '逆転勝利！',
           createdAt: '2024-06-01T10:00:00.000Z',
           updatedAt: '2024-06-01T10:00:00.000Z',
         },
@@ -47,7 +46,6 @@ describe('GetGamesController', () => {
           opponentScore: 4,
           result: 'lose',
           stadium: '甲子園',
-          notes: '接戦でした',
           createdAt: '2024-06-02T10:00:00.000Z',
           updatedAt: '2024-06-02T10:00:00.000Z',
         },
@@ -72,29 +70,6 @@ describe('GetGamesController', () => {
 
       expect(result).toEqual([]);
       expect(executeSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle null notes correctly', async () => {
-      const mockGamesDto: GameResponseDto[] = [
-        {
-          id: 'game-1',
-          gameDate: '2024-06-01',
-          opponent: '巨人',
-          dragonsScore: 5,
-          opponentScore: 3,
-          result: 'win',
-          stadium: 'バンテリンドーム',
-          notes: null,
-          createdAt: '2024-06-01T10:00:00.000Z',
-          updatedAt: '2024-06-01T10:00:00.000Z',
-        },
-      ];
-
-      jest.spyOn(usecase, 'execute').mockResolvedValue(mockGamesDto);
-
-      const result = await controller.getGames();
-
-      expect(result[0]?.notes).toBeNull();
     });
   });
 });

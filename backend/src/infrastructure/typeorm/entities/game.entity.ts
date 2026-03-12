@@ -4,7 +4,6 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
   ManyToOne,
   OneToMany,
   JoinColumn,
@@ -40,17 +39,11 @@ export class GameEntity {
   @JoinColumn({ name: 'stadium_id' })
   stadium: StadiumEntity;
 
-  @Column({ type: 'varchar', length: 191, nullable: true })
-  notes: string | null;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date = new Date();
-
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deletedAt: Date | null;
 
   @OneToMany(() => UserGameEntity, (usersGames) => usersGames.game)
   usersGames: UserGameEntity[];

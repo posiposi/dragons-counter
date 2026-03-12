@@ -5,5 +5,5 @@ export interface GamePort {
   save(game: Game): Promise<Game>;
   findAll(): Promise<Game[]>;
   findById(gameId: GameId): Promise<Game | null>;
-  softDelete(gameId: GameId): Promise<boolean>;
+  delete(gameId: GameId): Promise<boolean>;
 }

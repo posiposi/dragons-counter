@@ -87,7 +87,6 @@ describe('BulkCreateGameUsecase', () => {
           StadiumId.create('stadium-id-1'),
           StadiumName.create('バンテリンドーム ナゴヤ'),
         ),
-        undefined,
         new Date(),
         new Date(),
       );
@@ -133,7 +132,6 @@ describe('BulkCreateGameUsecase', () => {
           StadiumId.create('stadium-id-1'),
           StadiumName.create('バンテリンドーム ナゴヤ'),
         ),
-        undefined,
         new Date(),
         new Date(),
       );

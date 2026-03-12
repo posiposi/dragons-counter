@@ -23,7 +23,6 @@ export class BulkCreateGameAdapter implements BulkCreateGamePort {
       opponentScore: game.opponentScore.value,
       stadiumId: game.stadium.id.value,
       result: this.toGameResultEnum(game.result.value),
-      notes: game.notes?.value || null,
     });
 
     await this.gameRepository.save(entity);

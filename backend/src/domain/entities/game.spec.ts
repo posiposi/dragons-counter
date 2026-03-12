@@ -6,7 +6,6 @@ import { Score } from '../value-objects/score';
 import { Stadium } from '../value-objects/stadium';
 import { StadiumId } from '../value-objects/stadium-id';
 import { StadiumName } from '../value-objects/stadium-name';
-import { Notes } from '../value-objects/notes';
 import { GameResultValue } from '../value-objects/game-result';
 
 describe('Game Entity', () => {
@@ -20,7 +19,6 @@ describe('Game Entity', () => {
       StadiumId.create('stadium-id-001'),
       StadiumName.create('バンテリンドーム ナゴヤ'),
     ),
-    notes: new Notes('素晴らしい試合でした'),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -33,7 +31,6 @@ describe('Game Entity', () => {
       dragonsScore: Score;
       opponentScore: Score;
       stadium: Stadium;
-      notes: Notes;
       createdAt: Date;
       updatedAt: Date;
     }> = {},
@@ -46,7 +43,6 @@ describe('Game Entity', () => {
       data.dragonsScore,
       data.opponentScore,
       data.stadium,
-      data.notes,
       data.createdAt,
       data.updatedAt,
     );

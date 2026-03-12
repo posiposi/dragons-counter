@@ -8,7 +8,6 @@ export interface Game {
   opponentScore: number;
   result: GameResult;
   stadium: string;
-  notes?: string;
   createdAt: string;
   updatedAt: string;
 }

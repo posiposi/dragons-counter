@@ -131,26 +131,5 @@ describe('FindGameByDateAdapter Integration Tests', () => {
 
       expect(result).toBeNull();
     });
-
-    it('should exclude soft-deleted games', async () => {
-      const testDate = new Date('2024-07-01');
-
-      await gameRepository.save(
-        gameRepository.create({
-          id: randomUUID(),
-          gameDate: testDate,
-          opponent: '阪神タイガース',
-          stadiumId: testStadiums.vantelin.id,
-          dragonsScore: 5,
-          opponentScore: 3,
-          result: GameResultEnum.WIN,
-          deletedAt: new Date(),
-        }),
-      );
-
-      const result = await adapter.findByDate(new GameDate(testDate));
-
-      expect(result).toBeNull();
-    });
   });
 });

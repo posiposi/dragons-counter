@@ -86,7 +86,6 @@ export class BulkCreateGameUsecase {
         StadiumId.create(stadiumId),
         StadiumName.create(input.stadium),
       ),
-      undefined,
       new Date(),
       new Date(),
     );
