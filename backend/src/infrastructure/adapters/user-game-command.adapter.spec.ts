@@ -100,8 +100,7 @@ describe('UserGameCommandAdapter', () => {
         .createQueryBuilder()
         .delete()
         .from(UserGameEntity)
-        .where('userId LIKE :prefix', { prefix: `${testPrefix}%` })
-        .orWhere('userId = :userId', { userId: testUserId })
+        .where('userId = :userId', { userId: testUserId })
         .execute();
       await manager
         .createQueryBuilder()
