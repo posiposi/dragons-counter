@@ -13,7 +13,10 @@ color: blue
 
 ## 入力の取得
 
-TaskGetで仕様取得タスクのdescription/metadataからIssue仕様を読み込む。
+promptで受け取った以下の2つのタスクIDを使用する：
+
+1. **仕様取得タスクID**: TaskGetでdescription/metadataからIssue仕様を読み込む
+2. **自身のタスクID（コード調査タスク）**: 調査結果をTaskUpdateで記録する先
 
 ## 調査項目
 
@@ -43,7 +46,7 @@ TaskGetで仕様取得タスクのdescription/metadataからIssue仕様を読み
 
 ## 結果の記録
 
-TaskUpdateで自身のタスクに調査結果を記録する：
+TaskUpdateで**自身のタスクID（promptで受け取ったコード調査タスクID）**に調査結果を記録する：
 
 - descriptionに調査結果の要約を記述
 - metadataに構造化データを格納：
