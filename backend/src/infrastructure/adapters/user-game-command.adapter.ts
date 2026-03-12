@@ -16,6 +16,21 @@ export class UserGameCommandAdapter implements UserGameCommandPort {
   ) {}
 
   async save(userGame: UserGame): Promise<UserGame> {
+    const softDeleted = await this.userGameRepository.findOne({
+      where: {
+        userId: userGame.userId.value,
+        gameId: userGame.gameId.value,
+      },
+      withDeleted: true,
+    });
+
+    if (softDeleted?.deletedAt) {
+      softDeleted.impression = userGame.impression?.value ?? null;
+      softDeleted.deletedAt = null;
+      const restoredUserGame = await this.userGameRepository.save(softDeleted);
+      return UserGameMapper.toDomainEntity(restoredUserGame);
+    }
+
     const entity = this.userGameRepository.create(
       UserGameMapper.toPersistence(userGame),
     );

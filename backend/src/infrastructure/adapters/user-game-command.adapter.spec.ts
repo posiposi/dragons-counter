@@ -228,5 +228,33 @@ describe('UserGameCommandAdapter', () => {
 
       await expect(adapter.softDelete(userId, gameId)).resolves.not.toThrow();
     });
+
+    it('論理削除後に同じユーザー・試合で再登録できる', async () => {
+      const userId = UserId.create(testUserId);
+      const gameId = new GameId(testGameId);
+      const userGame = UserGame.createNew(userId, gameId);
+
+      await adapter.save(userGame);
+      await adapter.softDelete(userId, gameId);
+
+      const newUserGame = UserGame.createNew(
+        userId,
+        gameId,
+        Impression.create('再登録の感想'),
+      );
+      const result = await adapter.save(newUserGame);
+
+      expect(result).toBeInstanceOf(UserGame);
+      expect(result.userId.value).toBe(testUserId);
+      expect(result.gameId.value).toBe(testGameId);
+      expect(result.impression?.value).toBe('再登録の感想');
+
+      const found = await userGameRepository.findOne({
+        where: { userId: testUserId, gameId: testGameId },
+      });
+      expect(found).not.toBeNull();
+      expect(found?.deletedAt).toBeNull();
+      expect(found?.id).toBe(userGame.id.value);
+    });
   });
 });

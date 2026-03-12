@@ -7,11 +7,13 @@ import { UserGameEntity } from '../../typeorm/entities/user-game.entity';
 
 export class UserGameMapper {
   static toDomainEntity(data: UserGameEntity): UserGame {
+    const impression = Impression.create(data.impression);
+
     return UserGame.fromRepository(
       UserGameId.create(data.id),
       UserId.create(data.userId),
       new GameId(data.gameId),
-      data.impression !== null ? Impression.create(data.impression) : null,
+      impression.isEmpty() ? null : impression,
       data.createdAt,
       data.updatedAt,
     );

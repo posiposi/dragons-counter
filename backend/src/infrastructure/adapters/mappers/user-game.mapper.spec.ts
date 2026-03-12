@@ -51,6 +51,20 @@ describe('UserGameMapper', () => {
       expect(result.gameId.value).toBe(gameId);
       expect(result.impression).toBeNull();
     });
+
+    it('impression が空文字のUserGameEntityをnullに正規化して変換できる', () => {
+      const entity = new UserGameEntity();
+      entity.id = id;
+      entity.userId = userId;
+      entity.gameId = gameId;
+      entity.impression = '' as string | null;
+      entity.createdAt = createdAt;
+      entity.updatedAt = updatedAt;
+
+      const result = UserGameMapper.toDomainEntity(entity);
+
+      expect(result.impression).toBeNull();
+    });
   });
 
   describe('toPersistence', () => {
