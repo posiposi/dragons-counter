@@ -12,6 +12,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
   private readonly STATUS_CODE_MAP: Record<string, HttpStatus> = {
     NOT_FOUND: HttpStatus.NOT_FOUND,
     USER_NOT_FOUND: HttpStatus.NOT_FOUND,
+    GAME_NOT_FOUND: HttpStatus.NOT_FOUND,
     ALREADY_EXISTS: HttpStatus.CONFLICT,
     USER_ALREADY_EXISTS: HttpStatus.CONFLICT,
     EMAIL_ALREADY_EXISTS: HttpStatus.CONFLICT,

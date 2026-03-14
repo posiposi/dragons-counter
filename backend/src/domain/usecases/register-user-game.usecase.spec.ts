@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
 import { RegisterUserGameUsecase } from './register-user-game.usecase';
 import { UserGameAlreadyExistsException } from '../exceptions/user-game-already-exists.exception';
+import { GameNotFoundException } from '../exceptions/game-not-found.exception';
 import { UserGame } from '../entities/user-game';
 import { Game } from '../entities/game';
 import { UserId } from '../value-objects/user-id';
@@ -91,11 +91,11 @@ describe('RegisterUserGameUsecase', () => {
     });
 
     describe('異常系', () => {
-      it('存在しない試合IDの場合NotFoundExceptionがスローされる', async () => {
+      it('存在しない試合IDの場合GameNotFoundExceptionがスローされる', async () => {
         mockGamePort.findById.mockResolvedValue(null);
 
         await expect(usecase.execute(userId, gameId)).rejects.toThrow(
-          NotFoundException,
+          GameNotFoundException,
         );
 
         expect(mockUserGameCommandPort.save).not.toHaveBeenCalled();

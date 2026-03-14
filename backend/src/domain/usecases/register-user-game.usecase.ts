@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type { UserGameCommandPort } from '../ports/user-game-command.port';
 import type { UserGameQueryPort } from '../ports/user-game-query.port';
 import type { GamePort } from '../ports/game.port';
@@ -6,6 +6,7 @@ import { UserId } from '../value-objects/user-id';
 import { GameId } from '../value-objects/game-id';
 import { UserGame } from '../entities/user-game';
 import { UserGameAlreadyExistsException } from '../exceptions/user-game-already-exists.exception';
+import { GameNotFoundException } from '../exceptions/game-not-found.exception';
 
 @Injectable()
 export class RegisterUserGameUsecase {
@@ -24,7 +25,7 @@ export class RegisterUserGameUsecase {
 
     const game = await this.gamePort.findById(gameIdVO);
     if (!game) {
-      throw new NotFoundException('指定された試合が見つかりません');
+      throw new GameNotFoundException('指定された試合が見つかりません');
     }
 
     const existingUserGame = await this.userGameQueryPort.findByUserIdAndGameId(
