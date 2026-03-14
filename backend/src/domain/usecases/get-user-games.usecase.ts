@@ -5,6 +5,7 @@ import { UserGame } from '../entities/user-game';
 import { Game } from '../entities/game';
 import { UserId } from '../value-objects/user-id';
 import { UserGameWithGameReadModel } from './read-models/user-game-with-game.read-model';
+import { GameNotFoundException } from '../exceptions/game-not-found.exception';
 
 @Injectable()
 export class GetUserGamesUsecase {
@@ -28,14 +29,17 @@ export class GetUserGamesUsecase {
       games.map((game) => [game.id.value, game]),
     );
 
-    const dtos: UserGameWithGameReadModel[] = [];
-    for (const userGame of userGames) {
-      const game = gameMap.get(userGame.gameId.value);
-      if (game) {
-        dtos.push(this.toDto(userGame, game));
-      }
+    const missingGameIds = gameIds.filter(
+      (gameId) => !gameMap.has(gameId.value),
+    );
+    if (missingGameIds.length > 0) {
+      throw new GameNotFoundException('関連する試合情報が見つかりません');
     }
-    return dtos;
+
+    return userGames.map((userGame) => {
+      const game = gameMap.get(userGame.gameId.value)!;
+      return this.toDto(userGame, game);
+    });
   }
 
   private toDto(userGame: UserGame, game: Game): UserGameWithGameReadModel {

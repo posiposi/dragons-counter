@@ -15,6 +15,7 @@ import { StadiumId } from '../value-objects/stadium-id';
 import { StadiumName } from '../value-objects/stadium-name';
 import { Impression } from '../value-objects/impression';
 import { UserGameWithGameReadModel } from './read-models/user-game-with-game.read-model';
+import { GameNotFoundException } from '../exceptions/game-not-found.exception';
 
 describe('GetUserGamesUsecase', () => {
   let usecase: GetUserGamesUsecase;
@@ -150,7 +151,7 @@ describe('GetUserGamesUsecase', () => {
       expect(findByIdsSpy).not.toHaveBeenCalled();
     });
 
-    it('Game情報が見つからないUserGameはスキップされる', async () => {
+    it('関連試合が欠落している場合にGameNotFoundExceptionがスローされる', async () => {
       const userId = 'user-1';
       const createdAt = new Date('2024-06-01T12:00:00Z');
       const updatedAt = new Date('2024-06-01T12:00:00Z');
@@ -193,10 +194,9 @@ describe('GetUserGamesUsecase', () => {
         .mockResolvedValue(mockUserGames);
       jest.spyOn(gamePort, 'findByIds').mockResolvedValue([mockGame1]);
 
-      const result = await usecase.execute(userId);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('ug-1');
+      await expect(usecase.execute(userId)).rejects.toThrow(
+        GameNotFoundException,
+      );
     });
   });
 });
