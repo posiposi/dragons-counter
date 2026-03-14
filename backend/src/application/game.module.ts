@@ -36,5 +36,6 @@ import { StadiumEntity } from '../infrastructure/typeorm/entities/stadium.entity
       useClass: FindGameByDateAdapter,
     },
   ],
+  exports: ['GamePort'],
 })
 export class GameModule {}

@@ -283,6 +283,89 @@ describe('GameAdapter Integration Tests', () => {
     });
   });
 
+  describe('findByIds', () => {
+    let adapter: GameAdapter;
+
+    beforeEach(async () => {
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
+
+      adapter = module.get<GameAdapter>(GameAdapter);
+
+      await gameRepository.save(
+        createTestGame({
+          id: '33333333-game-byid-0001-000000000001',
+          gameDate: new Date('2024-04-01'),
+          opponent: '横浜DeNAベイスターズ',
+          stadiumId: testStadiums.vantelin.id,
+          dragonsScore: 5,
+          opponentScore: 3,
+          result: GameResultEnum.WIN,
+        }),
+      );
+      await gameRepository.save(
+        createTestGame({
+          id: '33333333-game-byid-0001-000000000002',
+          gameDate: new Date('2024-04-02'),
+          opponent: '阪神タイガース',
+          stadiumId: testStadiums.koshien.id,
+          dragonsScore: 2,
+          opponentScore: 7,
+          result: GameResultEnum.LOSE,
+        }),
+      );
+    });
+
+    afterEach(async () => {
+      const stadiumIds = Object.values(testStadiums).map((s) => s.id);
+      await gameRepository
+        .createQueryBuilder()
+        .delete()
+        .where('stadiumId IN (:...ids)', { ids: stadiumIds })
+        .execute();
+    });
+
+    it('複数の試合をIDリストで一括取得できる', async () => {
+      const gameIds = [
+        new GameId('33333333-game-byid-0001-000000000001'),
+        new GameId('33333333-game-byid-0001-000000000002'),
+      ];
+
+      const result = await adapter.findByIds(gameIds);
+
+      expect(result).toHaveLength(2);
+      expect(result.every((g) => g instanceof Game)).toBe(true);
+
+      const ids = result.map((g) => g.id.value).sort();
+      expect(ids).toEqual([
+        '33333333-game-byid-0001-000000000001',
+        '33333333-game-byid-0001-000000000002',
+      ]);
+    });
+
+    it('存在しないIDが含まれる場合、存在する試合のみ返す', async () => {
+      const gameIds = [
+        new GameId('33333333-game-byid-0001-000000000001'),
+        new GameId('00000000-0000-0000-0000-000000000000'),
+      ];
+
+      const result = await adapter.findByIds(gameIds);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id.value).toBe('33333333-game-byid-0001-000000000001');
+    });
+
+    it('空のIDリストの場合、空配列を返す', async () => {
+      const result = await adapter.findByIds([]);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('findById and delete', () => {
     let testGameId: string;
     let testGameIdVO: GameId;

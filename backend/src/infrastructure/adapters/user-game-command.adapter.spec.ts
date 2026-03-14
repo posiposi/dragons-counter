@@ -8,6 +8,7 @@ import { UserGame } from '../../domain/entities/user-game';
 import { UserId } from '../../domain/value-objects/user-id';
 import { GameId } from '../../domain/value-objects/game-id';
 import { Impression } from '../../domain/value-objects/impression';
+import { UserGameAlreadyExistsException } from '../../domain/exceptions/user-game-already-exists.exception';
 import { UserGameEntity } from '../typeorm/entities/user-game.entity';
 import { UserEntity } from '../typeorm/entities/user.entity';
 import { GameEntity } from '../typeorm/entities/game.entity';
@@ -176,6 +177,40 @@ describe('UserGameCommandAdapter', () => {
         where: { id: userGame.id.value },
       });
       expect(saved?.impression).toBeNull();
+    });
+
+    it('ユニーク制約違反時にUserGameAlreadyExistsExceptionがスローされる', async () => {
+      const userId = UserId.create(testUserId);
+      const gameId = new GameId(testGameId);
+      const userGame = UserGame.createNew(userId, gameId);
+
+      await adapter.save(userGame);
+
+      const duplicateUserGame = UserGame.createNew(userId, gameId);
+
+      jest
+        .spyOn(userGameRepository, 'findOne')
+        .mockResolvedValueOnce(null as unknown as UserGameEntity);
+
+      await expect(adapter.save(duplicateUserGame)).rejects.toThrow(
+        UserGameAlreadyExistsException,
+      );
+
+      jest.restoreAllMocks();
+    });
+
+    it('アクティブな既存レコードに別IDで保存すると重複例外がスローされる', async () => {
+      const userId = UserId.create(testUserId);
+      const gameId = new GameId(testGameId);
+      const userGame = UserGame.createNew(userId, gameId);
+
+      await adapter.save(userGame);
+
+      const duplicateUserGame = UserGame.createNew(userId, gameId);
+
+      await expect(adapter.save(duplicateUserGame)).rejects.toThrow(
+        UserGameAlreadyExistsException,
+      );
     });
 
     it('既存の観戦記録を更新できる', async () => {
