@@ -18,9 +18,19 @@ export class GetUserGamesUsecase {
     const userIdVO = UserId.create(userId);
     const userGames = await this.userGameQueryPort.findByUserId(userIdVO);
 
+    if (userGames.length === 0) {
+      return [];
+    }
+
+    const gameIds = userGames.map((ug) => ug.gameId);
+    const games = await this.gamePort.findByIds(gameIds);
+    const gameMap = new Map<string, Game>(
+      games.map((game) => [game.id.value, game]),
+    );
+
     const dtos: UserGameResponseDto[] = [];
     for (const userGame of userGames) {
-      const game = await this.gamePort.findById(userGame.gameId);
+      const game = gameMap.get(userGame.gameId.value);
       if (game) {
         dtos.push(this.toDto(userGame, game));
       }

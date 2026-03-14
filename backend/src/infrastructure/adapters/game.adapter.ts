@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { GamePort } from '../../domain/ports/game.port';
 import { Game } from '../../domain/entities/game';
 import { GameId } from '../../domain/value-objects/game-id';
@@ -58,6 +58,19 @@ export class GameAdapter implements GamePort {
     }
 
     return this.toDomainEntity(game);
+  }
+
+  async findByIds(gameIds: GameId[]): Promise<Game[]> {
+    if (gameIds.length === 0) {
+      return [];
+    }
+
+    const games = await this.gameRepository.find({
+      where: { id: In(gameIds.map((id) => id.value)) },
+      relations: ['stadium'],
+    });
+
+    return games.map((game) => this.toDomainEntity(game));
   }
 
   async delete(gameId: GameId): Promise<boolean> {

@@ -4,6 +4,8 @@ import { RegisterUserGameUsecase } from './register-user-game.usecase';
 import { UserGameAlreadyExistsException } from '../exceptions/user-game-already-exists.exception';
 import { UserGame } from '../entities/user-game';
 import { Game } from '../entities/game';
+import { UserId } from '../value-objects/user-id';
+import { GameId } from '../value-objects/game-id';
 
 describe('RegisterUserGameUsecase', () => {
   let usecase: RegisterUserGameUsecase;
@@ -53,9 +55,13 @@ describe('RegisterUserGameUsecase', () => {
 
     describe('正常系', () => {
       it('新規観戦登録が成功する', async () => {
+        const userIdVO = UserId.create(userId);
+        const gameIdVO = new GameId(gameId);
         mockGamePort.findById.mockResolvedValue({} as Game);
         mockUserGameQueryPort.findByUserIdAndGameId.mockResolvedValue(null);
-        mockUserGameCommandPort.save.mockResolvedValue(undefined);
+        mockUserGameCommandPort.save.mockResolvedValue(
+          UserGame.createNew(userIdVO, gameIdVO),
+        );
 
         await usecase.execute(userId, gameId);
 
@@ -67,9 +73,13 @@ describe('RegisterUserGameUsecase', () => {
       });
 
       it('saveに渡されるUserGameのuserId・gameIdが正しい', async () => {
+        const userIdVO = UserId.create(userId);
+        const gameIdVO = new GameId(gameId);
         mockGamePort.findById.mockResolvedValue({} as Game);
         mockUserGameQueryPort.findByUserIdAndGameId.mockResolvedValue(null);
-        mockUserGameCommandPort.save.mockResolvedValue(undefined);
+        mockUserGameCommandPort.save.mockResolvedValue(
+          UserGame.createNew(userIdVO, gameIdVO),
+        );
 
         await usecase.execute(userId, gameId);
 

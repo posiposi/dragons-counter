@@ -34,7 +34,7 @@ describe('GetUserGamesUsecase', () => {
         {
           provide: 'GamePort',
           useValue: {
-            findById: jest.fn(),
+            findByIds: jest.fn(),
           },
         },
       ],
@@ -102,9 +102,8 @@ describe('GetUserGamesUsecase', () => {
         .spyOn(userGameQueryPort, 'findByUserId')
         .mockResolvedValue(mockUserGames);
       jest
-        .spyOn(gamePort, 'findById')
-        .mockResolvedValueOnce(mockGame1)
-        .mockResolvedValueOnce(mockGame2);
+        .spyOn(gamePort, 'findByIds')
+        .mockResolvedValue([mockGame1, mockGame2]);
 
       const result = await usecase.execute(userId);
 
@@ -142,13 +141,13 @@ describe('GetUserGamesUsecase', () => {
       const findByUserIdSpy = jest
         .spyOn(userGameQueryPort, 'findByUserId')
         .mockResolvedValue([]);
-      const findByIdSpy = jest.spyOn(gamePort, 'findById');
+      const findByIdsSpy = jest.spyOn(gamePort, 'findByIds');
 
       const result = await usecase.execute('user-1');
 
       expect(result).toEqual([]);
       expect(findByUserIdSpy).toHaveBeenCalledTimes(1);
-      expect(findByIdSpy).not.toHaveBeenCalled();
+      expect(findByIdsSpy).not.toHaveBeenCalled();
     });
 
     it('Game情報が見つからないUserGameはスキップされる', async () => {
@@ -192,10 +191,7 @@ describe('GetUserGamesUsecase', () => {
       jest
         .spyOn(userGameQueryPort, 'findByUserId')
         .mockResolvedValue(mockUserGames);
-      jest
-        .spyOn(gamePort, 'findById')
-        .mockResolvedValueOnce(mockGame1)
-        .mockResolvedValueOnce(null);
+      jest.spyOn(gamePort, 'findByIds').mockResolvedValue([mockGame1]);
 
       const result = await usecase.execute(userId);
 
