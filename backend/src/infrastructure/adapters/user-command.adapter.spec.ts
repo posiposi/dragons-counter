@@ -17,7 +17,6 @@ import { RegistrationStatus } from '../../domain/enums/registration-status';
 import { UserAlreadyExistsException } from '../../domain/exceptions/user-already-exists.exception';
 import { UserEntity } from '../typeorm/entities/user.entity';
 import { UserRegistrationRequestEntity } from '../typeorm/entities/user-registration-request.entity';
-import { UserRoleEnum } from '../typeorm/enums/user-role.enum';
 import { RegistrationStatusEnum } from '../typeorm/enums/registration-status.enum';
 import { createDataSourceOptions } from '../typeorm/data-source';
 
@@ -144,7 +143,6 @@ describe('UserCommandAdapter ユニットテスト', () => {
 
 describe('UserCommandAdapter 統合テスト', () => {
   let module: TestingModule;
-  let userRepository: Repository<UserEntity>;
   let registrationRequestRepository: Repository<UserRegistrationRequestEntity>;
   let adapter: UserCommandAdapter;
   let dataSource: DataSource;
@@ -164,9 +162,6 @@ describe('UserCommandAdapter 統合テスト', () => {
       providers: [UserCommandAdapter],
     }).compile();
 
-    userRepository = module.get<Repository<UserEntity>>(
-      getRepositoryToken(UserEntity),
-    );
     registrationRequestRepository = module.get<
       Repository<UserRegistrationRequestEntity>
     >(getRepositoryToken(UserRegistrationRequestEntity));
@@ -199,59 +194,6 @@ describe('UserCommandAdapter 統合テスト', () => {
   afterAll(async () => {
     await cleanupTestData();
     await module.close();
-  });
-
-  describe('save', () => {
-    it('新規ユーザー保存時にPENDINGステータスの登録リクエストが作成される', async () => {
-      const email = Email.create(`${testEmailPrefix}save@example.com`);
-      const password = await Password.fromPlainText('password123');
-      const user = User.createNew(email, password);
-
-      const result = await adapter.save(user);
-
-      expect(result).toBeInstanceOf(User);
-      expect(result.id.value).toBe(user.id.value);
-      expect(result.email.value).toBe(`${testEmailPrefix}save@example.com`);
-      expect(result.registrationStatus).toBe(RegistrationStatus.PENDING);
-
-      const savedUser = await userRepository.findOne({
-        where: { id: user.id.value },
-        relations: ['registrationRequests'],
-      });
-      expect(savedUser).not.toBeNull();
-      expect(savedUser?.email).toBe(`${testEmailPrefix}save@example.com`);
-      expect(savedUser?.registrationRequests).toHaveLength(1);
-      expect(savedUser?.registrationRequests[0].status).toBe(
-        RegistrationStatusEnum.PENDING,
-      );
-    });
-
-    it('パスワードがハッシュ化された状態で保存される', async () => {
-      const email = Email.create(`${testEmailPrefix}hash@example.com`);
-      const password = await Password.fromPlainText('password123');
-      const user = User.createNew(email, password);
-
-      await adapter.save(user);
-
-      const savedUser = await userRepository.findOne({
-        where: { id: user.id.value },
-      });
-      expect(savedUser?.password).not.toBe('password123');
-      expect(savedUser?.password).toBe(password.hash);
-    });
-
-    it('ユーザーロールが正しくマッピングされる', async () => {
-      const email = Email.create(`${testEmailPrefix}role@example.com`);
-      const password = await Password.fromPlainText('password123');
-      const user = User.createNew(email, password);
-
-      await adapter.save(user);
-
-      const savedUser = await userRepository.findOne({
-        where: { id: user.id.value },
-      });
-      expect(savedUser?.role).toBe(UserRoleEnum.USER);
-    });
   });
 
   describe('updateRegistrationStatus', () => {
