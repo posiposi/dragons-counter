@@ -28,4 +28,5 @@ terraform.rc
 .github/templates/
 lambda/*.zip
 .worktrees/
+.worktree-ports.txt
 .vscode/
