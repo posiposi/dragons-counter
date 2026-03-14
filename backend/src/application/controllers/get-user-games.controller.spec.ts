@@ -1,6 +1,10 @@
 import { RequestMethod } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GUARDS_METADATA } from '@nestjs/common/constants';
+import {
+  GUARDS_METADATA,
+  PATH_METADATA,
+  METHOD_METADATA,
+} from '@nestjs/common/constants';
 import { GetUserGamesController } from './get-user-games.controller';
 import { GetUserGamesUsecase } from '../../domain/usecases/get-user-games.usecase';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -70,14 +74,23 @@ describe('GetUserGamesController', () => {
   });
 
   it('GETメソッドでuser-gamesパスにマッピングされている', () => {
+    const controllerPath = Reflect.getMetadata(
+      PATH_METADATA,
+      GetUserGamesController,
+    ) as string;
+    expect(controllerPath).toBe('user-games');
+
     const getUserGamesMethod = Object.getOwnPropertyDescriptor(
       GetUserGamesController.prototype,
       'getUserGames',
     )!.value as (...args: unknown[]) => unknown;
 
-    const path = Reflect.getMetadata('path', getUserGamesMethod) as string;
+    const path = Reflect.getMetadata(
+      PATH_METADATA,
+      getUserGamesMethod,
+    ) as string;
     const method = Reflect.getMetadata(
-      'method',
+      METHOD_METADATA,
       getUserGamesMethod,
     ) as RequestMethod;
 
