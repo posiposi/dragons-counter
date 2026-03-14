@@ -4,7 +4,7 @@ import type { GamePort } from '../ports/game.port';
 import { UserGame } from '../entities/user-game';
 import { Game } from '../entities/game';
 import { UserId } from '../value-objects/user-id';
-import { UserGameResponseDto } from '../../application/dto/response/user-game-response.dto';
+import { UserGameWithGameReadModel } from './read-models/user-game-with-game.read-model';
 
 @Injectable()
 export class GetUserGamesUsecase {
@@ -14,7 +14,7 @@ export class GetUserGamesUsecase {
     @Inject('GamePort') private readonly gamePort: GamePort,
   ) {}
 
-  async execute(userId: string): Promise<UserGameResponseDto[]> {
+  async execute(userId: string): Promise<UserGameWithGameReadModel[]> {
     const userIdVO = UserId.create(userId);
     const userGames = await this.userGameQueryPort.findByUserId(userIdVO);
 
@@ -28,7 +28,7 @@ export class GetUserGamesUsecase {
       games.map((game) => [game.id.value, game]),
     );
 
-    const dtos: UserGameResponseDto[] = [];
+    const dtos: UserGameWithGameReadModel[] = [];
     for (const userGame of userGames) {
       const game = gameMap.get(userGame.gameId.value);
       if (game) {
@@ -38,7 +38,7 @@ export class GetUserGamesUsecase {
     return dtos;
   }
 
-  private toDto(userGame: UserGame, game: Game): UserGameResponseDto {
+  private toDto(userGame: UserGame, game: Game): UserGameWithGameReadModel {
     return {
       id: userGame.id.value,
       gameId: game.id.value,

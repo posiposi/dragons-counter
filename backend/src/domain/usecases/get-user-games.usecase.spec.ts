@@ -14,7 +14,7 @@ import { Stadium } from '../value-objects/stadium';
 import { StadiumId } from '../value-objects/stadium-id';
 import { StadiumName } from '../value-objects/stadium-name';
 import { Impression } from '../value-objects/impression';
-import { UserGameResponseDto } from '../../application/dto/response/user-game-response.dto';
+import { UserGameWithGameReadModel } from './read-models/user-game-with-game.read-model';
 
 describe('GetUserGamesUsecase', () => {
   let usecase: GetUserGamesUsecase;
@@ -107,7 +107,7 @@ describe('GetUserGamesUsecase', () => {
 
       const result = await usecase.execute(userId);
 
-      const expected: UserGameResponseDto[] = [
+      const expected: UserGameWithGameReadModel[] = [
         {
           id: 'ug-1',
           gameId: 'game-1',
