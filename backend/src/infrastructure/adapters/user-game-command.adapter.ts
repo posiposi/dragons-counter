@@ -27,10 +27,13 @@ export class UserGameCommandAdapter implements UserGameCommandPort {
       });
 
       if (existing) {
-        existing.impression = userGame.impression?.value ?? null;
-        if (existing.deletedAt) {
-          existing.deletedAt = null;
+        if (!existing.deletedAt && existing.id !== userGame.id.value) {
+          throw new UserGameAlreadyExistsException(
+            'この試合は既に観戦登録されています',
+          );
         }
+        existing.impression = userGame.impression?.value ?? null;
+        existing.deletedAt = null;
         const updatedUserGame = await this.userGameRepository.save(existing);
         return UserGameMapper.toDomainEntity(updatedUserGame);
       }

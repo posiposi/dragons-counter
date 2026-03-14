@@ -199,6 +199,20 @@ describe('UserGameCommandAdapter', () => {
       jest.restoreAllMocks();
     });
 
+    it('アクティブな既存レコードに別IDで保存すると重複例外がスローされる', async () => {
+      const userId = UserId.create(testUserId);
+      const gameId = new GameId(testGameId);
+      const userGame = UserGame.createNew(userId, gameId);
+
+      await adapter.save(userGame);
+
+      const duplicateUserGame = UserGame.createNew(userId, gameId);
+
+      await expect(adapter.save(duplicateUserGame)).rejects.toThrow(
+        UserGameAlreadyExistsException,
+      );
+    });
+
     it('既存の観戦記録を更新できる', async () => {
       const userId = UserId.create(testUserId);
       const gameId = new GameId(testGameId);
