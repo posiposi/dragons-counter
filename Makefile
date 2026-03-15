@@ -14,6 +14,7 @@ dev:
 ifeq ($(IS_WORKTREE),1)
 	@test -f "$(MAIN_WORKTREE)/.env" || (echo "Error: $(MAIN_WORKTREE)/.env が存在しません" && exit 1)
 	@test -f .env || (cp "$(MAIN_WORKTREE)/.env" .env && echo "✔ .env をメインworktreeからコピーしました")
+	@test -d certs || (cp -r "$(MAIN_WORKTREE)/certs" certs && echo "✔ certs/ をメインworktreeからコピーしました")
 	@$(MAKE) --no-print-directory _assign-ports
 endif
 	docker compose up -d
