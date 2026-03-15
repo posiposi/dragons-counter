@@ -91,6 +91,29 @@ GitHub Actions + AWS CodeDeploy による自動デプロイ:
 | `frontend-ci.yml` | PR        | Lint + TypeCheck + Format |
 | `deploy.yml`      | main push | CodeDeploy デプロイ       |
 
+## 並列開発（git worktree）
+
+git worktree を使用して、複数の開発環境を同時に起動できます。
+
+```bash
+# 1. worktreeを作成
+git worktree add .worktrees/<name> -b <branch-name>
+
+# 2. worktreeに移動して開発環境を起動
+cd .worktrees/<name>
+make dev
+```
+
+`make dev` は `.env` と `certs/` のコピー、ポート動的割り当て、Docker起動を自動で行います。
+
+| コマンド | 内容 |
+| --- | --- |
+| `make dev` | 開発環境の起動 |
+| `make down` | Docker停止 |
+| `make status` | 現在のポート割り当てを表示 |
+
+メインworktreeはデフォルトの固定ポート、サブworktreeはオフセットで競合を回避します。割り当てポートは `.worktree-ports.txt` で確認できます。
+
 ## 開発方針
 
 - **API First**: OpenAPI 仕様に準拠

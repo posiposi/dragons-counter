@@ -95,9 +95,10 @@ make dev
 `make dev` は以下を自動で実行します：
 
 1. メインworktreeから `.env` をコピー（未存在時）
-2. ポートオフセットを算出して `.env` に `HOST_*_PORT` を追記（サブworktreeのみ）
-3. `docker compose up -d` で起動
-4. 割り当てポートを `.worktree-ports.txt` に記録
+2. メインworktreeから `certs/` をコピー（未存在時）
+3. ポートオフセットを算出して `.env` に `HOST_*_PORT` を追記（サブworktreeのみ）
+4. `docker compose up -d` で起動
+5. 割り当てポートを `.worktree-ports.txt` に記録
 
 ### 利用可能なコマンド
 
