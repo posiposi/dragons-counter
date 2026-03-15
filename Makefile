@@ -12,6 +12,7 @@ IS_WORKTREE := $(shell [ "$(MAIN_WORKTREE)" = "$(CURRENT_DIR)" ] && echo 0 || ec
 ## - サブworktree: .envコピー + ポート動的割り当て + 起動
 dev:
 ifeq ($(IS_WORKTREE),1)
+	@test -f "$(MAIN_WORKTREE)/.env" || (echo "Error: $(MAIN_WORKTREE)/.env が存在しません" && exit 1)
 	@test -f .env || (cp "$(MAIN_WORKTREE)/.env" .env && echo "✔ .env をメインworktreeからコピーしました")
 	@$(MAKE) --no-print-directory _assign-ports
 endif
@@ -46,6 +47,7 @@ _assign-ports:
 		echo "HOST_BACKEND_PORT=$$((3443 + $$OFFSET))"; \
 		echo "HOST_FRONTEND_PORT=$$((3043 + $$OFFSET))"; \
 		echo "HOST_API_DOCS_PORT=$$((8080 + $$OFFSET))"; \
+		echo "# proxyはメインworktreeで特権ポート443を使用するため、サブworktreeでは8443を基準にする"; \
 		echo "HOST_PROXY_PORT=$$((8443 + $$OFFSET))"; \
 	} >> .env; \
 	echo "✔ ポートオフセット: $$OFFSET を適用しました"
