@@ -10,7 +10,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${HOST_DB_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -25,7 +25,7 @@ services:
       MYSQL_USER: ${TEST_MYSQL_USER}
       MYSQL_PASSWORD: ${TEST_MYSQL_PASSWORD}
     ports:
-      - "3307:3306"
+      - "${HOST_TEST_DB_PORT:-3307}:3306"
     volumes:
       - test_mysql_data:/var/lib/mysql
     networks:
@@ -42,11 +42,10 @@ services:
     environment:
       NODE_ENV: development
     ports:
-      - "3443:3443"
+      - "${HOST_BACKEND_PORT:-3443}:3443"
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - ./.env:/app/.env:ro
       - ./backend/.env.test:/app/.env.test:ro
       - ./certs:/app/certs:ro
     depends_on:
@@ -63,7 +62,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - "3043:3043"
+      - "${HOST_FRONTEND_PORT:-3043}:3043"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -80,7 +79,7 @@ services:
   api-docs:
     image: nginx:alpine
     ports:
-      - "8080:80"
+      - "${HOST_API_DOCS_PORT:-8080}:80"
     volumes:
       - ./backend/docs:/usr/share/nginx/html:ro
       - ./backend/docs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -90,7 +89,7 @@ services:
   proxy:
     image: nginx:1.29.4-alpine
     ports:
-      - "443:443"
+      - "${HOST_PROXY_PORT:-443}:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certs:/etc/nginx/certs:ro
