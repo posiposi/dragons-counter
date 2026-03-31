@@ -43,7 +43,6 @@ export default function GameList() {
     await loadUserGames();
   };
 
-
   const calculateStats = () => {
     const wins = games.filter((g) => g.result === "win").length;
     const losses = games.filter((g) => g.result === "lose").length;

@@ -72,7 +72,6 @@ export default function GameSelectModal({
     }
   };
 
-
   if (!isOpen) return null;
 
   const unregisteredGames = games.filter(
