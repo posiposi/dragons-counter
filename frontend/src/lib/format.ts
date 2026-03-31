@@ -1,7 +1,10 @@
 const DAY_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
 
 export function formatGameDate(dateStr: string): string {
-  const date = new Date(dateStr + "T00:00:00");
+  const date = new Date(dateStr.slice(0, 10) + "T00:00:00");
+  if (isNaN(date.getTime())) {
+    return dateStr;
+  }
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
   const d = date.getDate();
