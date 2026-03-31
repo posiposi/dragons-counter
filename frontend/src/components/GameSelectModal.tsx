@@ -72,7 +72,7 @@ export default function GameSelectModal({
       case "lose":
         return "敗北";
       case "draw":
-        return "引分";
+        return "引き分け";
       default:
         return result;
     }
