@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Game } from "@/types/game";
 import { fetchGames } from "@/lib/api/games";
+import {
+  formatGameDate,
+  getResultText,
+  getResultBadgeClass,
+} from "@/lib/game-utils";
 import { X, MapPin } from "lucide-react";
 import styles from "./GameSelectModal.module.css";
 
@@ -55,41 +60,6 @@ export default function GameSelectModal({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      weekday: "short",
-    });
-  };
-
-  const getResultText = (result: string) => {
-    switch (result) {
-      case "win":
-        return "勝利";
-      case "lose":
-        return "敗北";
-      case "draw":
-        return "引き分け";
-      default:
-        return result;
-    }
-  };
-
-  const getResultBadgeClass = (result: string) => {
-    switch (result) {
-      case "win":
-        return styles.resultWin;
-      case "lose":
-        return styles.resultLose;
-      case "draw":
-        return styles.resultDraw;
-      default:
-        return "";
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -123,7 +93,7 @@ export default function GameSelectModal({
               <div key={game.id} className={styles.gameItem}>
                 <div className={styles.gameInfo}>
                   <span className={styles.gameDate}>
-                    {formatDate(game.gameDate)}
+                    {formatGameDate(game.gameDate)}
                   </span>
                   <span className={styles.gameOpponent}>
                     vs {game.opponent}
@@ -133,7 +103,7 @@ export default function GameSelectModal({
                       {game.dragonsScore} - {game.opponentScore}
                     </span>
                     <span
-                      className={`${styles.resultBadge} ${getResultBadgeClass(game.result)}`}
+                      className={`${styles.resultBadge} ${getResultBadgeClass(game.result, styles)}`}
                     >
                       {getResultText(game.result)}
                     </span>

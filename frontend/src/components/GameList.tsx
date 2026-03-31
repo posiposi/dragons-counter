@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserGame } from "@/types/user-game";
 import { fetchUserGames, registerUserGame } from "@/lib/api/user-games";
+import {
+  formatGameDate,
+  getResultText,
+  getResultBadgeClass,
+} from "@/lib/game-utils";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut, Settings, Plus } from "lucide-react";
 import GameSelectModal from "./GameSelectModal";
@@ -38,41 +43,6 @@ export default function GameList() {
     await loadUserGames();
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      weekday: "short",
-    });
-  };
-
-  const getResultBadgeClass = (result: string) => {
-    switch (result) {
-      case "win":
-        return styles.resultWin;
-      case "lose":
-        return styles.resultLose;
-      case "draw":
-        return styles.resultDraw;
-      default:
-        return "";
-    }
-  };
-
-  const getResultText = (result: string) => {
-    switch (result) {
-      case "win":
-        return "勝利";
-      case "lose":
-        return "敗北";
-      case "draw":
-        return "引き分け";
-      default:
-        return result;
-    }
-  };
 
   const calculateStats = () => {
     const wins = games.filter((g) => g.result === "win").length;
@@ -172,10 +142,10 @@ export default function GameList() {
               <div key={game.id} className={styles.gameCard}>
                 <div className={styles.gameHeader}>
                   <span className={styles.gameDate}>
-                    {formatDate(game.gameDate)}
+                    {formatGameDate(game.gameDate)}
                   </span>
                   <span
-                    className={`${styles.resultBadge} ${getResultBadgeClass(game.result)}`}
+                    className={`${styles.resultBadge} ${getResultBadgeClass(game.result, styles)}`}
                   >
                     {getResultText(game.result)}
                   </span>
