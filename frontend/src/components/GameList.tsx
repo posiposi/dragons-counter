@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserGame } from "@/types/user-game";
-import { fetchUserGames } from "@/lib/api/user-games";
+import { fetchUserGames, registerUserGame } from "@/lib/api/user-games";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, Plus } from "lucide-react";
+import GameSelectModal from "./GameSelectModal";
 import styles from "./GameList.module.css";
 
 export default function GameList() {
@@ -12,6 +13,7 @@ export default function GameList() {
   const [games, setGames] = useState<UserGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadUserGames();
@@ -29,6 +31,11 @@ export default function GameList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRegister = async (gameId: string) => {
+    await registerUserGame(gameId);
+    await loadUserGames();
   };
 
   const formatDate = (dateString: string) => {
@@ -125,6 +132,16 @@ export default function GameList() {
 
       {games.length > 0 ? (
         <>
+          <div className={styles.addButtonWrapper}>
+            <button
+              className={styles.addButton}
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus size={18} />
+              観戦記録を追加
+            </button>
+          </div>
+
           <div className={styles.statsCard}>
             <div className={styles.statsGrid}>
               <div className={styles.statItem}>
@@ -180,9 +197,21 @@ export default function GameList() {
           <p className={styles.emptyStateText}>
             最初の観戦記録を追加して、思い出を記録しましょう
           </p>
-          <button className={styles.addButton}>観戦記録を追加</button>
+          <button
+            className={styles.addButton}
+            onClick={() => setIsModalOpen(true)}
+          >
+            観戦記録を追加
+          </button>
         </div>
       )}
+
+      <GameSelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onRegister={handleRegister}
+        registeredGameIds={games.map((game) => game.gameId)}
+      />
     </div>
   );
 }

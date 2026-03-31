@@ -212,7 +212,16 @@
   margin-bottom: 24px;
 }
 
+.addButtonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
 .addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: var(--primary);
   color: white;
   border: none;
