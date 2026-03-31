@@ -4,60 +4,13 @@ import { ArrowLeft, Users } from "lucide-react";
 import GameScrapePanel from "@/components/GameScrapePanel";
 import GameResultBadge from "@/components/GameResultBadge";
 import { fetchGames } from "@/lib/api/games";
+import { formatGameDate, formatCreatedAt } from "@/lib/format";
+import { getPageNumbers } from "@/lib/pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Game } from "@/types/game";
 import styles from "./AdminGamesPage.module.css";
 
 const ITEMS_PER_PAGE = 6;
-
-const DAY_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
-
-function formatGameDate(dateStr: string): string {
-  const date = new Date(dateStr + "T00:00:00");
-  const y = date.getFullYear();
-  const m = date.getMonth() + 1;
-  const d = date.getDate();
-  const dow = DAY_OF_WEEK[date.getDay()];
-  return `${y}年${m}月${d}日（${dow}）`;
-}
-
-function formatCreatedAt(dateStr: string): string {
-  const date = new Date(dateStr);
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}/${m}/${d}`;
-}
-
-function getPageNumbers(
-  currentPage: number,
-  totalPages: number,
-): (number | "...")[] {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  }
-
-  const pages: (number | "...")[] = [1];
-
-  if (currentPage > 3) {
-    pages.push("...");
-  }
-
-  const start = Math.max(2, currentPage - 1);
-  const end = Math.min(totalPages - 1, currentPage + 1);
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  if (currentPage < totalPages - 2) {
-    pages.push("...");
-  }
-
-  pages.push(totalPages);
-
-  return pages;
-}
 
 export default function AdminGamesPage() {
   const navigate = useNavigate();
@@ -103,10 +56,6 @@ export default function AdminGamesPage() {
     isLastPage,
   } = usePagination(sortedGames, ITEMS_PER_PAGE);
 
-  if (loading) {
-    return <div className={styles.loading}>試合データを読み込み中...</div>;
-  }
-
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -132,82 +81,93 @@ export default function AdminGamesPage() {
 
       {error && <div className={styles.error}>{error}</div>}
 
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>試合一覧</h2>
-        <span className={styles.totalCount}>全 {totalItems} 件</span>
-      </div>
-
-      {sortedGames.length === 0 ? (
-        <div className={styles.emptyState}>
-          登録されている試合データはありません
-        </div>
+      {loading ? (
+        <div className={styles.loading}>試合データを読み込み中...</div>
       ) : (
         <>
-          <div className={styles.tableCard}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>日付</th>
-                  <th>対戦相手</th>
-                  <th>スコア</th>
-                  <th>結果</th>
-                  <th>球場</th>
-                  <th>登録日</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedItems.map((game) => (
-                  <tr key={game.id}>
-                    <td data-label="日付">{formatGameDate(game.gameDate)}</td>
-                    <td data-label="対戦相手">{game.opponent}</td>
-                    <td data-label="スコア">
-                      {game.dragonsScore} - {game.opponentScore}
-                    </td>
-                    <td data-label="結果">
-                      <GameResultBadge result={game.result} />
-                    </td>
-                    <td data-label="球場">{game.stadium}</td>
-                    <td data-label="登録日">
-                      {formatCreatedAt(game.createdAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>試合一覧</h2>
+            <span className={styles.totalCount}>全 {totalItems} 件</span>
           </div>
 
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                className={styles.pageButton}
-                onClick={goToPrevPage}
-                disabled={isFirstPage}
-              >
-                前へ
-              </button>
-              {getPageNumbers(currentPage, totalPages).map((page, index) =>
-                page === "..." ? (
-                  <span key={`ellipsis-${index}`} className={styles.ellipsis}>
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    className={`${styles.pageButton} ${currentPage === page ? styles.pageButtonActive : ""}`}
-                    onClick={() => goToPage(page)}
-                  >
-                    {page}
-                  </button>
-                ),
-              )}
-              <button
-                className={styles.pageButton}
-                onClick={goToNextPage}
-                disabled={isLastPage}
-              >
-                次へ
-              </button>
+          {sortedGames.length === 0 ? (
+            <div className={styles.emptyState}>
+              登録されている試合データはありません
             </div>
+          ) : (
+            <>
+              <div className={styles.tableCard}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>日付</th>
+                      <th>対戦相手</th>
+                      <th>スコア</th>
+                      <th>結果</th>
+                      <th>球場</th>
+                      <th>登録日</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedItems.map((game) => (
+                      <tr key={game.id}>
+                        <td data-label="日付">
+                          {formatGameDate(game.gameDate)}
+                        </td>
+                        <td data-label="対戦相手">{game.opponent}</td>
+                        <td data-label="スコア">
+                          {game.dragonsScore} - {game.opponentScore}
+                        </td>
+                        <td data-label="結果">
+                          <GameResultBadge result={game.result} />
+                        </td>
+                        <td data-label="球場">{game.stadium}</td>
+                        <td data-label="登録日">
+                          {formatCreatedAt(game.createdAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <button
+                    className={styles.pageButton}
+                    onClick={goToPrevPage}
+                    disabled={isFirstPage}
+                  >
+                    前へ
+                  </button>
+                  {getPageNumbers(currentPage, totalPages).map((page, index) =>
+                    page === "..." ? (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className={styles.ellipsis}
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        className={`${styles.pageButton} ${currentPage === page ? styles.pageButtonActive : ""}`}
+                        onClick={() => goToPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    className={styles.pageButton}
+                    onClick={goToNextPage}
+                    disabled={isLastPage}
+                  >
+                    次へ
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </>
       )}

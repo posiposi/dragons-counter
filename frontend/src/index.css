@@ -9,6 +9,8 @@
   --text-secondary: #6b7280;
   --shadow: rgba(0, 0, 0, 0.05);
   --shadow-md: rgba(0, 0, 0, 0.1);
+  --error-bg: #fee2e2;
+  --error-text: #dc2626;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,6 +25,8 @@
     --text-secondary: #9ca3af;
     --shadow: rgba(0, 0, 0, 0.2);
     --shadow-md: rgba(0, 0, 0, 0.3);
+    --error-bg: #451a1a;
+    --error-text: #fca5a5;
   }
 }
 

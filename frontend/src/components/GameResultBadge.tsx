@@ -5,32 +5,22 @@ interface Props {
   result: GameResult;
 }
 
+const RESULT_CLASS: Record<GameResult, string> = {
+  win: styles.win,
+  lose: styles.lose,
+  draw: styles.draw,
+};
+
+const RESULT_TEXT: Record<GameResult, string> = {
+  win: "勝利",
+  lose: "敗北",
+  draw: "引分",
+};
+
 export default function GameResultBadge({ result }: Props) {
-  const getResultClass = (result: GameResult): string => {
-    switch (result) {
-      case "win":
-        return styles.win;
-      case "lose":
-        return styles.lose;
-      case "draw":
-        return styles.draw;
-    }
-  };
-
-  const getResultText = (result: GameResult): string => {
-    switch (result) {
-      case "win":
-        return "勝利";
-      case "lose":
-        return "敗北";
-      case "draw":
-        return "引分";
-    }
-  };
-
   return (
-    <span className={`${styles.badge} ${getResultClass(result)}`}>
-      {getResultText(result)}
+    <span className={`${styles.badge} ${RESULT_CLASS[result]}`}>
+      {RESULT_TEXT[result]}
     </span>
   );
 }

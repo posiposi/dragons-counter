@@ -186,9 +186,9 @@
 .error {
   text-align: center;
   padding: 40px 20px;
-  background: #fee;
+  background: var(--error-bg);
   border-radius: 12px;
-  color: #dc2626;
+  color: var(--error-text);
   margin-bottom: 32px;
 }
 
