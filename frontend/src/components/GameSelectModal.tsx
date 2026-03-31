@@ -87,7 +87,7 @@ export default function GameSelectModal({
           <button
             className={styles.closeButton}
             onClick={onClose}
-            aria-label="close_modal"
+            aria-label="閉じる"
           >
             <X size={20} />
           </button>
