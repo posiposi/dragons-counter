@@ -11,6 +11,7 @@ certs/
 .claude/*.log
 .claude/audit-*.log
 .claude/tmp/
+.claude/worktrees/
 **/.terraform/*
 *.tfstate
 *.tfstate.*
