@@ -16,7 +16,7 @@ import { bulkSaveGames } from "@/lib/api/games";
 import styles from "./GameScrapePanel.module.css";
 
 interface GameScrapePanelProps {
-  onGameSaved: () => void;
+  onGameSaved: () => void | Promise<void>;
 }
 
 type Status = "idle" | "scraping" | "saving" | "success" | "error" | "noGame";

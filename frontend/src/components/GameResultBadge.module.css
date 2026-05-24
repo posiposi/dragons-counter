@@ -1,0 +1,23 @@
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  display: inline-block;
+}
+
+.win {
+  background: #2563eb;
+  color: white;
+}
+
+.lose {
+  background: #ef4444;
+  color: white;
+}
+
+.draw {
+  background: #6b7280;
+  color: white;
+}
