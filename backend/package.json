@@ -13,7 +13,9 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "dotenv -e .env.test -o -- jest --runInBand",
+    "test": "dotenv -e .env.test -o -- jest --selectProjects unit && dotenv -e .env.test -o -- jest --selectProjects integration --runInBand",
+    "test:unit": "dotenv -e .env.test -o -- jest --selectProjects unit",
+    "test:integration": "dotenv -e .env.test -o -- jest --selectProjects integration --runInBand",
     "test:watch": "dotenv -e .env.test -o -- jest --runInBand --watch",
     "test:cov": "dotenv -e .env.test -o -- jest --runInBand --coverage",
     "test:debug": "dotenv -e .env.test -o -- node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -76,20 +78,42 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "projects": [
+      {
+        "displayName": "unit",
+        "rootDir": "src",
+        "moduleFileExtensions": [
+          "js",
+          "json",
+          "ts"
+        ],
+        "testEnvironment": "node",
+        "transform": {
+          "^.+\\.(t|j)s$": "ts-jest"
+        },
+        "testRegex": ".*\\.spec\\.ts$",
+        "testPathIgnorePatterns": [
+          ".*\\.integration\\.spec\\.ts$"
+        ]
+      },
+      {
+        "displayName": "integration",
+        "rootDir": "src",
+        "moduleFileExtensions": [
+          "js",
+          "json",
+          "ts"
+        ],
+        "testEnvironment": "node",
+        "transform": {
+          "^.+\\.(t|j)s$": "ts-jest"
+        },
+        "testRegex": ".*\\.integration\\.spec\\.ts$"
+      }
+    ]
   }
 }
