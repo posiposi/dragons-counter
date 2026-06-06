@@ -1,18 +1,17 @@
 ---
 name: implement-task
 description: GitHub IssueからPR作成までの開発ワークフローを実行する。Issue番号を引数として受け取る。
-argument-hint: "[Issue番号]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 # 概要
 
-GitHub Issue #$ARGUMENTS の仕様に基づき、以下のフェーズを順番に実行する。
+引数で受け取ったGitHub Issue番号（以下 `<Issue番号>`）の仕様に基づき、以下のフェーズを順番に実行する。
 各フェーズ間の情報連携はClaude CodeのTasks機能を使用する。
 
 ## Phase 1: 仕様取得
 
-1. GitHub MCPサーバー（`mcp__github__issue_read`）を使用してIssue #$ARGUMENTS の内容を取得する
+1. GitHub MCPサーバー（`mcp__github__issue_read`）を使用してIssue #`<Issue番号>` の内容を取得する
 2. Issueのタイトル、本文、ラベル、コメントを収集する
 3. TaskCreateで「仕様取得」タスクを作成する
    - subjectにIssueタイトルを記載
