@@ -73,10 +73,7 @@ origin  git@github.com:posiposi/dragons-counter.git (push)
 
 ### 許可ルール
 
-- 下記コマンドはユーザーに実行許可を求める
-  - `git add`
-  - `git commit` `git push`
-    - 許可された場合は一連のコマンドを併せて実行する
+- `git add` / `git commit` / `git push` の実行にユーザーの許可は不要。一連のコマンドを併せて実行してよい
 - push先はローカルブランチと同名のリモートブランチとする
   - `git push origin HEAD` でプッシュする
 
