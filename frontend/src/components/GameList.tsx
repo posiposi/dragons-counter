@@ -57,14 +57,15 @@ export default function GameList() {
       setIsDeleting(true);
       setDeleteError(null);
       await deleteUserGame(deleteTarget.gameId);
-      setDeleteTarget(null);
-      await loadUserGames();
     } catch (err) {
       setDeleteError("観戦記録の削除に失敗しました");
       console.error("Failed to delete user game:", err);
+      return;
     } finally {
       setIsDeleting(false);
     }
+    setDeleteTarget(null);
+    await loadUserGames();
   };
 
   const handleDeleteCancel = () => {

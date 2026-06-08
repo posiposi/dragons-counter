@@ -140,6 +140,30 @@ describe("GameList 削除UI", () => {
     expect(deleteUserGameMock).not.toHaveBeenCalled();
   });
 
+  it("削除成功後の再読込が失敗しても削除失敗エラーは表示されない", async () => {
+    fetchUserGamesMock
+      .mockResolvedValueOnce([firstGame])
+      .mockRejectedValueOnce(new Error("再読込に失敗"));
+    deleteUserGameMock.mockResolvedValue(undefined);
+    renderGameList();
+
+    await waitFor(() =>
+      expect(screen.getByText("vs 巨人")).toBeInTheDocument(),
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "削除" }));
+    await userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "OK" }),
+    );
+
+    await waitFor(() => expect(deleteUserGameMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchUserGamesMock).toHaveBeenCalledTimes(2));
+
+    expect(
+      screen.queryByText("観戦記録の削除に失敗しました"),
+    ).not.toBeInTheDocument();
+  });
+
   it("削除失敗時はダイアログ内にエラーを表示しリストを残して再試行できる", async () => {
     fetchUserGamesMock.mockResolvedValue([firstGame]);
     deleteUserGameMock
