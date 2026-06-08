@@ -97,13 +97,40 @@ Phase 2-cで分解した**1コミット粒度の実装タスクごと**に、メ
 
 > **補足**: 実装レビュー（旧 `code-reviewer`）とレビュー指摘修正（旧 `review-fixer`）は、Phase 3-2 の実装ループ内（step 2・7・8 のレビューと step 3・8 の修正）に統合された。独立したレビューフェーズは設けない。
 
-## Phase 4: PR作成
+## Phase 4: PR作成・レビュー・指摘修正
+
+Phase 3の全タスク完了後、メインコンテキストが以下をオーケストレーションする。
+
+**オーケストレーションの所在（重要）**: `/commit-commands:commit-push-pr`・`/code-review:code-review` はスラッシュコマンド、指摘修正の `implementer` 起動はAgentツールであり、いずれもサブエージェントからは実行できない。よってPR作成・レビュー・修正のオーケストレーションはすべてメインコンテキストが担う。
+
+### Phase 4-1: PRタイトル・本文の生成
 
 **`pr-creator`** サブエージェントを起動する。
 
 - Tasksから仕様・設計・実装の全体像を把握する
-- PRタイトルにIssue番号を含めない
-- GitHub MCPサーバーを優先してPRを作成する（フォールバック: ghコマンド）
+- `pr-template` のルールに従いPRタイトル・本文を生成する
+- **PRタイトルにIssue番号を含めない**
+- 生成したタイトル・本文を返す（PR作成の実行は行わない）
+
+### Phase 4-2: PR作成
+
+メインコンテキストが **`/commit-commands:commit-push-pr`** を使用してPRを作成する。
+
+- Phase 4-1で生成したタイトル・本文を用いる
+- 作業ブランチをpushし、PRを作成する（未コミットの変更が残っている場合はコミットも行われる）
+- 作成されたPR番号を控える
+
+### Phase 4-3: コードレビュー
+
+PR作成後、メインコンテキストが **`/code-review:code-review`** に作成したPR（番号またはURL）を渡してレビューを実行する。
+
+### Phase 4-4: レビュー指摘修正
+
+レビューで指摘があった場合、**特に重要な指摘がある場合は `implementer` サブエージェントを起動して修正する**。
+
+- 修正は**実装フロー（Phase 3-2）同様にTDD（Red→Green→Refactor）を遵守する**
+- 修正後、メインコンテキストが `/commit-commands:commit` でコミットし、ブランチへpushする
+- 必要に応じて `/code-review:code-review` を再実行し、指摘が解消されたことを確認する
 
 ## タスク構造
 
@@ -116,7 +143,7 @@ Phase 2-cで分解した**1コミット粒度の実装タスクごと**に、メ
   → [Phase 2-b] ログ調査 (metadata: log_investigation)
   → [Phase 2-c] タスク分解 (blockedBy: 2-a, 2-b)
     → [Phase 3] 実装ループ (blockedBy: 2-c) ※タスクごとに12ステップ（実装 + レビュー + コミット）を反復
-      → [Phase 4] PR作成
+      → [Phase 4] PR作成・レビュー・指摘修正
 ```
 
 ## 制約事項
@@ -125,5 +152,6 @@ Phase 2-cで分解した**1コミット粒度の実装タスクごと**に、メ
 - CLIコマンド実行は必ずDockerコンテナ内で実行する
 - レビューエージェント（`pr-review-toolkit:*`）の起動・並列実行、および `/commit-commands:commit` によるコミットは、すべてメインコンテキストが行う。サブエージェントはAgentツール（他サブエージェントの起動）を使用できないため、オーケストレーションはサブエージェントに委ねない
 - コミットは一定の機能粒度（1コミットで意味を把握できる単位）で都度 `/commit-commands:commit` を使用して行う。判断しにくい大きな粒度でのコミットは禁止する
-- 本ワークフローでのPR作成はPhase 4（`pr-creator`）の責務とし、コミット運用とは分離する。コミット工程でPR作成（`/commit-commands:commit-push-pr` 等）を行わない
+- Phase 3-2のコミット工程ではPR作成を行わない。PR作成はPhase 4でメインコンテキストが `/commit-commands:commit-push-pr` を用いて行う
+- Phase 4のレビュー（`/code-review:code-review`）で重要な指摘があった場合の修正は、`implementer` を用いて実装フロー同様にTDDを遵守して行う
 - Web調査（公式ドキュメント参照、API仕様確認、エラー解決策検索）が必要な場合は **`web-researcher`** サブエージェントを使用する（メインコンテキストで直接WebFetch/WebSearchを実行しない）
