@@ -1,8 +1,8 @@
 ---
 name: pr-template
-description: Pull Request作成時のテンプレートとルールを定義するスキル。PRタイトル・本文の生成規則、Issue番号の扱い、GitHub MCP優先使用ルールを提供する。PR作成時に使用する。
+description: Pull Requestのタイトル・本文を生成するためのテンプレートとルールを定義するスキル。PRタイトル・本文の生成規則、Issue番号の扱いを提供する。PR本文の生成時に使用する。
 user-invocable: false
-allowed-tools: Read, Glob, Grep, Bash, TaskGet, TaskList, mcp__github__create_pull_request
+allowed-tools: Read, Glob, Grep, Bash, TaskGet, TaskList
 ---
 
 # PR作成テンプレートスキル
@@ -62,54 +62,10 @@ Closes #[Issue番号]
 - 実装の詳細なコード説明
 - スクリーンショット（必要な場合を除く）
 
-## gitコマンドの実行ルール
-
-### リポジトリ情報
-
-```text
-origin  git@github.com:posiposi/dragons-counter.git (fetch)
-origin  git@github.com:posiposi/dragons-counter.git (push)
-```
-
-### 許可ルール
-
-- `git add` / `git commit` / `git push` の実行にユーザーの許可は不要。一連のコマンドを併せて実行してよい
-- push先はローカルブランチと同名のリモートブランチとする
-  - `git push origin HEAD` でプッシュする
-
-### コマンド例
-
-```bash
-# ステージング
-git add <対象ファイル>
-
-# コミット＋プッシュ（許可後に併せて実行）
-git commit -m "コミットメッセージ" && git push origin HEAD
-```
-
 ## PR作成の実行
 
-- MCPサーバーの利用を優先する
-- MCPサーバーが利用できない場合はユーザーにその理由を伝えてから、`gh`コマンドの利用を宣言する
+本スキルは生成したPRタイトル・本文を提供する役割であり、**PR作成（コミット・push・PR発行）は行わない**。
 
-### 優先: GitHub MCPサーバー
-
-`mcp__github__create_pull_request` ツールを使用する：
-
-- owner: リポジトリオーナー
-- repo: リポジトリ名
-- title: PRタイトル
-- head: 作業ブランチ名
-- base: マージ先ブランチ名（通常はmain）
-- body: PR本文
-
-### フォールバック: ghコマンド
-
-MCPサーバーが使用できない場合：
-
-```bash
-gh pr create --title "PRタイトル" --body "$(cat <<'EOF'
-PR本文
-EOF
-)"
-```
+- PR作成は呼び出し元フロー（`implement-task` の Phase 4）のメインコンテキストが **`/commit-commands:commit-push-pr`** を使用して実行する
+- 本スキルが生成したタイトル・本文を、そのPR作成コマンドに渡して用いる
+- push先はローカルブランチと同名のリモートブランチとする（`git push origin HEAD` 相当）
