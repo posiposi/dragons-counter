@@ -10,8 +10,10 @@ import { UserGameQueryPort } from '../domain/ports/user-game-query.port';
 import type { GamePort } from '../domain/ports/game.port';
 import { RegisterUserGameUsecase } from '../domain/usecases/register-user-game.usecase';
 import { GetUserGamesUsecase } from '../domain/usecases/get-user-games.usecase';
+import { DeleteUserGameUsecase } from '../domain/usecases/delete-user-game.usecase';
 import { RegisterUserGameController } from './controllers/register-user-game.controller';
 import { GetUserGamesController } from './controllers/get-user-games.controller';
+import { DeleteUserGameController } from './controllers/delete-user-game.controller';
 
 describe('UserGameModule', () => {
   let module: TestingModule;
@@ -64,6 +66,11 @@ describe('UserGameModule', () => {
     expect(usecase).toBeDefined();
   });
 
+  it('DeleteUserGameUsecaseが解決される', () => {
+    const usecase = module.get<DeleteUserGameUsecase>(DeleteUserGameUsecase);
+    expect(usecase).toBeDefined();
+  });
+
   it('RegisterUserGameControllerが解決される', () => {
     const controller = module.get<RegisterUserGameController>(
       RegisterUserGameController,
@@ -74,6 +81,13 @@ describe('UserGameModule', () => {
   it('GetUserGamesControllerが解決される', () => {
     const controller = module.get<GetUserGamesController>(
       GetUserGamesController,
+    );
+    expect(controller).toBeDefined();
+  });
+
+  it('DeleteUserGameControllerが解決される', () => {
+    const controller = module.get<DeleteUserGameController>(
+      DeleteUserGameController,
     );
     expect(controller).toBeDefined();
   });

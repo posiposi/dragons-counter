@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { UserGame } from "@/types/user-game";
-import { fetchUserGames, registerUserGame } from "@/lib/api/user-games";
+import {
+  fetchUserGames,
+  registerUserGame,
+  deleteUserGame,
+} from "@/lib/api/user-games";
 import {
   formatGameDate,
   getResultText,
   getResultBadgeClass,
 } from "@/lib/game-utils";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Settings, Plus } from "lucide-react";
+import { LogOut, Settings, Plus, Trash2 } from "lucide-react";
 import GameSelectModal from "./GameSelectModal";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import styles from "./GameList.module.css";
 
 export default function GameList() {
@@ -19,6 +24,9 @@ export default function GameList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UserGame | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadUserGames();
@@ -41,6 +49,28 @@ export default function GameList() {
   const handleRegister = async (gameId: string) => {
     await registerUserGame(gameId);
     await loadUserGames();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget || isDeleting) return;
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      await deleteUserGame(deleteTarget.gameId);
+    } catch (err) {
+      setDeleteError("観戦記録の削除に失敗しました");
+      console.error("Failed to delete user game:", err);
+      return;
+    } finally {
+      setIsDeleting(false);
+    }
+    setDeleteTarget(null);
+    await loadUserGames();
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteTarget(null);
+    setDeleteError(null);
   };
 
   const calculateStats = () => {
@@ -143,11 +173,21 @@ export default function GameList() {
                   <span className={styles.gameDate}>
                     {formatGameDate(game.gameDate)}
                   </span>
-                  <span
-                    className={`${styles.resultBadge} ${getResultBadgeClass(game.result, styles)}`}
-                  >
-                    {getResultText(game.result)}
-                  </span>
+                  <div className={styles.gameHeaderActions}>
+                    <span
+                      className={`${styles.resultBadge} ${getResultBadgeClass(game.result, styles)}`}
+                    >
+                      {getResultText(game.result)}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.deleteButton}
+                      aria-label="削除"
+                      onClick={() => setDeleteTarget(game)}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
                 <div className={styles.gameContent}>
                   <div className={styles.opponent}>vs {game.opponent}</div>
@@ -180,6 +220,16 @@ export default function GameList() {
         onClose={() => setIsModalOpen(false)}
         onRegister={handleRegister}
         registeredGameIds={games.map((game) => game.gameId)}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={deleteTarget !== null}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        opponent={deleteTarget?.opponent ?? ""}
+        gameDate={deleteTarget?.gameDate ?? ""}
+        errorMessage={deleteError}
+        isProcessing={isDeleting}
       />
     </div>
   );

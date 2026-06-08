@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { DeleteGameController } from './delete-game.controller';
 import { DeleteGameUsecase } from '../../domain/usecases/delete-game.usecase';
 import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../admin/guards/admin.guard';
 
 describe('DeleteGameController', () => {
   let controller: DeleteGameController;
@@ -62,5 +65,17 @@ describe('DeleteGameController', () => {
         InternalServerErrorException,
       );
     });
+  });
+
+  it('JwtAuthGuardとAdminGuardがクラスレベルで適用されている', () => {
+    const guards = Reflect.getMetadata(
+      GUARDS_METADATA,
+      DeleteGameController,
+    ) as Array<new (...args: unknown[]) => unknown>;
+
+    expect(guards).toBeDefined();
+    expect(guards).toHaveLength(2);
+    expect(guards[0]).toBe(JwtAuthGuard);
+    expect(guards[1]).toBe(AdminGuard);
   });
 });
