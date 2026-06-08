@@ -1,8 +1,9 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import type { UserGameCommandPort } from '../ports/user-game-command.port';
 import type { UserGameQueryPort } from '../ports/user-game-query.port';
 import { UserId } from '../value-objects/user-id';
 import { GameId } from '../value-objects/game-id';
+import { UserGameNotFoundException } from '../exceptions/user-game-not-found.exception';
 
 @Injectable()
 export class DeleteUserGameUsecase {
@@ -22,7 +23,7 @@ export class DeleteUserGameUsecase {
       gameIdVO,
     );
     if (!userGame) {
-      throw new NotFoundException('観戦記録が見つかりません');
+      throw new UserGameNotFoundException('観戦記録が見つかりません');
     }
 
     await this.userGameCommandPort.softDelete(userIdVO, gameIdVO);

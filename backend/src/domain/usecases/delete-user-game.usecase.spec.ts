@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
 import { DeleteUserGameUsecase } from './delete-user-game.usecase';
+import { UserGameNotFoundException } from '../exceptions/user-game-not-found.exception';
 import { UserGame } from '../entities/user-game';
 import { UserId } from '../value-objects/user-id';
 import { GameId } from '../value-objects/game-id';
@@ -11,7 +11,10 @@ describe('DeleteUserGameUsecase', () => {
     softDelete: jest.Mock<Promise<void>, [UserId, GameId]>;
   };
   let mockUserGameQueryPort: {
-    findByUserIdAndGameId: jest.Mock;
+    findByUserIdAndGameId: jest.Mock<
+      Promise<UserGame | null>,
+      [UserId, GameId]
+    >;
   };
 
   beforeEach(async () => {
@@ -19,7 +22,10 @@ describe('DeleteUserGameUsecase', () => {
       softDelete: jest.fn<Promise<void>, [UserId, GameId]>(),
     };
     mockUserGameQueryPort = {
-      findByUserIdAndGameId: jest.fn(),
+      findByUserIdAndGameId: jest.fn<
+        Promise<UserGame | null>,
+        [UserId, GameId]
+      >(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -77,23 +83,28 @@ describe('DeleteUserGameUsecase', () => {
     });
 
     describe('異常系', () => {
-      it('対象レコードが存在しない場合NotFoundExceptionがスローされる', async () => {
+      it('対象レコードが存在しない場合UserGameNotFoundExceptionがスローされる', async () => {
         mockUserGameQueryPort.findByUserIdAndGameId.mockResolvedValue(null);
 
         await expect(usecase.execute(userId, gameId)).rejects.toThrow(
-          NotFoundException,
+          UserGameNotFoundException,
         );
 
         expect(mockUserGameCommandPort.softDelete).not.toHaveBeenCalled();
       });
 
-      it('他ユーザーの観戦記録は削除できずNotFoundExceptionがスローされる', async () => {
+      it('他ユーザーのIDで検索され該当なしの場合UserGameNotFoundExceptionがスローされる', async () => {
+        const otherUserId = 'other-user-999';
         mockUserGameQueryPort.findByUserIdAndGameId.mockResolvedValue(null);
 
-        await expect(usecase.execute(userId, gameId)).rejects.toThrow(
-          NotFoundException,
+        await expect(usecase.execute(otherUserId, gameId)).rejects.toThrow(
+          UserGameNotFoundException,
         );
 
+        const [passedUserId, passedGameId] =
+          mockUserGameQueryPort.findByUserIdAndGameId.mock.calls[0];
+        expect(passedUserId.value).toBe(otherUserId);
+        expect(passedGameId.value).toBe(gameId);
         expect(mockUserGameCommandPort.softDelete).not.toHaveBeenCalled();
       });
     });
