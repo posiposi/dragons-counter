@@ -13,6 +13,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
     NOT_FOUND: HttpStatus.NOT_FOUND,
     USER_NOT_FOUND: HttpStatus.NOT_FOUND,
     GAME_NOT_FOUND: HttpStatus.NOT_FOUND,
+    USER_GAME_NOT_FOUND: HttpStatus.NOT_FOUND,
     ALREADY_EXISTS: HttpStatus.CONFLICT,
     USER_ALREADY_EXISTS: HttpStatus.CONFLICT,
     EMAIL_ALREADY_EXISTS: HttpStatus.CONFLICT,

@@ -56,10 +56,25 @@
   margin-bottom: 24px;
 }
 
+.error {
+  background: #fee;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
 .actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.cancelButton:disabled,
+.confirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .cancelButton,

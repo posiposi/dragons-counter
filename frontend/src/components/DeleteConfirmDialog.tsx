@@ -6,6 +6,8 @@ interface DeleteConfirmDialogProps {
   onCancel: () => void;
   opponent: string;
   gameDate: string;
+  errorMessage?: string | null;
+  isProcessing?: boolean;
 }
 
 export default function DeleteConfirmDialog({
@@ -14,6 +16,8 @@ export default function DeleteConfirmDialog({
   onCancel,
   opponent,
   gameDate,
+  errorMessage = null,
+  isProcessing = false,
 }: DeleteConfirmDialogProps) {
   if (!isOpen) return null;
 
@@ -28,19 +32,33 @@ export default function DeleteConfirmDialog({
 
   return (
     <div className={styles.overlay} onClick={onCancel}>
-      <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
-        <h3 className={styles.title}>試合記録を削除しますか？</h3>
+      <div
+        className={styles.dialog}
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className={styles.title}>観戦記録を削除しますか？</h3>
         <p className={styles.message}>
-          {formatDate(gameDate)} の {opponent} 戦の記録を削除します。
+          {formatDate(gameDate)} の {opponent} 戦の観戦記録を削除します。
           <br />
           この操作は取り消せません。
         </p>
+        {errorMessage && <div className={styles.error}>{errorMessage}</div>}
         <div className={styles.actions}>
-          <button className={styles.cancelButton} onClick={onCancel}>
+          <button
+            className={styles.cancelButton}
+            onClick={onCancel}
+            disabled={isProcessing}
+          >
             キャンセル
           </button>
-          <button className={styles.confirmButton} onClick={onConfirm}>
-            OK
+          <button
+            className={styles.confirmButton}
+            onClick={onConfirm}
+            disabled={isProcessing}
+          >
+            {isProcessing ? "削除中..." : "OK"}
           </button>
         </div>
       </div>
