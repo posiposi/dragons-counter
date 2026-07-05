@@ -62,7 +62,7 @@ GitHub Issueからの実装には `implement-task` スキルを使用します�
 | --------------------- | ------------------------------- | ------------------------------------------------------------ |
 | 1. 仕様取得           | GitHub Issueから仕様を取得      | （スキル自身が実行）                                         |
 | 2. タスク分解         | 並列調査 + 1コミット粒度に分解  | `code-investigator` + `log-investigator` → `task-decomposer` |
-| 3. TDD+DDD実装ループ  | テスト作成→レビュー→実装→レビュー→簡素化→コミットを1コミット粒度ごとに反復 | `implementer`（実装ワーカー） + `pr-review-toolkit:{pr-test-analyzer, comment-analyzer, code-reviewer, silent-failure-hunter, code-simplifier}`（メインがオーケストレーション・コミット） |
+| 3. TDD+DDD実装ループ  | テスト作成→RED確認→実装→GREEN確認→コミットを1コミット粒度ごとに反復 | `implementer`（実装ワーカー、メインがオーケストレーション・コミット） |
 | 4. PR作成・レビュー・修正 | commit-push-prでPR作成→code-reviewでレビュー→重要指摘をTDDで修正 | `pr-creator`（タイトル・本文生成） + `/commit-commands:commit-push-pr` + `/code-review:code-review` + `implementer`（メインがオーケストレーション） |
 
 詳細は `.claude/skills/implement-task/SKILL.md` を参照してください。
@@ -91,7 +91,7 @@ GitHub Issueからの実装には `implement-task` スキルを使用します�
 
 `git add`、`git commit`、`git push`の実行に**ユーザーの実行許可は不要**。都度確認せず実行してよい。
 
-実装ワークフロー（`implement-task`）でのコミットは、一定の機能粒度で都度 `/commit-commands:commit` スキルを使用して実行する。1コミットの粒度はそのコミット単体で変更の意味を把握できる単位に限定し、判断しにくい大きな粒度でのコミットは禁止する。実装フローではレビューエージェント（`pr-review-toolkit:*`）の並列起動が必要であり、これはサブエージェントからは起動できないため、フロー全体のオーケストレーションとコミット実行は `implement-task` スキルのメインコンテキストが担う。PR作成（push・PR発行）はPhase 4でメインコンテキストが `/commit-commands:commit-push-pr` を用いて行い、コミット工程とは分離する（`pr-creator` はPRタイトル・本文の生成のみを担う）。
+実装ワークフロー（`implement-task`）でのコミットは、一定の機能粒度で都度 `/commit-commands:commit` スキルを使用して実行する。1コミットの粒度はそのコミット単体で変更の意味を把握できる単位に限定し、判断しにくい大きな粒度でのコミットは禁止する。コミットやPR作成・レビューのスラッシュコマンドはサブエージェントからは実行できないため、フロー全体のオーケストレーションとコミット実行は `implement-task` スキルのメインコンテキストが担う。PR作成（push・PR発行）はPhase 4でメインコンテキストが `/commit-commands:commit-push-pr` を用いて行い、コミット工程とは分離する（`pr-creator` はPRタイトル・本文の生成のみを担う）。コードレビューはPR作成後にメインコンテキストが `/code-review:code-review` を用いてPR全体に対して実行する（コミット単位の個別レビューは行わない）。
 
 ## Agent Teams使用規約
 
