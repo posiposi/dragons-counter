@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// NewRouter はアプリケーションの全ルートを登録した HTTP ハンドラを返す。
 func NewRouter() http.Handler {
 	r := chi.NewRouter()
 
