@@ -1,19 +1,23 @@
 package main
 
 import (
-	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/config"
+	"github.com/posiposi/dragons-counter/backend-go/internal/logger"
 	"github.com/posiposi/dragons-counter/backend-go/internal/router"
 )
 
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal(err)
+		logger.New(config.Config{}, os.Stdout).Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
+
+	log := logger.New(cfg, os.Stdout)
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,
@@ -24,7 +28,7 @@ func main() {
 		IdleTimeout:       120 * time.Second,
 	}
 
-	log.Printf("listening on %s (env: %s)", cfg.Addr, cfg.Env)
+	log.Info("server starting", "addr", cfg.Addr, "env", cfg.Env)
 
 	if cfg.TLSEnabled {
 		err = srv.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile)
@@ -32,6 +36,7 @@ func main() {
 		err = srv.ListenAndServe()
 	}
 	if err != nil {
-		log.Fatal(err)
+		log.Error("server stopped", "error", err)
+		os.Exit(1)
 	}
 }
