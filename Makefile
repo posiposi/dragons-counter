@@ -37,17 +37,23 @@ status:
 	fi
 
 ## サブworktree用: ポートオフセットを計算して.envに設定
-## 既存割り当てがあればそのまま再利用し、初回のみ全6ポートを検査して割り当てる
+## 既存割り当てがあればそのまま再利用し、初回のみ全ポートを検査して割り当てる
 _assign-ports:
 	@if grep -q '^HOST_DB_PORT=' .env 2>/dev/null; then \
 		echo "✔ 既存のポート割り当てを再利用します"; \
+		if ! grep -q '^HOST_BACKEND_GO_PORT=' .env; then \
+			DB_PORT=$$(grep '^HOST_DB_PORT=' .env | cut -d= -f2); \
+			OFFSET=$$(($$DB_PORT - 3306)); \
+			echo "HOST_BACKEND_GO_PORT=$$((3444 + $$OFFSET))" >> .env; \
+			echo "✔ HOST_BACKEND_GO_PORT=$$((3444 + $$OFFSET)) を .env に追記しました"; \
+		fi; \
 	else \
 		BASE_OFFSET=$$(echo "$(CURRENT_DIR)" | cksum | awk '{print ($$1 % 50 + 1) * 100}'); \
 		FOUND=0; \
 		for RETRY in $$(seq 0 9); do \
 			OFFSET=$$(($$BASE_OFFSET + $$RETRY * 100)); \
 			CONFLICT=0; \
-			for BASE_PORT in 3306 3307 3443 3043 8080 8443; do \
+			for BASE_PORT in 3306 3307 3443 3444 3043 8080 8443; do \
 				CHECK_PORT=$$(($$BASE_PORT + $$OFFSET)); \
 				if lsof -i :$$CHECK_PORT -sTCP:LISTEN > /dev/null 2>&1; then \
 					CONFLICT=1; \
@@ -70,6 +76,7 @@ _assign-ports:
 			echo "HOST_DB_PORT=$$((3306 + $$OFFSET))"; \
 			echo "HOST_TEST_DB_PORT=$$((3307 + $$OFFSET))"; \
 			echo "HOST_BACKEND_PORT=$$((3443 + $$OFFSET))"; \
+			echo "HOST_BACKEND_GO_PORT=$$((3444 + $$OFFSET))"; \
 			echo "HOST_FRONTEND_PORT=$$((3043 + $$OFFSET))"; \
 			echo "HOST_API_DOCS_PORT=$$((8080 + $$OFFSET))"; \
 			echo "# proxyはメインworktreeで特権ポート443を使用するため、サブworktreeでは8443を基準にする"; \
@@ -86,7 +93,7 @@ _record-ports:
 		echo "# Directory: $(CURRENT_DIR)"; \
 		echo "# Generated: $$(date '+%Y-%m-%d %H:%M:%S')"; \
 		echo ""; \
-		for svc_port in "db 3306" "test-db 3306" "backend 3443" "frontend 3043" "api-docs 80" "proxy 443"; do \
+		for svc_port in "db 3306" "test-db 3306" "backend 3443" "backend-go 3443" "frontend 3043" "api-docs 80" "proxy 443"; do \
 			svc=$$(echo $$svc_port | cut -d' ' -f1); \
 			port=$$(echo $$svc_port | cut -d' ' -f2); \
 			host_port=$$(docker compose port $$svc $$port 2>/dev/null | cut -d: -f2); \

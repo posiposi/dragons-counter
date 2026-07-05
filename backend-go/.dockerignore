@@ -1,0 +1,26 @@
+.env
+.env.*
+*.md
+.git
+.gitignore
+.vscode
+.idea
+coverage
+*.out
+logs
+*.log
+.DS_Store
+Thumbs.db
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+# 証明書は実行時マウント（Dockerfile参照）
+certs/
+*.pem
+*.key
+*.crt
+tmp
+temp
+*.tmp
+*.swp
+*.swo
