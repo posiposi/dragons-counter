@@ -10,7 +10,10 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,
@@ -23,7 +26,6 @@ func main() {
 
 	log.Printf("listening on %s (env: %s)", cfg.Addr, cfg.Env)
 
-	var err error
 	if cfg.TLSEnabled {
 		err = srv.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile)
 	} else {
