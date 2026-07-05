@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	Env string
-	Addr string
+	Env        string
+	Addr       string
 	TLSEnabled bool
-	CertFile string
-	KeyFile string
+	CertFile   string
+	KeyFile    string
 }
 
 func Load() Config {
