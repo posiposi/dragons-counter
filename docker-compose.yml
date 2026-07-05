@@ -53,6 +53,22 @@ services:
     networks:
       - dragons-network
 
+  backend-go:
+    build:
+      context: ./backend-go
+      dockerfile: Dockerfile
+      target: development
+    restart: always
+    environment:
+      GO_ENV: development
+    ports:
+      - "${HOST_BACKEND_GO_PORT:-3444}:3443"
+    volumes:
+      - ./backend-go:/app
+      - ./certs:/app/certs:ro
+    networks:
+      - dragons-network
+
   frontend:
     build:
       context: ./frontend
