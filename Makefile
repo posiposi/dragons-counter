@@ -37,10 +37,16 @@ status:
 	fi
 
 ## サブworktree用: ポートオフセットを計算して.envに設定
-## 既存割り当てがあればそのまま再利用し、初回のみ全6ポートを検査して割り当てる
+## 既存割り当てがあればそのまま再利用し、初回のみ全ポートを検査して割り当てる
 _assign-ports:
 	@if grep -q '^HOST_DB_PORT=' .env 2>/dev/null; then \
 		echo "✔ 既存のポート割り当てを再利用します"; \
+		if ! grep -q '^HOST_BACKEND_GO_PORT=' .env; then \
+			DB_PORT=$$(grep '^HOST_DB_PORT=' .env | cut -d= -f2); \
+			OFFSET=$$(($$DB_PORT - 3306)); \
+			echo "HOST_BACKEND_GO_PORT=$$((3444 + $$OFFSET))" >> .env; \
+			echo "✔ HOST_BACKEND_GO_PORT=$$((3444 + $$OFFSET)) を .env に追記しました"; \
+		fi; \
 	else \
 		BASE_OFFSET=$$(echo "$(CURRENT_DIR)" | cksum | awk '{print ($$1 % 50 + 1) * 100}'); \
 		FOUND=0; \
