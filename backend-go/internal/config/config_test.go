@@ -144,4 +144,24 @@ func TestLoadEnv(t *testing.T) {
 		assert.Empty(t, cfg.DatabaseURL)
 		assert.Empty(t, cfg.JWTSecret)
 	})
+
+	t.Run("production環境ではPORTでリッスンアドレスが決まる", func(t *testing.T) {
+		t.Setenv("GO_ENV", "production")
+		t.Setenv("PORT", "8080")
+
+		cfg, err := Load()
+
+		require.NoError(t, err)
+		assert.Equal(t, ":8080", cfg.Addr)
+	})
+
+	t.Run("development環境ではHTTPS_PORTでリッスンアドレスが決まる", func(t *testing.T) {
+		t.Setenv("GO_ENV", "development")
+		t.Setenv("HTTPS_PORT", "8443")
+
+		cfg, err := Load()
+
+		require.NoError(t, err)
+		assert.Equal(t, ":8443", cfg.Addr)
+	})
 }

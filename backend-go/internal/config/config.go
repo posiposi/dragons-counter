@@ -43,7 +43,7 @@ func applyRuntimeMode(cfg *Config) {
 	goEnv := strings.ToLower(strings.TrimSpace(os.Getenv("GO_ENV")))
 	if goEnv == "production" {
 		cfg.Env = "production"
-		cfg.Addr = ":3000"
+		cfg.Addr = ":" + cfg.Port
 		cfg.TLSEnabled = false
 		cfg.CertFile = ""
 		cfg.KeyFile = ""
@@ -51,7 +51,7 @@ func applyRuntimeMode(cfg *Config) {
 	}
 
 	cfg.Env = "development"
-	cfg.Addr = ":3443"
+	cfg.Addr = ":" + cfg.HTTPSPort
 	cfg.TLSEnabled = true
 	cfg.CertFile = "certs/localhost.pem"
 	cfg.KeyFile = "certs/localhost-key.pem"
