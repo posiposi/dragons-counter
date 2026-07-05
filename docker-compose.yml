@@ -59,6 +59,8 @@ services:
       dockerfile: Dockerfile
       target: development
     restart: always
+    env_file:
+      - ./.env
     environment:
       GO_ENV: development
     ports:
