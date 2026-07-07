@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -143,6 +144,36 @@ func TestLoadEnv(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, cfg.DatabaseURL)
 		assert.Empty(t, cfg.JWTSecret)
+	})
+
+	t.Run("接続プールenv未設定時はデフォルト値が入る", func(t *testing.T) {
+		for _, key := range []string{"DB_MAX_OPEN_CONNS", "DB_MAX_IDLE_CONNS", "DB_CONN_MAX_LIFETIME", "DB_CONN_MAX_IDLE_TIME"} {
+			t.Setenv(key, "")
+			require.NoError(t, os.Unsetenv(key))
+		}
+
+		cfg, err := Load()
+
+		require.NoError(t, err)
+		assert.Equal(t, 25, cfg.DBMaxOpenConns)
+		assert.Equal(t, 25, cfg.DBMaxIdleConns)
+		assert.Equal(t, 5*time.Minute, cfg.DBConnMaxLifetime)
+		assert.Equal(t, 5*time.Minute, cfg.DBConnMaxIdleTime)
+	})
+
+	t.Run("接続プールenvが設定されている場合はConfigの各フィールドへマッピングされる", func(t *testing.T) {
+		t.Setenv("DB_MAX_OPEN_CONNS", "50")
+		t.Setenv("DB_MAX_IDLE_CONNS", "10")
+		t.Setenv("DB_CONN_MAX_LIFETIME", "10m")
+		t.Setenv("DB_CONN_MAX_IDLE_TIME", "30s")
+
+		cfg, err := Load()
+
+		require.NoError(t, err)
+		assert.Equal(t, 50, cfg.DBMaxOpenConns)
+		assert.Equal(t, 10, cfg.DBMaxIdleConns)
+		assert.Equal(t, 10*time.Minute, cfg.DBConnMaxLifetime)
+		assert.Equal(t, 30*time.Second, cfg.DBConnMaxIdleTime)
 	})
 
 	t.Run("production環境ではPORTでリッスンアドレスが決まる", func(t *testing.T) {

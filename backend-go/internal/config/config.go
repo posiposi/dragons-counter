@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strings"
+	"time"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -24,6 +25,11 @@ type Config struct {
 	AWSRegion            string   `env:"AWS_REGION" envDefault:"ap-northeast-1"`
 	AdminEmail           string   `env:"ADMIN_EMAIL"`
 	AdminDefaultPassword string   `env:"ADMIN_DEFAULT_PASSWORD"`
+
+	DBMaxOpenConns    int           `env:"DB_MAX_OPEN_CONNS" envDefault:"25"`
+	DBMaxIdleConns    int           `env:"DB_MAX_IDLE_CONNS" envDefault:"25"`
+	DBConnMaxLifetime time.Duration `env:"DB_CONN_MAX_LIFETIME" envDefault:"5m"`
+	DBConnMaxIdleTime time.Duration `env:"DB_CONN_MAX_IDLE_TIME" envDefault:"5m"`
 }
 
 func Load() (Config, error) {
