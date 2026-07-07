@@ -82,3 +82,47 @@ func TestBuildDSN(t *testing.T) {
 		assert.Contains(t, err.Error(), "invalid DATABASE_URL format")
 	})
 }
+
+func TestBuildMigrationDSN(t *testing.T) {
+	t.Run("multiStatements=trueを強制付与する", func(t *testing.T) {
+		dsn, err := BuildMigrationDSN("mysql://user:pass@db:3306/dragons_counter")
+
+		require.NoError(t, err)
+
+		parsed, err := mysql.ParseDSN(dsn)
+		require.NoError(t, err)
+		assert.True(t, parsed.MultiStatements)
+		assert.True(t, parsed.ParseTime)
+		assert.Equal(t, "user", parsed.User)
+		assert.Equal(t, "pass", parsed.Passwd)
+		assert.Equal(t, "db:3306", parsed.Addr)
+		assert.Equal(t, "dragons_counter", parsed.DBName)
+	})
+
+	t.Run("クエリでmultiStatements=falseが指定されてもtrueを強制する", func(t *testing.T) {
+		dsn, err := BuildMigrationDSN("mysql://user:pass@db:3306/dragons_counter?multiStatements=false")
+
+		require.NoError(t, err)
+
+		parsed, err := mysql.ParseDSN(dsn)
+		require.NoError(t, err)
+		assert.True(t, parsed.MultiStatements)
+	})
+
+	t.Run("BuildDSNのmultiStatementsには影響しない", func(t *testing.T) {
+		dsn, err := BuildDSN("mysql://user:pass@db:3306/dragons_counter")
+
+		require.NoError(t, err)
+
+		parsed, err := mysql.ParseDSN(dsn)
+		require.NoError(t, err)
+		assert.False(t, parsed.MultiStatements)
+	})
+
+	t.Run("空文字の場合はDATABASE_URL is requiredエラーを返す", func(t *testing.T) {
+		_, err := BuildMigrationDSN("")
+
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "DATABASE_URL is required")
+	})
+}
