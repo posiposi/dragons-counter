@@ -9,16 +9,20 @@ import (
 	migratemysql "github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 
+	"github.com/posiposi/dragons-counter/backend-go/internal/config"
 	"github.com/posiposi/dragons-counter/backend-go/migrations"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Up は埋め込まれたマイグレーションを最新まで適用する。
 // 適用済みで変更がない場合はエラーとせずnilを返す。
-func Up(database *sql.DB) error {
-	m, err := newMigrate(database)
+func Up(cfg config.Config) error {
+	m, database, err := newMigrate(cfg)
 	if err != nil {
 		return err
 	}
+	defer func() { _ = database.Close() }()
 
 	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("failed to apply migrations: %w", err)
@@ -29,11 +33,12 @@ func Up(database *sql.DB) error {
 
 // Down は適用済みのマイグレーションをすべて巻き戻す。
 // 巻き戻すものがない場合はエラーとせずnilを返す。
-func Down(database *sql.DB) error {
-	m, err := newMigrate(database)
+func Down(cfg config.Config) error {
+	m, database, err := newMigrate(cfg)
 	if err != nil {
 		return err
 	}
+	defer func() { _ = database.Close() }()
 
 	if err := m.Down(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("failed to revert migrations: %w", err)
@@ -42,21 +47,37 @@ func Down(database *sql.DB) error {
 	return nil
 }
 
-func newMigrate(database *sql.DB) (*migrate.Migrate, error) {
+// newMigrate はマイグレーション専用の短命接続を生成し、
+// 埋め込みソースと紐づけたmigrateインスタンスを返す。
+// 呼び出し側は返却されたDBをCloseする責務を負う。
+func newMigrate(cfg config.Config) (*migrate.Migrate, *sql.DB, error) {
+	dsn, err := config.BuildMigrationDSN(cfg.DatabaseURL)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	database, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to open migration database: %w", err)
+	}
+
 	source, err := iofs.New(migrations.FS, ".")
 	if err != nil {
-		return nil, fmt.Errorf("failed to build migration source: %w", err)
+		_ = database.Close()
+		return nil, nil, fmt.Errorf("failed to build migration source: %w", err)
 	}
 
 	driver, err := migratemysql.WithInstance(database, &migratemysql.Config{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to build migration driver: %w", err)
+		_ = database.Close()
+		return nil, nil, fmt.Errorf("failed to build migration driver: %w", err)
 	}
 
 	m, err := migrate.NewWithInstance("iofs", source, "mysql", driver)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build migrate instance: %w", err)
+		_ = database.Close()
+		return nil, nil, fmt.Errorf("failed to build migrate instance: %w", err)
 	}
 
-	return m, nil
+	return m, database, nil
 }
