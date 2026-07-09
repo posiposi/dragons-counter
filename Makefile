@@ -5,7 +5,7 @@ MAIN_WORKTREE := $(shell git worktree list --porcelain | head -1 | sed 's/worktr
 CURRENT_DIR := $(shell pwd)
 IS_WORKTREE := $(shell [ "$(MAIN_WORKTREE)" = "$(CURRENT_DIR)" ] && echo 0 || echo 1)
 
-.PHONY: dev down status
+.PHONY: dev down status test-go test-go-integration migrate-go
 
 ## メイン: 開発環境の起動
 ## - メインworktree: そのまま起動（デフォルトポート使用）
@@ -27,6 +27,20 @@ endif
 down:
 	docker compose down
 	@$(MAKE) --no-print-directory _record-ports
+
+## backend-go のユニットテストを実行
+test-go:
+	docker compose exec -T backend-go go test ./...
+
+## backend-go の integration テストを実行（test-db に実接続）
+test-go-integration:
+	docker compose exec -T -e TEST_DATABASE_URL="mysql://dragons_user:dragons_password@test-db:3306/dragons_counter_test" backend-go go test -tags=integration ./internal/migrate/...
+
+## backend-go を再起動して起動時マイグレーション（migrate up）を適用
+## 実装上マイグレーションは main 起動時に自動適用されるため、
+## コンテナ再起動により未適用分を最新まで反映する
+migrate-go:
+	docker compose restart backend-go
 
 ## 現在のポート割り当てを表示
 status:

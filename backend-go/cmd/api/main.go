@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/config"
+	"github.com/posiposi/dragons-counter/backend-go/internal/db"
 	"github.com/posiposi/dragons-counter/backend-go/internal/logger"
+	"github.com/posiposi/dragons-counter/backend-go/internal/migrate"
 	"github.com/posiposi/dragons-counter/backend-go/internal/router"
 )
 
@@ -18,6 +20,20 @@ func main() {
 	}
 
 	log := logger.New(cfg, os.Stdout)
+
+	database, err := db.Open(cfg)
+	if err != nil {
+		log.Error("failed to connect database", "error", err)
+		os.Exit(1)
+	}
+	defer database.Close()
+
+	if err := migrate.Up(cfg); err != nil {
+		log.Error("failed to apply migrations", "error", err)
+		os.Exit(1)
+	}
+
+	log.Info("database connected and migrations applied")
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,
