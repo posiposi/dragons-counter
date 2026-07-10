@@ -7,7 +7,34 @@ package sqlc
 
 import (
 	"context"
+	"time"
 )
+
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (id, email, password, role, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?)
+`
+
+type CreateUserParams struct {
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Role      UsersRole `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser,
+		arg.ID,
+		arg.Email,
+		arg.Password,
+		arg.Role,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, password, role, created_at, updated_at FROM users
@@ -27,4 +54,74 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, email, password, role, created_at, updated_at FROM users
+WHERE id = ?
+LIMIT 1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Password,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, email, password, role, created_at, updated_at FROM users
+ORDER BY created_at DESC
+`
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Password,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateUserRole = `-- name: UpdateUserRole :exec
+UPDATE users SET role = ?, updated_at = ? WHERE id = ?
+`
+
+type UpdateUserRoleParams struct {
+	Role      UsersRole `json:"role"`
+	UpdatedAt time.Time `json:"updated_at"`
+	ID        string    `json:"id"`
+}
+
+func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserRole, arg.Role, arg.UpdatedAt, arg.ID)
+	return err
 }

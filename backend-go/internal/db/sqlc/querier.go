@@ -6,11 +6,30 @@ package sqlc
 
 import (
 	"context"
+	"time"
 )
 
 type Querier interface {
+	CreateGame(ctx context.Context, arg CreateGameParams) error
+	CreateRegistrationRequest(ctx context.Context, arg CreateRegistrationRequestParams) error
+	CreateUser(ctx context.Context, arg CreateUserParams) error
+	CreateUserGame(ctx context.Context, arg CreateUserGameParams) error
+	DeleteGame(ctx context.Context, id string) error
+	FindGamesByDate(ctx context.Context, gameDate time.Time) ([]FindGamesByDateRow, error)
 	GetGameByID(ctx context.Context, id string) (Game, error)
+	GetLatestRegistrationByUserID(ctx context.Context, userID string) (UserRegistrationRequest, error)
+	GetStadiumByID(ctx context.Context, id string) (Stadium, error)
+	GetStadiumByName(ctx context.Context, name string) (Stadium, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, id string) (User, error)
+	GetUserGameByUserIDAndGameID(ctx context.Context, arg GetUserGameByUserIDAndGameIDParams) (UsersGame, error)
+	ListStadiums(ctx context.Context) ([]Stadium, error)
+	ListUserGamesByUserID(ctx context.Context, userID string) ([]UsersGame, error)
+	ListUsers(ctx context.Context) ([]User, error)
+	RestoreUserGame(ctx context.Context, arg RestoreUserGameParams) error
+	SoftDeleteUserGame(ctx context.Context, arg SoftDeleteUserGameParams) error
+	UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) error
+	UpsertStadium(ctx context.Context, arg UpsertStadiumParams) error
 }
 
 var _ Querier = (*Queries)(nil)

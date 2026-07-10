@@ -7,7 +7,103 @@ package sqlc
 
 import (
 	"context"
+	"time"
 )
+
+const createGame = `-- name: CreateGame :exec
+INSERT INTO games (id, game_date, opponent, dragons_score, opponent_score, result, stadium_id, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type CreateGameParams struct {
+	ID            string      `json:"id"`
+	GameDate      time.Time   `json:"game_date"`
+	Opponent      string      `json:"opponent"`
+	DragonsScore  int32       `json:"dragons_score"`
+	OpponentScore int32       `json:"opponent_score"`
+	Result        GamesResult `json:"result"`
+	StadiumID     string      `json:"stadium_id"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
+}
+
+func (q *Queries) CreateGame(ctx context.Context, arg CreateGameParams) error {
+	_, err := q.db.ExecContext(ctx, createGame,
+		arg.ID,
+		arg.GameDate,
+		arg.Opponent,
+		arg.DragonsScore,
+		arg.OpponentScore,
+		arg.Result,
+		arg.StadiumID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
+const deleteGame = `-- name: DeleteGame :exec
+DELETE FROM games WHERE id = ?
+`
+
+func (q *Queries) DeleteGame(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteGame, id)
+	return err
+}
+
+const findGamesByDate = `-- name: FindGamesByDate :many
+SELECT g.id, g.game_date, g.opponent, g.dragons_score, g.opponent_score, g.result, g.stadium_id, g.created_at, g.updated_at, s.name as stadium_name
+FROM games g
+JOIN stadiums s ON g.stadium_id = s.id
+WHERE DATE(g.game_date) = ?
+`
+
+type FindGamesByDateRow struct {
+	ID            string      `json:"id"`
+	GameDate      time.Time   `json:"game_date"`
+	Opponent      string      `json:"opponent"`
+	DragonsScore  int32       `json:"dragons_score"`
+	OpponentScore int32       `json:"opponent_score"`
+	Result        GamesResult `json:"result"`
+	StadiumID     string      `json:"stadium_id"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
+	StadiumName   string      `json:"stadium_name"`
+}
+
+func (q *Queries) FindGamesByDate(ctx context.Context, gameDate time.Time) ([]FindGamesByDateRow, error) {
+	rows, err := q.db.QueryContext(ctx, findGamesByDate, gameDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []FindGamesByDateRow{}
+	for rows.Next() {
+		var i FindGamesByDateRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.GameDate,
+			&i.Opponent,
+			&i.DragonsScore,
+			&i.OpponentScore,
+			&i.Result,
+			&i.StadiumID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.StadiumName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getGameByID = `-- name: GetGameByID :one
 SELECT id, game_date, opponent, dragons_score, opponent_score, result, stadium_id, created_at, updated_at FROM games
