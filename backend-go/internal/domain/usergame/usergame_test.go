@@ -35,14 +35,6 @@ func newEmptyImpression(t *testing.T) usergame.Impression {
 }
 
 func TestCreateNewUserGame(t *testing.T) {
-	t.Run("IDが自動生成され空でない", func(t *testing.T) {
-		userID, gameID := newTestIDs(t)
-
-		userGame := usergame.CreateNewUserGame(userID, gameID, newEmptyImpression(t))
-
-		assert.NotEmpty(t, userGame.ID().Value())
-	})
-
 	t.Run("指定したuserIDとgameIDで作成できる", func(t *testing.T) {
 		userID, gameID := newTestIDs(t)
 

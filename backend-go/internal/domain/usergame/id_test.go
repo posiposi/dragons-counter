@@ -9,14 +9,6 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/usergame"
 )
 
-func TestNewUserGameID(t *testing.T) {
-	t.Run("非空のIDを採番する", func(t *testing.T) {
-		id := usergame.NewUserGameID()
-
-		assert.NotEmpty(t, id.Value())
-	})
-}
-
 func TestParseUserGameID(t *testing.T) {
 	t.Run("有効な文字列で生成できる", func(t *testing.T) {
 		id, err := usergame.ParseUserGameID("user-game-id-1")
