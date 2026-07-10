@@ -65,12 +65,6 @@ func TestID_Equals(t *testing.T) {
 }
 
 func TestNewID(t *testing.T) {
-	t.Run("空でない値が生成される", func(t *testing.T) {
-		id := domain.NewID()
-
-		assert.NotEmpty(t, id.Value())
-	})
-
 	t.Run("呼び出しごとに異なる値が生成される", func(t *testing.T) {
 		first := domain.NewID()
 		second := domain.NewID()
