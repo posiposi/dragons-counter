@@ -1,0 +1,48 @@
+package usergame
+
+import (
+	"strings"
+	"unicode/utf8"
+
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
+)
+
+const impressionMaxLength = 191
+
+type Impression struct {
+	value string
+	empty bool
+}
+
+func NewImpression(value *string) (Impression, error) {
+	if value == nil {
+		return Impression{empty: true}, nil
+	}
+	trimmed := strings.TrimSpace(*value)
+	if trimmed == "" {
+		return Impression{empty: true}, nil
+	}
+	if utf8.RuneCountInString(trimmed) > impressionMaxLength {
+		return Impression{}, domain.NewError(
+			"INVALID_IMPRESSION",
+			"Impression must be 191 characters or less",
+		)
+	}
+	return Impression{value: trimmed}, nil
+}
+
+func (i Impression) Value() *string {
+	if i.empty {
+		return nil
+	}
+	value := i.value
+	return &value
+}
+
+func (i Impression) IsEmpty() bool {
+	return i.empty
+}
+
+func (i Impression) Equals(other Impression) bool {
+	return i == other
+}
