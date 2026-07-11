@@ -6,6 +6,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -14,9 +15,11 @@ type Querier interface {
 	CreateRegistrationRequest(ctx context.Context, arg CreateRegistrationRequestParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) error
 	CreateUserGame(ctx context.Context, arg CreateUserGameParams) error
-	DeleteGame(ctx context.Context, id string) error
+	DeleteGame(ctx context.Context, id string) (sql.Result, error)
+	FindAllGames(ctx context.Context) ([]FindAllGamesRow, error)
 	FindGamesByDate(ctx context.Context, gameDate time.Time) ([]FindGamesByDateRow, error)
 	GetGameByID(ctx context.Context, id string) (Game, error)
+	GetGameByIDWithStadium(ctx context.Context, id string) (GetGameByIDWithStadiumRow, error)
 	GetLatestRegistrationByUserID(ctx context.Context, userID string) (UserRegistrationRequest, error)
 	GetStadiumByID(ctx context.Context, id string) (Stadium, error)
 	GetStadiumByName(ctx context.Context, name string) (Stadium, error)

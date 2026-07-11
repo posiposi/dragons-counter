@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -42,13 +43,66 @@ func (q *Queries) CreateGame(ctx context.Context, arg CreateGameParams) error {
 	return err
 }
 
-const deleteGame = `-- name: DeleteGame :exec
+const deleteGame = `-- name: DeleteGame :execresult
 DELETE FROM games WHERE id = ?
 `
 
-func (q *Queries) DeleteGame(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, deleteGame, id)
-	return err
+func (q *Queries) DeleteGame(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteGame, id)
+}
+
+const findAllGames = `-- name: FindAllGames :many
+SELECT g.id, g.game_date, g.opponent, g.dragons_score, g.opponent_score, g.result, g.stadium_id, g.created_at, g.updated_at, s.name as stadium_name
+FROM games g
+JOIN stadiums s ON g.stadium_id = s.id
+ORDER BY g.game_date DESC
+`
+
+type FindAllGamesRow struct {
+	ID            string      `json:"id"`
+	GameDate      time.Time   `json:"game_date"`
+	Opponent      string      `json:"opponent"`
+	DragonsScore  int32       `json:"dragons_score"`
+	OpponentScore int32       `json:"opponent_score"`
+	Result        GamesResult `json:"result"`
+	StadiumID     string      `json:"stadium_id"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
+	StadiumName   string      `json:"stadium_name"`
+}
+
+func (q *Queries) FindAllGames(ctx context.Context) ([]FindAllGamesRow, error) {
+	rows, err := q.db.QueryContext(ctx, findAllGames)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []FindAllGamesRow{}
+	for rows.Next() {
+		var i FindAllGamesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.GameDate,
+			&i.Opponent,
+			&i.DragonsScore,
+			&i.OpponentScore,
+			&i.Result,
+			&i.StadiumID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.StadiumName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const findGamesByDate = `-- name: FindGamesByDate :many
@@ -124,6 +178,45 @@ func (q *Queries) GetGameByID(ctx context.Context, id string) (Game, error) {
 		&i.StadiumID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getGameByIDWithStadium = `-- name: GetGameByIDWithStadium :one
+SELECT g.id, g.game_date, g.opponent, g.dragons_score, g.opponent_score, g.result, g.stadium_id, g.created_at, g.updated_at, s.name as stadium_name
+FROM games g
+JOIN stadiums s ON g.stadium_id = s.id
+WHERE g.id = ?
+LIMIT 1
+`
+
+type GetGameByIDWithStadiumRow struct {
+	ID            string      `json:"id"`
+	GameDate      time.Time   `json:"game_date"`
+	Opponent      string      `json:"opponent"`
+	DragonsScore  int32       `json:"dragons_score"`
+	OpponentScore int32       `json:"opponent_score"`
+	Result        GamesResult `json:"result"`
+	StadiumID     string      `json:"stadium_id"`
+	CreatedAt     time.Time   `json:"created_at"`
+	UpdatedAt     time.Time   `json:"updated_at"`
+	StadiumName   string      `json:"stadium_name"`
+}
+
+func (q *Queries) GetGameByIDWithStadium(ctx context.Context, id string) (GetGameByIDWithStadiumRow, error) {
+	row := q.db.QueryRowContext(ctx, getGameByIDWithStadium, id)
+	var i GetGameByIDWithStadiumRow
+	err := row.Scan(
+		&i.ID,
+		&i.GameDate,
+		&i.Opponent,
+		&i.DragonsScore,
+		&i.OpponentScore,
+		&i.Result,
+		&i.StadiumID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.StadiumName,
 	)
 	return i, err
 }
