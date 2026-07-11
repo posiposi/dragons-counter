@@ -2,12 +2,53 @@ package gameadapter
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
 
-func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
+type gameRow struct {
+	ID            string
+	GameDate      time.Time
+	Opponent      string
+	DragonsScore  int32
+	OpponentScore int32
+	Result        sqlc.GamesResult
+	StadiumID     string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	StadiumName   string
+}
+
+func findGamesByDateRowToGameRow(row sqlc.FindGamesByDateRow) gameRow {
+	return gameRow{
+		ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+		DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+		Result: row.Result, StadiumID: row.StadiumID,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt, StadiumName: row.StadiumName,
+	}
+}
+
+func findAllGamesRowToGameRow(row sqlc.FindAllGamesRow) gameRow {
+	return gameRow{
+		ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+		DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+		Result: row.Result, StadiumID: row.StadiumID,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt, StadiumName: row.StadiumName,
+	}
+}
+
+func getGameByIDWithStadiumRowToGameRow(row sqlc.GetGameByIDWithStadiumRow) gameRow {
+	return gameRow{
+		ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+		DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+		Result: row.Result, StadiumID: row.StadiumID,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt, StadiumName: row.StadiumName,
+	}
+}
+
+func gameRowToDomain(row gameRow) (game.Game, error) {
 	gameID, err := game.ParseGameID(row.ID)
 	if err != nil {
 		return game.Game{}, fmt.Errorf("failed to parse game id: %w", err)
@@ -46,17 +87,15 @@ func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
 	stadium := game.NewStadium(stadiumID, stadiumName)
 
 	g := game.NewGame(
-		gameID,
-		gameDate,
-		opponent,
-		dragonsScore,
-		opponentScore,
-		stadium,
-		row.CreatedAt,
-		row.UpdatedAt,
+		gameID, gameDate, opponent, dragonsScore, opponentScore,
+		stadium, row.CreatedAt, row.UpdatedAt,
 	)
 
 	return g, nil
+}
+
+func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
+	return gameRowToDomain(findGamesByDateRowToGameRow(row))
 }
 
 func GameResultToDB(result game.GameResultValue) sqlc.GamesResult {
