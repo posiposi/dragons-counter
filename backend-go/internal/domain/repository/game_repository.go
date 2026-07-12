@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/model"
 )
 
 type BulkCreateGameInput struct {
@@ -26,9 +26,9 @@ type BulkCreateGamePort interface {
 }
 
 type GameQueryPort interface {
-	FindAll(ctx context.Context) ([]game.Game, error)
-	FindByID(ctx context.Context, id game.GameID) (*game.Game, error)
-	FindByIDs(ctx context.Context, ids []game.GameID) ([]game.Game, error)
+	FindAll(ctx context.Context) ([]model.Game, error)
+	FindByID(ctx context.Context, id model.GameID) (*model.Game, error)
+	FindByIDs(ctx context.Context, ids []model.GameID) ([]model.Game, error)
 }
 
 type FindGameByDatePort interface {
@@ -36,6 +36,6 @@ type FindGameByDatePort interface {
 }
 
 type GameCommandPort interface {
-	Save(ctx context.Context, g game.Game) error
-	Delete(ctx context.Context, id game.GameID) (bool, error)
+	Save(ctx context.Context, g model.Game) error
+	Delete(ctx context.Context, id model.GameID) (bool, error)
 }
