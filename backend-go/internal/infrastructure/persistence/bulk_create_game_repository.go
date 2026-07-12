@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
-	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/model"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/repository"
 )
 
@@ -51,7 +51,7 @@ func (a *BulkCreateGameAdapter) BulkSave(ctx context.Context, inputs []repositor
 	queries := sqlc.New(a.db)
 
 	for _, input := range inputs {
-		gameDate, err := game.NewGameDate(input.GameDate)
+		gameDate, err := model.NewGameDate(input.GameDate)
 		if err != nil {
 			result.Errors = append(result.Errors, fmt.Sprintf("invalid game date %v: %v", input.GameDate, err))
 			continue
@@ -67,27 +67,27 @@ func (a *BulkCreateGameAdapter) BulkSave(ctx context.Context, inputs []repositor
 			continue
 		}
 
-		gameID := game.NewGameID()
-		opponent, err := game.NewOpponent(input.Opponent)
+		gameID := model.NewGameID()
+		opponent, err := model.NewOpponent(input.Opponent)
 		if err != nil {
 			result.Errors = append(result.Errors, fmt.Sprintf("invalid opponent %q: %v", input.Opponent, err))
 			continue
 		}
 
-		dragonsScore, err := game.NewScore(input.DragonsScore)
+		dragonsScore, err := model.NewScore(input.DragonsScore)
 		if err != nil {
 			result.Errors = append(result.Errors, fmt.Sprintf("invalid dragons score %d: %v", input.DragonsScore, err))
 			continue
 		}
 
-		opponentScore, err := game.NewScore(input.OpponentScore)
+		opponentScore, err := model.NewScore(input.OpponentScore)
 		if err != nil {
 			result.Errors = append(result.Errors, fmt.Sprintf("invalid opponent score %d: %v", input.OpponentScore, err))
 			continue
 		}
 
 		stadiumID := resolveStadiumID(input.StadiumName)
-		gameResult := game.NewGameResultFromScores(dragonsScore.Value(), opponentScore.Value())
+		gameResult := model.NewGameResultFromScores(dragonsScore.Value(), opponentScore.Value())
 
 		now := time.Now().Truncate(time.Second)
 		params := sqlc.CreateGameParams{

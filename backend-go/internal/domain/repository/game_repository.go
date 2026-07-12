@@ -32,7 +32,7 @@ type GameQueryPort interface {
 }
 
 type FindGameByDatePort interface {
-	FindByDate(ctx context.Context, gameDate game.GameDate) (*game.Game, error)
+	FindByDate(ctx context.Context, gameDate model.GameDate) (*model.Game, error)
 }
 
 type GameCommandPort interface {
