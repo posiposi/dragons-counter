@@ -1,6 +1,6 @@
 //go:build integration
 
-package gameadapter_test
+package persistence_test
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	gameadapter "github.com/posiposi/dragons-counter/backend-go/internal/adapter/game"
+	"github.com/posiposi/dragons-counter/backend-go/internal/infrastructure/persistence"
 	"github.com/posiposi/dragons-counter/backend-go/internal/config"
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
@@ -112,7 +112,7 @@ func newTestGame(t *testing.T, id, opponent string, dragonsScore, opponentScore 
 
 func TestGameRepository_Save(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
+	repo := persistence.NewGameRepository(db)
 
 	stadiumID := testPrefix + "stadium-save"
 	stadiumName := "バンテリンドーム ナゴヤ"
@@ -205,7 +205,7 @@ func TestGameRepository_Save(t *testing.T) {
 
 func TestGameRepository_FindAll(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
+	repo := persistence.NewGameRepository(db)
 
 	stadiumID := testPrefix + "stadium-findall"
 	stadiumName := "東京ドーム"
@@ -273,7 +273,7 @@ func TestGameRepository_FindAll(t *testing.T) {
 
 func TestGameRepository_FindByIDs(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
+	repo := persistence.NewGameRepository(db)
 
 	stadiumID := testPrefix + "stadium-findbyids"
 	stadiumName := "甲子園球場"
@@ -339,7 +339,7 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 
 func TestGameRepository_FindByID(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
+	repo := persistence.NewGameRepository(db)
 
 	stadiumID := testPrefix + "stadium-findbyid"
 	stadiumName := "ナゴヤ球場"
@@ -400,7 +400,7 @@ func TestGameRepository_FindByID(t *testing.T) {
 
 func TestGameRepository_Delete(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
+	repo := persistence.NewGameRepository(db)
 
 	stadiumID := testPrefix + "stadium-delete"
 	stadiumName := "マツダスタジアム"

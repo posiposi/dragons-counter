@@ -1,4 +1,4 @@
-package gameadapter
+package persistence
 
 import (
 	"context"
