@@ -12,6 +12,10 @@ type GameQueryPort interface {
 	FindByIDs(ctx context.Context, ids []game.GameID) ([]game.Game, error)
 }
 
+type FindGameByDatePort interface {
+	FindByDate(ctx context.Context, gameDate game.GameDate) (*game.Game, error)
+}
+
 type GameCommandPort interface {
 	Save(ctx context.Context, g game.Game) error
 	Delete(ctx context.Context, id game.GameID) (bool, error)

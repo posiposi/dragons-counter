@@ -302,6 +302,71 @@ func TestGameRepository_FindByID(t *testing.T) {
 	})
 }
 
+func TestGameRepository_FindByDate(t *testing.T) {
+	db := setupDB(t)
+	repo := gameadapter.NewGameRepository(db)
+
+	stadiumID := testPrefix + "stadium-findbydate"
+	stadiumName := "バンテリンドーム ナゴヤ"
+	insertTestStadium(t, db, stadiumID, stadiumName)
+
+	t.Cleanup(func() {
+		cleanupTestGamesAndStadiums(t, db, nil, []string{stadiumID})
+	})
+
+	t.Run("一致する日付のゲームが存在する場合にGameを返す", func(t *testing.T) {
+		gameID := testPrefix + "game-findbydate-hit"
+		gameDate := time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC)
+		g := newTestGame(t, gameID, "阪神タイガース", 5, 3, stadiumID, stadiumName, gameDate)
+		require.NoError(t, repo.Save(context.Background(), g))
+
+		t.Cleanup(func() {
+			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
+		})
+
+		searchDate, err := game.NewGameDate(gameDate)
+		require.NoError(t, err)
+
+		found, err := repo.FindByDate(context.Background(), searchDate)
+		require.NoError(t, err)
+		require.NotNil(t, found)
+
+		assert.Equal(t, gameID, found.ID().Value())
+		assert.Equal(t, "阪神タイガース", found.Opponent().Value())
+		assert.Equal(t, 5, found.DragonsScore().Value())
+		assert.Equal(t, 3, found.OpponentScore().Value())
+		assert.Equal(t, game.Win, found.Result().Value())
+		assert.Equal(t, stadiumName, found.Stadium().Name().Value())
+	})
+
+	t.Run("ゲームが存在しない日付の場合はnilを返す", func(t *testing.T) {
+		searchDate, err := game.NewGameDate(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC))
+		require.NoError(t, err)
+
+		found, err := repo.FindByDate(context.Background(), searchDate)
+		require.NoError(t, err)
+		assert.Nil(t, found)
+	})
+
+	t.Run("別の日付のゲームがある場合でも指定日付に一致しなければnilを返す", func(t *testing.T) {
+		gameID := testPrefix + "game-findbydate-miss"
+		gameDate := time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC)
+		g := newTestGame(t, gameID, "読売ジャイアンツ", 2, 4, stadiumID, stadiumName, gameDate)
+		require.NoError(t, repo.Save(context.Background(), g))
+
+		t.Cleanup(func() {
+			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
+		})
+
+		searchDate, err := game.NewGameDate(time.Date(2024, 7, 2, 0, 0, 0, 0, time.UTC))
+		require.NoError(t, err)
+
+		found, err := repo.FindByDate(context.Background(), searchDate)
+		require.NoError(t, err)
+		assert.Nil(t, found)
+	})
+}
+
 func TestGameRepository_Delete(t *testing.T) {
 	db := setupDB(t)
 	repo := gameadapter.NewGameRepository(db)

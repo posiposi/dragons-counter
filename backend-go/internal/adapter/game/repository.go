@@ -82,6 +82,24 @@ func (r *GameRepository) FindByIDs(ctx context.Context, ids []game.GameID) ([]ga
 	return games, nil
 }
 
+func (r *GameRepository) FindByDate(ctx context.Context, gameDate game.GameDate) (*game.Game, error) {
+	rows, err := r.queries.FindGamesByDate(ctx, gameDate.Value())
+	if err != nil {
+		return nil, fmt.Errorf("failed to find games by date: %w", err)
+	}
+
+	if len(rows) == 0 {
+		return nil, nil
+	}
+
+	g, err := gameRowToDomain(findGamesByDateRowToGameRow(rows[0]))
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert game row: %w", err)
+	}
+
+	return &g, nil
+}
+
 func (r *GameRepository) Save(ctx context.Context, g game.Game) error {
 	now := time.Now().Truncate(time.Second)
 	params := sqlc.CreateGameParams{
