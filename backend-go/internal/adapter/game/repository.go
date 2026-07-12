@@ -10,11 +10,13 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
 
+// GameRepository はGameQueryPortおよびGameCommandPortの実装であり、sqlcを用いてデータベースアクセスを行う。
 type GameRepository struct {
 	queries *sqlc.Queries
 	db      *sql.DB
 }
 
+// NewGameRepository はGameRepositoryの新しいインスタンスを生成する。
 func NewGameRepository(db *sql.DB) *GameRepository {
 	return &GameRepository{
 		queries: sqlc.New(db),

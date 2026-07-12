@@ -22,6 +22,7 @@ var statusMappings = []statusMapping{
 	{code: "FORBIDDEN", status: http.StatusForbidden},
 }
 
+// ResolveHTTPStatus maps a domain error code to the corresponding HTTP status code.
 func ResolveHTTPStatus(code string) int {
 	for _, m := range statusMappings {
 		if m.code == code {

@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 )
 
@@ -64,7 +62,10 @@ func TestResolveHTTPStatus(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, domain.ResolveHTTPStatus(tt.code))
+			got := domain.ResolveHTTPStatus(tt.code)
+			if got != tt.want {
+				t.Errorf("ResolveHTTPStatus(%q) = %v, want %v", tt.code, got, tt.want)
+			}
 		})
 	}
 }

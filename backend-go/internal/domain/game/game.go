@@ -2,6 +2,7 @@ package game
 
 import "time"
 
+// Game is the aggregate root representing a single baseball game record.
 type Game struct {
 	id            GameID
 	gameDate      GameDate
@@ -14,6 +15,7 @@ type Game struct {
 	updatedAt     time.Time
 }
 
+// NewGame creates a Game instance and derives the result from the given scores.
 func NewGame(
 	id GameID,
 	gameDate GameDate,

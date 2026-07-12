@@ -6,6 +6,7 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 )
 
+// User is the aggregate root representing an application user.
 type User struct {
 	id                 UserID
 	email              Email
@@ -14,6 +15,7 @@ type User struct {
 	role               UserRole
 }
 
+// CreateNewUser creates a new User with Pending status and User role.
 func CreateNewUser(email Email, password Password) User {
 	return User{
 		id:                 NewUserID(),
@@ -24,6 +26,7 @@ func CreateNewUser(email Email, password Password) User {
 	}
 }
 
+// UserFromRepository reconstructs a User entity from persisted data.
 func UserFromRepository(
 	id UserID,
 	email Email,

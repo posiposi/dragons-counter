@@ -10,10 +10,12 @@ import (
 
 const bcryptCost = 10
 
+// Password is a value object that holds a bcrypt-hashed password.
 type Password struct {
 	hash string
 }
 
+// NewPasswordFromPlainText hashes the given plain text and returns a Password.
 func NewPasswordFromPlainText(plainText string) (Password, error) {
 	if strings.TrimSpace(plainText) == "" {
 		return Password{}, domain.NewError("INVALID_PASSWORD", "Password cannot be empty")
@@ -25,6 +27,7 @@ func NewPasswordFromPlainText(plainText string) (Password, error) {
 	return Password{hash: string(hash)}, nil
 }
 
+// NewPasswordFromHash creates a Password from an existing bcrypt hash string.
 func NewPasswordFromHash(hash string) (Password, error) {
 	if strings.TrimSpace(hash) == "" {
 		return Password{}, domain.NewError("INVALID_PASSWORD", "Password hash cannot be empty")
