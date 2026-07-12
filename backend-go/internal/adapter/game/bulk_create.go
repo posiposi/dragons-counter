@@ -96,7 +96,7 @@ func (a *BulkCreateGameAdapter) BulkSave(ctx context.Context, inputs []ports.Bul
 			Opponent:      opponent.Value(),
 			DragonsScore:  int32(dragonsScore.Value()),
 			OpponentScore: int32(opponentScore.Value()),
-			Result:        GameResultToDB(gameResult.Value()),
+			Result:        gameResultToDB(gameResult.Value()),
 			StadiumID:     stadiumID,
 			CreatedAt:     now,
 			UpdatedAt:     now,
