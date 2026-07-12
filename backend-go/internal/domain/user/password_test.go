@@ -3,8 +3,6 @@ package user_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/user"
@@ -22,9 +20,13 @@ func TestNewPasswordFromPlainText(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				_, err := user.NewPasswordFromPlainText(tt.value)
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
 
-				require.Error(t, err)
-				assert.Equal(t, "Password cannot be empty", err.Error())
+				if got := err.Error(); got != "Password cannot be empty" {
+					t.Errorf("error message = %v, want %v", got, "Password cannot be empty")
+				}
 			})
 		}
 	})
@@ -42,9 +44,13 @@ func TestNewPasswordFromHash(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				_, err := user.NewPasswordFromHash(tt.value)
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
 
-				require.Error(t, err)
-				assert.Equal(t, "Password hash cannot be empty", err.Error())
+				if got := err.Error(); got != "Password hash cannot be empty" {
+					t.Errorf("error message = %v, want %v", got, "Password hash cannot be empty")
+				}
 			})
 		}
 	})
@@ -53,37 +59,61 @@ func TestNewPasswordFromHash(t *testing.T) {
 func TestPassword_Compare(t *testing.T) {
 	t.Run("平文から生成したPasswordが同じ平文と一致する", func(t *testing.T) {
 		password, err := user.NewPasswordFromPlainText("SecurePass123!")
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		assert.True(t, password.Compare("SecurePass123!"))
+		if !password.Compare("SecurePass123!") {
+			t.Error("expected Compare to return true for matching plaintext")
+		}
 	})
 
 	t.Run("平文から生成したPasswordが異なる平文と一致しない", func(t *testing.T) {
 		password, err := user.NewPasswordFromPlainText("SecurePass123!")
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		assert.False(t, password.Compare("WrongPass456!"))
+		if password.Compare("WrongPass456!") {
+			t.Error("expected Compare to return false for non-matching plaintext")
+		}
 	})
 
 	t.Run("ハッシュから復元したPasswordのCompareが機能する", func(t *testing.T) {
 		original, err := user.NewPasswordFromPlainText("SecurePass123!")
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		restored, err := user.NewPasswordFromHash(original.Hash())
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		assert.True(t, restored.Compare("SecurePass123!"))
-		assert.False(t, restored.Compare("WrongPass456!"))
+		if !restored.Compare("SecurePass123!") {
+			t.Error("expected Compare to return true for matching plaintext")
+		}
+		if restored.Compare("WrongPass456!") {
+			t.Error("expected Compare to return false for non-matching plaintext")
+		}
 	})
 
 	t.Run("既知のbcryptハッシュから復元したPasswordが平文と照合できる", func(t *testing.T) {
 		hashBytes, err := bcrypt.GenerateFromPassword([]byte("StoredDbPass789!"), 10)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		password, err := user.NewPasswordFromHash(string(hashBytes))
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		assert.True(t, password.Compare("StoredDbPass789!"))
-		assert.False(t, password.Compare("WrongPass456!"))
+		if !password.Compare("StoredDbPass789!") {
+			t.Error("expected Compare to return true for matching plaintext")
+		}
+		if password.Compare("WrongPass456!") {
+			t.Error("expected Compare to return false for non-matching plaintext")
+		}
 	})
 }

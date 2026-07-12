@@ -4,9 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/user"
 )
@@ -14,18 +11,26 @@ import (
 func newTestEmailAndPassword(t *testing.T) (user.Email, user.Password) {
 	t.Helper()
 	email, err := user.NewEmail("test@example.com")
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	password, err := user.NewPasswordFromHash("$2b$10$hashedpasswordvalue")
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	return email, password
 }
 
 func TestParseUserID(t *testing.T) {
 	t.Run("有効な値でUserIDを生成できる", func(t *testing.T) {
 		id, err := user.ParseUserID("550e8400-e29b-41d4-a716-446655440000")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, "550e8400-e29b-41d4-a716-446655440000", id.Value())
+		if got := id.Value(); got != "550e8400-e29b-41d4-a716-446655440000" {
+			t.Errorf("ParseUserID().Value() = %v, want %v", got, "550e8400-e29b-41d4-a716-446655440000")
+		}
 	})
 }
 
@@ -35,11 +40,21 @@ func TestCreateNewUser(t *testing.T) {
 
 		u := user.CreateNewUser(email, password)
 
-		assert.NotEmpty(t, u.ID().Value())
-		assert.Equal(t, email, u.Email())
-		assert.Equal(t, password, u.Password())
-		assert.Equal(t, user.RegistrationStatusPending, u.RegistrationStatus())
-		assert.Equal(t, user.RoleUser, u.Role())
+		if u.ID().Value() == "" {
+			t.Error("expected non-empty ID")
+		}
+		if u.Email() != email {
+			t.Errorf("CreateNewUser().Email() = %v, want %v", u.Email(), email)
+		}
+		if u.Password() != password {
+			t.Errorf("CreateNewUser().Password() does not match")
+		}
+		if u.RegistrationStatus() != user.RegistrationStatusPending {
+			t.Errorf("CreateNewUser().RegistrationStatus() = %v, want %v", u.RegistrationStatus(), user.RegistrationStatusPending)
+		}
+		if u.Role() != user.RoleUser {
+			t.Errorf("CreateNewUser().Role() = %v, want %v", u.Role(), user.RoleUser)
+		}
 	})
 }
 
@@ -50,11 +65,21 @@ func TestUserFromRepository(t *testing.T) {
 
 		u := user.UserFromRepository(id, email, password, user.RegistrationStatusApproved, user.RoleAdmin)
 
-		assert.Equal(t, id, u.ID())
-		assert.Equal(t, email, u.Email())
-		assert.Equal(t, password, u.Password())
-		assert.Equal(t, user.RegistrationStatusApproved, u.RegistrationStatus())
-		assert.Equal(t, user.RoleAdmin, u.Role())
+		if u.ID() != id {
+			t.Errorf("UserFromRepository().ID() = %v, want %v", u.ID(), id)
+		}
+		if u.Email() != email {
+			t.Errorf("UserFromRepository().Email() = %v, want %v", u.Email(), email)
+		}
+		if u.Password() != password {
+			t.Errorf("UserFromRepository().Password() does not match")
+		}
+		if u.RegistrationStatus() != user.RegistrationStatusApproved {
+			t.Errorf("UserFromRepository().RegistrationStatus() = %v, want %v", u.RegistrationStatus(), user.RegistrationStatusApproved)
+		}
+		if u.Role() != user.RoleAdmin {
+			t.Errorf("UserFromRepository().Role() = %v, want %v", u.Role(), user.RoleAdmin)
+		}
 	})
 }
 
@@ -74,7 +99,9 @@ func TestUser_CanLogin(t *testing.T) {
 			email, password := newTestEmailAndPassword(t)
 			u := user.UserFromRepository(user.NewUserID(), email, password, tt.status, user.RoleUser)
 
-			assert.Equal(t, tt.want, u.CanLogin())
+			if got := u.CanLogin(); got != tt.want {
+				t.Errorf("User.CanLogin() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
@@ -85,11 +112,19 @@ func TestUser_Approve(t *testing.T) {
 		original := user.UserFromRepository(user.NewUserID(), email, password, user.RegistrationStatusPending, user.RoleUser)
 
 		approved, err := original.Approve()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, user.RegistrationStatusApproved, approved.RegistrationStatus())
-		assert.Equal(t, original.ID(), approved.ID())
-		assert.Equal(t, user.RegistrationStatusPending, original.RegistrationStatus())
+		if approved.RegistrationStatus() != user.RegistrationStatusApproved {
+			t.Errorf("Approve().RegistrationStatus() = %v, want %v", approved.RegistrationStatus(), user.RegistrationStatusApproved)
+		}
+		if approved.ID() != original.ID() {
+			t.Error("Approve() changed the ID")
+		}
+		if original.RegistrationStatus() != user.RegistrationStatusPending {
+			t.Error("original User was mutated")
+		}
 	})
 
 	t.Run("PENDING以外の状態からはAPPROVEDへ遷移できずエラーを返す", func(t *testing.T) {
@@ -108,12 +143,20 @@ func TestUser_Approve(t *testing.T) {
 				u := user.UserFromRepository(user.NewUserID(), email, password, tt.status, user.RoleUser)
 
 				_, err := u.Approve()
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
 
-				require.Error(t, err)
 				var domainErr *domain.Error
-				require.True(t, errors.As(err, &domainErr))
-				assert.Equal(t, "INVALID_STATUS_TRANSITION", domainErr.Code)
-				assert.Equal(t, tt.message, domainErr.Message)
+				if !errors.As(err, &domainErr) {
+					t.Fatal("errors.As failed to extract *domain.Error")
+				}
+				if domainErr.Code != "INVALID_STATUS_TRANSITION" {
+					t.Errorf("domainErr.Code = %v, want %v", domainErr.Code, "INVALID_STATUS_TRANSITION")
+				}
+				if domainErr.Message != tt.message {
+					t.Errorf("domainErr.Message = %v, want %v", domainErr.Message, tt.message)
+				}
 			})
 		}
 	})
@@ -125,11 +168,19 @@ func TestUser_Reject(t *testing.T) {
 		original := user.UserFromRepository(user.NewUserID(), email, password, user.RegistrationStatusPending, user.RoleUser)
 
 		rejected, err := original.Reject()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, user.RegistrationStatusRejected, rejected.RegistrationStatus())
-		assert.Equal(t, original.ID(), rejected.ID())
-		assert.Equal(t, user.RegistrationStatusPending, original.RegistrationStatus())
+		if rejected.RegistrationStatus() != user.RegistrationStatusRejected {
+			t.Errorf("Reject().RegistrationStatus() = %v, want %v", rejected.RegistrationStatus(), user.RegistrationStatusRejected)
+		}
+		if rejected.ID() != original.ID() {
+			t.Error("Reject() changed the ID")
+		}
+		if original.RegistrationStatus() != user.RegistrationStatusPending {
+			t.Error("original User was mutated")
+		}
 	})
 
 	t.Run("PENDING以外の状態からはREJECTEDへ遷移できずエラーを返す", func(t *testing.T) {
@@ -148,12 +199,20 @@ func TestUser_Reject(t *testing.T) {
 				u := user.UserFromRepository(user.NewUserID(), email, password, tt.status, user.RoleUser)
 
 				_, err := u.Reject()
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
 
-				require.Error(t, err)
 				var domainErr *domain.Error
-				require.True(t, errors.As(err, &domainErr))
-				assert.Equal(t, "INVALID_STATUS_TRANSITION", domainErr.Code)
-				assert.Equal(t, tt.message, domainErr.Message)
+				if !errors.As(err, &domainErr) {
+					t.Fatal("errors.As failed to extract *domain.Error")
+				}
+				if domainErr.Code != "INVALID_STATUS_TRANSITION" {
+					t.Errorf("domainErr.Code = %v, want %v", domainErr.Code, "INVALID_STATUS_TRANSITION")
+				}
+				if domainErr.Message != tt.message {
+					t.Errorf("domainErr.Message = %v, want %v", domainErr.Message, tt.message)
+				}
 			})
 		}
 	})

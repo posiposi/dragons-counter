@@ -3,8 +3,6 @@ package game_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
 
@@ -27,7 +25,9 @@ func TestNewGameResultFromScores(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := game.NewGameResultFromScores(tt.dragonsScore, tt.opponentScore)
 
-			assert.Equal(t, tt.expected, result.Value())
+			if got := result.Value(); got != tt.expected {
+				t.Errorf("NewGameResultFromScores(%d, %d).Value() = %v, want %v", tt.dragonsScore, tt.opponentScore, got, tt.expected)
+			}
 		})
 	}
 }
@@ -48,7 +48,9 @@ func TestGameResult_IsWin(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := game.NewGameResultFromScores(tt.dragonsScore, tt.opponentScore)
 
-			assert.Equal(t, tt.expected, result.IsWin())
+			if got := result.IsWin(); got != tt.expected {
+				t.Errorf("GameResult.IsWin() = %v, want %v", got, tt.expected)
+			}
 		})
 	}
 }

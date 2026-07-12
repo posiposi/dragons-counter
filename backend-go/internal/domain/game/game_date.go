@@ -10,6 +10,7 @@ type GameDate struct {
 	value time.Time
 }
 
+// 未来日を拒否する。
 func NewGameDate(value time.Time) (GameDate, error) {
 	if value.After(time.Now()) {
 		return GameDate{}, domain.NewError("INVALID_GAME_DATE", "Game date cannot be in the future")

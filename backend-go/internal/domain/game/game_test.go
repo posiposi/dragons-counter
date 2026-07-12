@@ -4,9 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
 
@@ -25,19 +22,29 @@ func newGameFixture(t *testing.T, dragonsScore, opponentScore int) gameFixture {
 	t.Helper()
 
 	gameDate, err := game.NewGameDate(time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	opponent, err := game.NewOpponent("阪神タイガース")
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	dScore, err := game.NewScore(dragonsScore)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	oScore, err := game.NewScore(opponentScore)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	stadiumName, err := game.NewStadiumName("バンテリンドーム ナゴヤ")
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	return gameFixture{
 		id:            game.NewGameID(),
@@ -66,15 +73,33 @@ func TestNewGame(t *testing.T) {
 			f.updatedAt,
 		)
 
-		assert.True(t, g.ID().Equals(f.id))
-		assert.Equal(t, f.gameDate, g.GameDate())
-		assert.True(t, g.Opponent().Equals(f.opponent))
-		assert.True(t, g.DragonsScore().Equals(f.dragonsScore))
-		assert.True(t, g.OpponentScore().Equals(f.opponentScore))
-		assert.True(t, g.Stadium().Equals(f.stadium))
-		assert.Equal(t, f.createdAt, g.CreatedAt())
-		assert.Equal(t, f.updatedAt, g.UpdatedAt())
-		assert.Equal(t, game.Win, g.Result().Value())
+		if !g.ID().Equals(f.id) {
+			t.Errorf("Game.ID() does not equal fixture ID")
+		}
+		if g.GameDate() != f.gameDate {
+			t.Errorf("Game.GameDate() = %v, want %v", g.GameDate(), f.gameDate)
+		}
+		if !g.Opponent().Equals(f.opponent) {
+			t.Errorf("Game.Opponent() does not equal fixture opponent")
+		}
+		if !g.DragonsScore().Equals(f.dragonsScore) {
+			t.Errorf("Game.DragonsScore() does not equal fixture dragonsScore")
+		}
+		if !g.OpponentScore().Equals(f.opponentScore) {
+			t.Errorf("Game.OpponentScore() does not equal fixture opponentScore")
+		}
+		if !g.Stadium().Equals(f.stadium) {
+			t.Errorf("Game.Stadium() does not equal fixture stadium")
+		}
+		if g.CreatedAt() != f.createdAt {
+			t.Errorf("Game.CreatedAt() = %v, want %v", g.CreatedAt(), f.createdAt)
+		}
+		if g.UpdatedAt() != f.updatedAt {
+			t.Errorf("Game.UpdatedAt() = %v, want %v", g.UpdatedAt(), f.updatedAt)
+		}
+		if g.Result().Value() != game.Win {
+			t.Errorf("Game.Result().Value() = %v, want %v", g.Result().Value(), game.Win)
+		}
 	})
 }
 
@@ -105,7 +130,9 @@ func TestNewGame_ResultDetermination(t *testing.T) {
 				f.updatedAt,
 			)
 
-			assert.Equal(t, tt.expected, g.Result().Value())
+			if got := g.Result().Value(); got != tt.expected {
+				t.Errorf("NewGame().Result().Value() = %v, want %v", got, tt.expected)
+			}
 		})
 	}
 }
@@ -137,7 +164,9 @@ func TestGame_IsVictory(t *testing.T) {
 				f.updatedAt,
 			)
 
-			assert.Equal(t, tt.expected, g.IsVictory())
+			if got := g.IsVictory(); got != tt.expected {
+				t.Errorf("Game.IsVictory() = %v, want %v", got, tt.expected)
+			}
 		})
 	}
 }

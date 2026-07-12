@@ -14,6 +14,7 @@ type Password struct {
 	hash string
 }
 
+// bcrypt cost 10でハッシュ化する。
 func NewPasswordFromPlainText(plainText string) (Password, error) {
 	if strings.TrimSpace(plainText) == "" {
 		return Password{}, domain.NewError("INVALID_PASSWORD", "Password cannot be empty")

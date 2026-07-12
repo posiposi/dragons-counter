@@ -14,6 +14,7 @@ type User struct {
 	role               UserRole
 }
 
+// 初期状態はPending/Userロール。
 func CreateNewUser(email Email, password Password) User {
 	return User{
 		id:                 NewUserID(),

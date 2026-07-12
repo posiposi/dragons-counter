@@ -25,6 +25,7 @@ type Opponent struct {
 	value string
 }
 
+// 略称が渡された場合は正式チーム名に展開する。
 func NewOpponent(value string) (Opponent, error) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {

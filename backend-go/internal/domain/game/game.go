@@ -14,6 +14,7 @@ type Game struct {
 	updatedAt     time.Time
 }
 
+// スコアから勝敗(result)を自動導出する。
 func NewGame(
 	id GameID,
 	gameDate GameDate,

@@ -9,6 +9,7 @@ import (
 
 const impressionMaxLength = 191
 
+// runeカウントで191文字制限。nilまたは空文字はempty扱い。
 type Impression struct {
 	value string
 	empty bool
