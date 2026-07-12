@@ -9,12 +9,10 @@ import (
 
 var emailRegex = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 
-// Email is a value object that validates and holds an email address.
 type Email struct {
 	value string
 }
 
-// NewEmail creates an Email after validating the format.
 func NewEmail(value string) (Email, error) {
 	if strings.TrimSpace(value) == "" {
 		return Email{}, domain.NewError("INVALID_EMAIL", "Email cannot be empty")

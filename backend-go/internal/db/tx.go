@@ -6,7 +6,6 @@ import (
 	"fmt"
 )
 
-// WithTx はトランザクション内でfnを実行するヘルパー関数。
 // fn成功時はCommit、fnエラー時はRollback、fn内panicはRollback後にre-panicする。
 func WithTx(ctx context.Context, pool *sql.DB, fn func(tx *sql.Tx) error) (err error) {
 	tx, err := pool.BeginTx(ctx, nil)

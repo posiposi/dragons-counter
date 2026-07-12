@@ -21,12 +21,11 @@ var teamNameByAbbreviation = map[string]string{
 	"日":  "北海道日本ハムファイターズ",
 }
 
-// Opponent is a value object representing the opposing team name.
 type Opponent struct {
 	value string
 }
 
-// NewOpponent creates an Opponent, expanding abbreviations to full team names.
+// 略称が渡された場合は正式チーム名に展開する。
 func NewOpponent(value string) (Opponent, error) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
