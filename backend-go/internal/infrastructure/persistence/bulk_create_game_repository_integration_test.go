@@ -1,14 +1,14 @@
 //go:build integration
 
-package gameadapter_test
+package persistence_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	gameadapter "github.com/posiposi/dragons-counter/backend-go/internal/adapter/game"
-	"github.com/posiposi/dragons-counter/backend-go/internal/domain/ports"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/repository"
+	"github.com/posiposi/dragons-counter/backend-go/internal/infrastructure/persistence"
 )
 
 const bulkTestPrefix = "bulk-test-"
@@ -20,8 +20,8 @@ const (
 
 func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
-	adapter := gameadapter.NewBulkCreateGameAdapter(db, repo)
+	repo := persistence.NewGameRepository(db)
+	adapter := persistence.NewBulkCreateGameAdapter(db, repo)
 
 	// fixture: insert stadiums
 	insertTestStadium(t, db, bantelinStadiumID, "バンテリンドーム")
@@ -35,7 +35,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 	})
 
 	t.Run("正常に1件保存できsavedCountが1になる", func(t *testing.T) {
-		inputs := []ports.BulkCreateGameInput{
+		inputs := []repository.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "阪神タイガース",
@@ -72,7 +72,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 		})
 
 		// 同日付でBulkSave
-		inputs := []ports.BulkCreateGameInput{
+		inputs := []repository.BulkCreateGameInput{
 			{
 				GameDate:      gameDate,
 				Opponent:      "広島東洋カープ",
@@ -96,7 +96,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 	})
 
 	t.Run("球場名が完全一致する場合に正しいUUIDが使われる", func(t *testing.T) {
-		inputs := []ports.BulkCreateGameInput{
+		inputs := []repository.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "阪神タイガース",
@@ -136,7 +136,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 	})
 
 	t.Run("球場名が部分一致でフォールバックする", func(t *testing.T) {
-		inputs := []ports.BulkCreateGameInput{
+		inputs := []repository.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "読売ジャイアンツ",
@@ -176,7 +176,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 	})
 
 	t.Run("未知の球場名はデフォルトのバンテリンドームになる", func(t *testing.T) {
-		inputs := []ports.BulkCreateGameInput{
+		inputs := []repository.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "横浜DeNAベイスターズ",
@@ -228,7 +228,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
 		})
 
-		inputs := []ports.BulkCreateGameInput{
+		inputs := []repository.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 9, 14, 0, 0, 0, 0, time.UTC),
 				Opponent:      "阪神タイガース",
