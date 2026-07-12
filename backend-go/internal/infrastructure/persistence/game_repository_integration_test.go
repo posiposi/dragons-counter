@@ -14,7 +14,7 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/infrastructure/persistence"
 	"github.com/posiposi/dragons-counter/backend-go/internal/config"
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
-	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/model"
 )
 
 const testPrefix = "repo-test-"
@@ -73,41 +73,41 @@ func cleanupTestGamesAndStadiums(t *testing.T, db *sql.DB, gameIDs []string, sta
 	}
 }
 
-func newTestGame(t *testing.T, id, opponent string, dragonsScore, opponentScore int, stadiumID, stadiumName string, gameDate time.Time) game.Game {
+func newTestGame(t *testing.T, id, opponent string, dragonsScore, opponentScore int, stadiumID, stadiumName string, gameDate time.Time) model.Game {
 	t.Helper()
 
-	gid, err := game.ParseGameID(id)
+	gid, err := model.ParseGameID(id)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	gd, err := game.NewGameDate(gameDate)
+	gd, err := model.NewGameDate(gameDate)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	opp, err := game.NewOpponent(opponent)
+	opp, err := model.NewOpponent(opponent)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	ds, err := game.NewScore(dragonsScore)
+	ds, err := model.NewScore(dragonsScore)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	os, err := game.NewScore(opponentScore)
+	os, err := model.NewScore(opponentScore)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	sid, err := game.ParseStadiumID(stadiumID)
+	sid, err := model.ParseStadiumID(stadiumID)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	sn, err := game.NewStadiumName(stadiumName)
+	sn, err := model.NewStadiumName(stadiumName)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	stadium := game.NewStadium(sid, sn)
+	stadium := model.NewStadium(sid, sn)
 
 	now := time.Now().Truncate(time.Second)
-	return game.NewGame(gid, gd, opp, ds, os, stadium, now, now)
+	return model.NewGame(gid, gd, opp, ds, os, stadium, now, now)
 }
 
 func TestGameRepository_Save(t *testing.T) {
@@ -124,7 +124,7 @@ func TestGameRepository_Save(t *testing.T) {
 		opponent      string
 		dragonsScore  int
 		opponentScore int
-		wantResult    game.GameResultValue
+		wantResult    model.GameResultValue
 	}{
 		{
 			name:          "勝利の試合を保存しFindByIDで全フィールドを検証できる",
@@ -132,7 +132,7 @@ func TestGameRepository_Save(t *testing.T) {
 			opponent:      "阪神タイガース",
 			dragonsScore:  5,
 			opponentScore: 3,
-			wantResult:    game.Win,
+			wantResult:    model.Win,
 		},
 		{
 			name:          "敗北の試合を保存しFindByIDで全フィールドを検証できる",
@@ -140,7 +140,7 @@ func TestGameRepository_Save(t *testing.T) {
 			opponent:      "読売ジャイアンツ",
 			dragonsScore:  1,
 			opponentScore: 4,
-			wantResult:    game.Lose,
+			wantResult:    model.Lose,
 		},
 		{
 			name:          "引き分けの試合を保存しFindByIDで全フィールドを検証できる",
@@ -148,7 +148,7 @@ func TestGameRepository_Save(t *testing.T) {
 			opponent:      "広島東洋カープ",
 			dragonsScore:  2,
 			opponentScore: 2,
-			wantResult:    game.Draw,
+			wantResult:    model.Draw,
 		},
 	}
 
@@ -298,10 +298,10 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 	})
 
 	t.Run("指定した2件のIDで2件返却される", func(t *testing.T) {
-		id1, _ := game.ParseGameID(gameID1)
-		id2, _ := game.ParseGameID(gameID2)
+		id1, _ := model.ParseGameID(gameID1)
+		id2, _ := model.ParseGameID(gameID2)
 
-		games, err := repo.FindByIDs(context.Background(), []game.GameID{id1, id2})
+		games, err := repo.FindByIDs(context.Background(), []model.GameID{id1, id2})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -311,10 +311,10 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 	})
 
 	t.Run("存在しないIDを含む場合は存在分のみ返却される", func(t *testing.T) {
-		id1, _ := game.ParseGameID(gameID1)
-		nonExistent, _ := game.ParseGameID(testPrefix + "non-existent")
+		id1, _ := model.ParseGameID(gameID1)
+		nonExistent, _ := model.ParseGameID(testPrefix + "non-existent")
 
-		games, err := repo.FindByIDs(context.Background(), []game.GameID{id1, nonExistent})
+		games, err := repo.FindByIDs(context.Background(), []model.GameID{id1, nonExistent})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -327,7 +327,7 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 	})
 
 	t.Run("空配列を渡すと空の結果が返る", func(t *testing.T) {
-		games, err := repo.FindByIDs(context.Background(), []game.GameID{})
+		games, err := repo.FindByIDs(context.Background(), []model.GameID{})
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -357,7 +357,7 @@ func TestGameRepository_FindByID(t *testing.T) {
 	})
 
 	t.Run("存在するIDで全フィールドが取得できる", func(t *testing.T) {
-		id, _ := game.ParseGameID(gameID)
+		id, _ := model.ParseGameID(gameID)
 		found, err := repo.FindByID(context.Background(), id)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
@@ -378,8 +378,8 @@ func TestGameRepository_FindByID(t *testing.T) {
 		if got := found.OpponentScore().Value(); got != 2 {
 			t.Errorf("OpponentScore: got %v, want %v", got, 2)
 		}
-		if got := found.Result().Value(); got != game.Win {
-			t.Errorf("Result: got %v, want %v", got, game.Win)
+		if got := found.Result().Value(); got != model.Win {
+			t.Errorf("Result: got %v, want %v", got, model.Win)
 		}
 		if got := found.Stadium().Name().Value(); got != stadiumName {
 			t.Errorf("Stadium.Name: got %v, want %v", got, stadiumName)
@@ -387,7 +387,7 @@ func TestGameRepository_FindByID(t *testing.T) {
 	})
 
 	t.Run("存在しないIDの場合nilが返る", func(t *testing.T) {
-		id, _ := game.ParseGameID(testPrefix + "non-existent-id")
+		id, _ := model.ParseGameID(testPrefix + "non-existent-id")
 		found, err := repo.FindByID(context.Background(), id)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
@@ -436,7 +436,7 @@ func TestGameRepository_Delete(t *testing.T) {
 	})
 
 	t.Run("存在しないIDを削除するとfalseが返る", func(t *testing.T) {
-		id, _ := game.ParseGameID(testPrefix + "game-delete-none")
+		id, _ := model.ParseGameID(testPrefix + "game-delete-none")
 		deleted, err := repo.Delete(context.Background(), id)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
