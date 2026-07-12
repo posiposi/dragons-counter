@@ -2,9 +2,28 @@ package port
 
 import (
 	"context"
+	"time"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
+
+type BulkCreateGameInput struct {
+	GameDate      time.Time
+	Opponent      string
+	DragonsScore  int
+	OpponentScore int
+	StadiumName   string
+}
+
+type BulkCreateGameResult struct {
+	SavedCount   int
+	SkippedCount int
+	Errors       []string
+}
+
+type BulkCreateGamePort interface {
+	BulkSave(ctx context.Context, inputs []BulkCreateGameInput) BulkCreateGameResult
+}
 
 type GameQueryPort interface {
 	FindAll(ctx context.Context) ([]game.Game, error)
