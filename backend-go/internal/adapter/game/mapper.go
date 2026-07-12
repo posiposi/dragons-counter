@@ -7,6 +7,7 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
 
+// GameRowToDomain converts a database row into a domain Game aggregate.
 func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
 	gameID, err := game.ParseGameID(row.ID)
 	if err != nil {
@@ -59,6 +60,7 @@ func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
 	return g, nil
 }
 
+// GameResultToDB converts a domain GameResultValue to the database enum type.
 func GameResultToDB(result game.GameResultValue) sqlc.GamesResult {
 	switch result {
 	case game.Win:
@@ -72,6 +74,7 @@ func GameResultToDB(result game.GameResultValue) sqlc.GamesResult {
 	}
 }
 
+// GameResultToDomain converts a database enum value to the domain GameResultValue.
 func GameResultToDomain(result sqlc.GamesResult) game.GameResultValue {
 	switch result {
 	case sqlc.GamesResultWin:

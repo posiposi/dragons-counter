@@ -5,9 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
@@ -17,29 +14,43 @@ func TestNewGameDate(t *testing.T) {
 		value := time.Date(2024, 8, 1, 18, 0, 0, 0, time.Local)
 
 		gameDate, err := game.NewGameDate(value)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.True(t, gameDate.Value().Equal(value))
+		if !gameDate.Value().Equal(value) {
+			t.Errorf("NewGameDate().Value() = %v, want %v", gameDate.Value(), value)
+		}
 	})
 
 	t.Run("現在時刻の直前の日時で試合日を生成できる", func(t *testing.T) {
 		value := time.Now().Add(-time.Second)
 
 		gameDate, err := game.NewGameDate(value)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.True(t, gameDate.Value().Equal(value))
+		if !gameDate.Value().Equal(value) {
+			t.Errorf("NewGameDate().Value() = %v, want %v", gameDate.Value(), value)
+		}
 	})
 
 	t.Run("未来の日時の場合はドメインエラーを返す", func(t *testing.T) {
 		value := time.Now().AddDate(0, 0, 1)
 
 		_, err := game.NewGameDate(value)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
 
-		require.Error(t, err)
 		var domainErr *domain.Error
-		require.True(t, errors.As(err, &domainErr))
-		assert.NotEmpty(t, domainErr.Code)
+		if !errors.As(err, &domainErr) {
+			t.Fatal("errors.As failed to extract *domain.Error")
+		}
+		if domainErr.Code == "" {
+			t.Error("expected non-empty Code")
+		}
 	})
 }
 
@@ -74,9 +85,13 @@ func TestGameDate_Format(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gameDate, err := game.NewGameDate(tt.value)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 
-			assert.Equal(t, tt.expected, gameDate.Format())
+			if got := gameDate.Format(); got != tt.expected {
+				t.Errorf("GameDate.Format() = %v, want %v", got, tt.expected)
+			}
 		})
 	}
 }

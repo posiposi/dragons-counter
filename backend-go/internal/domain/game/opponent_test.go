@@ -4,9 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
@@ -14,16 +11,24 @@ import (
 func TestNewOpponent(t *testing.T) {
 	t.Run("正式名称をそのまま保持できる", func(t *testing.T) {
 		opponent, err := game.NewOpponent("読売ジャイアンツ")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, "読売ジャイアンツ", opponent.Value())
+		if got := opponent.Value(); got != "読売ジャイアンツ" {
+			t.Errorf("NewOpponent().Value() = %v, want %v", got, "読売ジャイアンツ")
+		}
 	})
 
 	t.Run("英語名をそのまま保持できる", func(t *testing.T) {
 		opponent, err := game.NewOpponent("Yomiuri Giants")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, "Yomiuri Giants", opponent.Value())
+		if got := opponent.Value(); got != "Yomiuri Giants" {
+			t.Errorf("NewOpponent().Value() = %v, want %v", got, "Yomiuri Giants")
+		}
 	})
 
 	t.Run("空文字または空白のみの場合はドメインエラーを返す", func(t *testing.T) {
@@ -38,20 +43,30 @@ func TestNewOpponent(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				_, err := game.NewOpponent(tt.value)
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
 
-				require.Error(t, err)
 				var domainErr *domain.Error
-				require.True(t, errors.As(err, &domainErr))
-				assert.NotEmpty(t, domainErr.Code)
+				if !errors.As(err, &domainErr) {
+					t.Fatal("errors.As failed to extract *domain.Error")
+				}
+				if domainErr.Code == "" {
+					t.Error("expected non-empty Code")
+				}
 			})
 		}
 	})
 
 	t.Run("前後の空白を除去して保持する", func(t *testing.T) {
 		opponent, err := game.NewOpponent("  読売ジャイアンツ  ")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, "読売ジャイアンツ", opponent.Value())
+		if got := opponent.Value(); got != "読売ジャイアンツ" {
+			t.Errorf("NewOpponent().Value() = %v, want %v", got, "読売ジャイアンツ")
+		}
 	})
 
 	t.Run("12球団の略称を正式名称に変換できる", func(t *testing.T) {
@@ -77,18 +92,26 @@ func TestNewOpponent(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				opponent, err := game.NewOpponent(tt.abbreviation)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 
-				require.NoError(t, err)
-				assert.Equal(t, tt.expected, opponent.Value())
+				if got := opponent.Value(); got != tt.expected {
+					t.Errorf("NewOpponent(%q).Value() = %v, want %v", tt.abbreviation, got, tt.expected)
+				}
 			})
 		}
 	})
 
 	t.Run("未知の値はそのまま保持する", func(t *testing.T) {
 		opponent, err := game.NewOpponent("未知のチーム")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		require.NoError(t, err)
-		assert.Equal(t, "未知のチーム", opponent.Value())
+		if got := opponent.Value(); got != "未知のチーム" {
+			t.Errorf("NewOpponent().Value() = %v, want %v", got, "未知のチーム")
+		}
 	})
 }
 
@@ -107,11 +130,17 @@ func TestOpponent_Equals(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a, err := game.NewOpponent(tt.a)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			b, err := game.NewOpponent(tt.b)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 
-			assert.Equal(t, tt.expected, a.Equals(b))
+			if got := a.Equals(b); got != tt.expected {
+				t.Errorf("Opponent.Equals() = %v, want %v", got, tt.expected)
+			}
 		})
 	}
 }
