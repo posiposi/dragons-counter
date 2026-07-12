@@ -40,3 +40,14 @@ paths:
 - 構造体比較は deep equality で行い、手動フィールド比較を避ける
 - テストヘルパーではエラーを返し、fail 判断はテスト関数自身に委ねる
 - Table-driven tests を活用し、テストケースの追加を容易にする
+
+## Test File Naming
+
+- テストファイル名: `{対象ファイル名}_test.go`（Go標準に従う）
+- ファイル名に `integration` は含めない。integrationテストは `//go:build integration` タグで区別する
+- 配置: テスト対象と同じディレクトリに配置する
+
+| テスト種別 | ビルドタグ | 実行コマンド |
+|-----------|-----------|------------|
+| Unit test | なし | `go test ./...` |
+| Integration test | `//go:build integration` | `go test -tags=integration ./...` |
