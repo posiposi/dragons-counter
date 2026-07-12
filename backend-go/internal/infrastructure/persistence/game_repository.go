@@ -30,7 +30,7 @@ func (r *GameRepository) FindAll(ctx context.Context) ([]model.Game, error) {
 
 	games := make([]model.Game, 0, len(rows))
 	for _, row := range rows {
-		g, err := toDomainFromFindAllRow(row)
+		g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert game row: %w", err)
 		}
@@ -49,7 +49,7 @@ func (r *GameRepository) FindByID(ctx context.Context, id model.GameID) (*model.
 		return nil, fmt.Errorf("failed to find game by id: %w", err)
 	}
 
-	g, err := toDomainFromGetByIDRow(row)
+	g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert game row: %w", err)
 	}
@@ -72,7 +72,7 @@ func (r *GameRepository) FindByIDs(ctx context.Context, ids []model.GameID) ([]m
 			return nil, fmt.Errorf("failed to find game by id %s: %w", id.Value(), err)
 		}
 
-		g, err := toDomainFromGetByIDRow(row)
+		g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert game row: %w", err)
 		}
@@ -92,7 +92,7 @@ func (r *GameRepository) FindByDate(ctx context.Context, gameDate model.GameDate
 		return nil, nil
 	}
 
-	g, err := toDomainFromFindByDateRow(rows[0])
+	g, err := toDomainGame(rows[0].ID, rows[0].GameDate, rows[0].Opponent, rows[0].DragonsScore, rows[0].OpponentScore, rows[0].Result, rows[0].StadiumID, rows[0].StadiumName, rows[0].CreatedAt, rows[0].UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert game row: %w", err)
 	}
@@ -133,18 +133,6 @@ func (r *GameRepository) Delete(ctx context.Context, id model.GameID) (bool, err
 	}
 
 	return affected > 0, nil
-}
-
-func toDomainFromFindAllRow(row sqlc.FindAllGamesRow) (model.Game, error) {
-	return toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
-}
-
-func toDomainFromGetByIDRow(row sqlc.GetGameByIDWithStadiumRow) (model.Game, error) {
-	return toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
-}
-
-func toDomainFromFindByDateRow(row sqlc.FindGamesByDateRow) (model.Game, error) {
-	return toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
 }
 
 func toDomainGame(id string, gameDate time.Time, opponent string, dragonsScore, opponentScore int32, result sqlc.GamesResult, stadiumID, stadiumName string, createdAt, updatedAt time.Time) (model.Game, error) {
