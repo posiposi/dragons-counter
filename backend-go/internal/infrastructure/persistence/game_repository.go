@@ -92,7 +92,8 @@ func (r *GameRepository) FindByDate(ctx context.Context, gameDate model.GameDate
 		return nil, nil
 	}
 
-	g, err := toDomainGame(rows[0].ID, rows[0].GameDate, rows[0].Opponent, rows[0].DragonsScore, rows[0].OpponentScore, rows[0].Result, rows[0].StadiumID, rows[0].StadiumName, rows[0].CreatedAt, rows[0].UpdatedAt)
+	row := rows[0]
+	g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert game row: %w", err)
 	}
