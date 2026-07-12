@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 )
 
@@ -15,8 +12,12 @@ func TestNewError(t *testing.T) {
 	t.Run("生成したErrorがcodeとmessageを保持する", func(t *testing.T) {
 		err := domain.NewError("INVALID_EMAIL", "メールアドレスの形式が不正です")
 
-		assert.Equal(t, "INVALID_EMAIL", err.Code)
-		assert.Equal(t, "メールアドレスの形式が不正です", err.Message)
+		if err.Code != "INVALID_EMAIL" {
+			t.Errorf("NewError().Code = %v, want %v", err.Code, "INVALID_EMAIL")
+		}
+		if err.Message != "メールアドレスの形式が不正です" {
+			t.Errorf("NewError().Message = %v, want %v", err.Message, "メールアドレスの形式が不正です")
+		}
 	})
 }
 
@@ -24,7 +25,9 @@ func TestError_Error(t *testing.T) {
 	t.Run("Errorがmessage文字列を返す", func(t *testing.T) {
 		err := domain.NewError("GAME_NOT_FOUND", "試合が見つかりません")
 
-		assert.Equal(t, "試合が見つかりません", err.Error())
+		if got := err.Error(); got != "試合が見つかりません" {
+			t.Errorf("Error.Error() = %v, want %v", got, "試合が見つかりません")
+		}
 	})
 }
 
@@ -34,7 +37,11 @@ func TestError_ErrorsAs(t *testing.T) {
 		wrapped := fmt.Errorf("usecase failed: %w", err)
 
 		var domainErr *domain.Error
-		require.True(t, errors.As(wrapped, &domainErr))
-		assert.Equal(t, "ALREADY_EXISTS", domainErr.Code)
+		if !errors.As(wrapped, &domainErr) {
+			t.Fatal("errors.As failed to extract *domain.Error")
+		}
+		if domainErr.Code != "ALREADY_EXISTS" {
+			t.Errorf("domainErr.Code = %v, want %v", domainErr.Code, "ALREADY_EXISTS")
+		}
 	})
 }

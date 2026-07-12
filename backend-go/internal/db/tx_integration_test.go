@@ -14,8 +14,6 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/db"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const testIDPrefix = "tx-test-"
@@ -29,10 +27,14 @@ func setupTestDB(t *testing.T) *sql.DB {
 	}
 
 	dsn, err := config.BuildDSN(databaseURL)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error building DSN: %v", err)
+	}
 
 	database, err := sql.Open("mysql", dsn)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error opening DB: %v", err)
+	}
 
 	t.Cleanup(func() {
 		database.Close()
@@ -44,7 +46,9 @@ func setupTestDB(t *testing.T) *sql.DB {
 func cleanupTestData(t *testing.T, database *sql.DB, testID string) {
 	t.Helper()
 	_, err := database.ExecContext(context.Background(), "DELETE FROM stadiums WHERE id = ?", testID)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error cleaning up test data: %v", err)
+	}
 }
 
 func TestWithTx(t *testing.T) {
@@ -64,14 +68,20 @@ func TestWithTx(t *testing.T) {
 			)
 			return err
 		})
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		var name string
 		err = pool.QueryRowContext(context.Background(),
 			"SELECT name FROM stadiums WHERE id = ?", testID,
 		).Scan(&name)
-		require.NoError(t, err)
-		assert.Equal(t, "テスト球場", name)
+		if err != nil {
+			t.Fatalf("unexpected error querying: %v", err)
+		}
+		if name != "テスト球場" {
+			t.Errorf("queried name = %v, want %v", name, "テスト球場")
+		}
 	})
 
 	t.Run("コールバックがエラーを返した場合にrollbackされデータが存在しない", func(t *testing.T) {
@@ -92,14 +102,20 @@ func TestWithTx(t *testing.T) {
 			}
 			return callbackErr
 		})
-		require.ErrorIs(t, err, callbackErr)
+		if !errors.Is(err, callbackErr) {
+			t.Fatalf("WithTx() error = %v, want %v", err, callbackErr)
+		}
 
 		var count int
 		err = pool.QueryRowContext(context.Background(),
 			"SELECT COUNT(*) FROM stadiums WHERE id = ?", testID,
 		).Scan(&count)
-		require.NoError(t, err)
-		assert.Equal(t, 0, count)
+		if err != nil {
+			t.Fatalf("unexpected error querying: %v", err)
+		}
+		if count != 0 {
+			t.Errorf("row count = %v, want 0", count)
+		}
 	})
 
 	t.Run("コールバック内でpanicが発生した場合にrollbackされre-panicする", func(t *testing.T) {
@@ -109,25 +125,36 @@ func TestWithTx(t *testing.T) {
 
 		now := time.Now().Truncate(time.Second)
 
-		assert.PanicsWithValue(t, "intentional panic", func() {
-			_ = db.WithTx(context.Background(), pool, func(tx *sql.Tx) error {
-				_, err := tx.ExecContext(context.Background(),
-					"INSERT INTO stadiums (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
-					testID, "パニック球場", now, now,
-				)
-				if err != nil {
-					return err
-				}
-				panic("intentional panic")
-			})
-		})
+		defer func() {
+			r := recover()
+			if r == nil {
+				t.Fatal("expected panic, got none")
+			}
+			if r != "intentional panic" {
+				t.Fatalf("panic value = %v, want %v", r, "intentional panic")
+			}
 
-		var count int
-		err := pool.QueryRowContext(context.Background(),
-			"SELECT COUNT(*) FROM stadiums WHERE id = ?", testID,
-		).Scan(&count)
-		require.NoError(t, err)
-		assert.Equal(t, 0, count)
+			var count int
+			err := pool.QueryRowContext(context.Background(),
+				"SELECT COUNT(*) FROM stadiums WHERE id = ?", testID,
+			).Scan(&count)
+			if err != nil {
+				t.Fatalf("unexpected error querying: %v", err)
+			}
+			if count != 0 {
+				t.Errorf("row count = %v, want 0", count)
+			}
+		}()
+
+		_ = db.WithTx(context.Background(), pool, func(tx *sql.Tx) error {
+			_, err := tx.ExecContext(context.Background(),
+				"INSERT INTO stadiums (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
+				testID, "パニック球場", now, now,
+			)
+			if err != nil {
+				return err
+			}
+			panic("intentional panic")
+		})
 	})
 }
-

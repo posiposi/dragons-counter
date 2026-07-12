@@ -6,6 +6,7 @@ import (
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 )
 
+// UserGame is the aggregate root representing a user's attendance record for a game.
 type UserGame struct {
 	id         UserGameID
 	userID     domain.ID
@@ -15,6 +16,7 @@ type UserGame struct {
 	updatedAt  time.Time
 }
 
+// CreateNewUserGame creates a new UserGame with a generated ID and current timestamps.
 func CreateNewUserGame(userID, gameID domain.ID, impression Impression) UserGame {
 	now := time.Now()
 	return UserGame{
@@ -27,6 +29,7 @@ func CreateNewUserGame(userID, gameID domain.ID, impression Impression) UserGame
 	}
 }
 
+// UserGameFromRepository reconstructs a UserGame entity from persisted data.
 func UserGameFromRepository(
 	id UserGameID,
 	userID, gameID domain.ID,

@@ -4,9 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
 )
@@ -25,20 +22,30 @@ func TestNewScore(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				score, err := game.NewScore(tt.value)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 
-				require.NoError(t, err)
-				assert.Equal(t, tt.value, score.Value())
+				if got := score.Value(); got != tt.value {
+					t.Errorf("NewScore(%d).Value() = %v, want %v", tt.value, got, tt.value)
+				}
 			})
 		}
 	})
 
 	t.Run("負数の場合はドメインエラーを返す", func(t *testing.T) {
 		_, err := game.NewScore(-1)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
 
-		require.Error(t, err)
 		var domainErr *domain.Error
-		require.True(t, errors.As(err, &domainErr))
-		assert.NotEmpty(t, domainErr.Code)
+		if !errors.As(err, &domainErr) {
+			t.Fatal("errors.As failed to extract *domain.Error")
+		}
+		if domainErr.Code == "" {
+			t.Error("expected non-empty Code")
+		}
 	})
 }
 
@@ -57,11 +64,17 @@ func TestScore_Equals(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a, err := game.NewScore(tt.a)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			b, err := game.NewScore(tt.b)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 
-			assert.Equal(t, tt.expected, a.Equals(b))
+			if got := a.Equals(b); got != tt.expected {
+				t.Errorf("Score.Equals() = %v, want %v", got, tt.expected)
+			}
 		})
 	}
 }

@@ -7,8 +7,6 @@ import (
 	gameadapter "github.com/posiposi/dragons-counter/backend-go/internal/adapter/game"
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGameRowToDomain(t *testing.T) {
@@ -105,18 +103,40 @@ func TestGameRowToDomain(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g, err := gameadapter.GameRowToDomain(tt.row)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 
-			require.NoError(t, err)
-			assert.Equal(t, tt.row.ID, g.ID().Value())
-			assert.Equal(t, tt.row.GameDate, g.GameDate().Value())
-			assert.Equal(t, tt.wantOpponent, g.Opponent().Value())
-			assert.Equal(t, tt.wantDragons, g.DragonsScore().Value())
-			assert.Equal(t, tt.wantOpponentSc, g.OpponentScore().Value())
-			assert.Equal(t, tt.wantResult, g.Result().Value())
-			assert.Equal(t, tt.row.StadiumID, g.Stadium().ID().Value())
-			assert.Equal(t, tt.row.StadiumName, g.Stadium().Name().Value())
-			assert.Equal(t, tt.row.CreatedAt, g.CreatedAt())
-			assert.Equal(t, tt.row.UpdatedAt, g.UpdatedAt())
+			if got := g.ID().Value(); got != tt.row.ID {
+				t.Errorf("Game.ID().Value() = %v, want %v", got, tt.row.ID)
+			}
+			if got := g.GameDate().Value(); got != tt.row.GameDate {
+				t.Errorf("Game.GameDate().Value() = %v, want %v", got, tt.row.GameDate)
+			}
+			if got := g.Opponent().Value(); got != tt.wantOpponent {
+				t.Errorf("Game.Opponent().Value() = %v, want %v", got, tt.wantOpponent)
+			}
+			if got := g.DragonsScore().Value(); got != tt.wantDragons {
+				t.Errorf("Game.DragonsScore().Value() = %v, want %v", got, tt.wantDragons)
+			}
+			if got := g.OpponentScore().Value(); got != tt.wantOpponentSc {
+				t.Errorf("Game.OpponentScore().Value() = %v, want %v", got, tt.wantOpponentSc)
+			}
+			if got := g.Result().Value(); got != tt.wantResult {
+				t.Errorf("Game.Result().Value() = %v, want %v", got, tt.wantResult)
+			}
+			if got := g.Stadium().ID().Value(); got != tt.row.StadiumID {
+				t.Errorf("Game.Stadium().ID().Value() = %v, want %v", got, tt.row.StadiumID)
+			}
+			if got := g.Stadium().Name().Value(); got != tt.row.StadiumName {
+				t.Errorf("Game.Stadium().Name().Value() = %v, want %v", got, tt.row.StadiumName)
+			}
+			if got := g.CreatedAt(); got != tt.row.CreatedAt {
+				t.Errorf("Game.CreatedAt() = %v, want %v", got, tt.row.CreatedAt)
+			}
+			if got := g.UpdatedAt(); got != tt.row.UpdatedAt {
+				t.Errorf("Game.UpdatedAt() = %v, want %v", got, tt.row.UpdatedAt)
+			}
 		})
 	}
 }
@@ -135,10 +155,14 @@ func TestGameResultConversion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotDB := gameadapter.GameResultToDB(tt.domValue)
-			assert.Equal(t, tt.dbValue, gotDB)
+			if gotDB != tt.dbValue {
+				t.Errorf("GameResultToDB(%v) = %v, want %v", tt.domValue, gotDB, tt.dbValue)
+			}
 
 			gotDom := gameadapter.GameResultToDomain(tt.dbValue)
-			assert.Equal(t, tt.domValue, gotDom)
+			if gotDom != tt.domValue {
+				t.Errorf("GameResultToDomain(%v) = %v, want %v", tt.dbValue, gotDom, tt.domValue)
+			}
 		})
 	}
 }

@@ -9,11 +9,13 @@ import (
 
 const impressionMaxLength = 191
 
+// Impression is a value object for optional game attendance commentary (max 191 chars).
 type Impression struct {
 	value string
 	empty bool
 }
 
+// NewImpression creates an Impression from an optional string, validating length.
 func NewImpression(value *string) (Impression, error) {
 	if value == nil {
 		return Impression{empty: true}, nil
