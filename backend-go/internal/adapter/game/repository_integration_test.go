@@ -10,8 +10,6 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	gameadapter "github.com/posiposi/dragons-counter/backend-go/internal/adapter/game"
 	"github.com/posiposi/dragons-counter/backend-go/internal/config"
@@ -30,10 +28,14 @@ func setupDB(t *testing.T) *sql.DB {
 	}
 
 	dsn, err := config.BuildDSN(databaseURL)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	database, err := sql.Open("mysql", dsn)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	t.Cleanup(func() { database.Close() })
 	return database
@@ -49,7 +51,9 @@ func insertTestStadium(t *testing.T, db *sql.DB, id, name string) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 }
 
 func cleanupTestGamesAndStadiums(t *testing.T, db *sql.DB, gameIDs []string, stadiumIDs []string) {
@@ -57,11 +61,15 @@ func cleanupTestGamesAndStadiums(t *testing.T, db *sql.DB, gameIDs []string, sta
 	ctx := context.Background()
 	for _, id := range gameIDs {
 		_, err := db.ExecContext(ctx, "DELETE FROM games WHERE id = ?", id)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 	}
 	for _, id := range stadiumIDs {
 		_, err := db.ExecContext(ctx, "DELETE FROM stadiums WHERE id = ?", id)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 	}
 }
 
@@ -69,19 +77,33 @@ func newTestGame(t *testing.T, id, opponent string, dragonsScore, opponentScore 
 	t.Helper()
 
 	gid, err := game.ParseGameID(id)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	gd, err := game.NewGameDate(gameDate)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	opp, err := game.NewOpponent(opponent)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	ds, err := game.NewScore(dragonsScore)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	os, err := game.NewScore(opponentScore)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	sid, err := game.ParseStadiumID(stadiumID)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	sn, err := game.NewStadiumName(stadiumName)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	stadium := game.NewStadium(sid, sn)
 
 	now := time.Now().Truncate(time.Second)
@@ -140,19 +162,39 @@ func TestGameRepository_Save(t *testing.T) {
 			})
 
 			err := repo.Save(context.Background(), g)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 
 			found, err := repo.FindByID(context.Background(), g.ID())
-			require.NoError(t, err)
-			require.NotNil(t, found)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if found == nil {
+				t.Fatal("got nil, want non-nil")
+			}
 
-			assert.Equal(t, tt.gameID, found.ID().Value())
-			assert.Equal(t, tt.opponent, found.Opponent().Value())
-			assert.Equal(t, tt.dragonsScore, found.DragonsScore().Value())
-			assert.Equal(t, tt.opponentScore, found.OpponentScore().Value())
-			assert.Equal(t, tt.wantResult, found.Result().Value())
-			assert.Equal(t, stadiumName, found.Stadium().Name().Value())
-			assert.Equal(t, stadiumID, found.Stadium().ID().Value())
+			if got := found.ID().Value(); got != tt.gameID {
+				t.Errorf("ID: got %v, want %v", got, tt.gameID)
+			}
+			if got := found.Opponent().Value(); got != tt.opponent {
+				t.Errorf("Opponent: got %v, want %v", got, tt.opponent)
+			}
+			if got := found.DragonsScore().Value(); got != tt.dragonsScore {
+				t.Errorf("DragonsScore: got %v, want %v", got, tt.dragonsScore)
+			}
+			if got := found.OpponentScore().Value(); got != tt.opponentScore {
+				t.Errorf("OpponentScore: got %v, want %v", got, tt.opponentScore)
+			}
+			if got := found.Result().Value(); got != tt.wantResult {
+				t.Errorf("Result: got %v, want %v", got, tt.wantResult)
+			}
+			if got := found.Stadium().Name().Value(); got != stadiumName {
+				t.Errorf("Stadium.Name: got %v, want %v", got, stadiumName)
+			}
+			if got := found.Stadium().ID().Value(); got != stadiumID {
+				t.Errorf("Stadium.ID: got %v, want %v", got, stadiumID)
+			}
 		})
 	}
 
@@ -177,23 +219,33 @@ func TestGameRepository_FindAll(t *testing.T) {
 	g1 := newTestGame(t, gameID1, "阪神タイガース", 3, 1, stadiumID, stadiumName, date1)
 	g2 := newTestGame(t, gameID2, "読売ジャイアンツ", 2, 5, stadiumID, stadiumName, date2)
 
-	require.NoError(t, repo.Save(context.Background(), g1))
-	require.NoError(t, repo.Save(context.Background(), g2))
+	if err := repo.Save(context.Background(), g1); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := repo.Save(context.Background(), g2); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	t.Cleanup(func() {
 		cleanupTestGamesAndStadiums(t, db, []string{gameID1, gameID2}, []string{stadiumID})
 	})
 
 	games, err := repo.FindAll(context.Background())
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	// FindAllは他テストのデータも含む可能性があるため、挿入した2件が含まれることを確認
 	foundIDs := make(map[string]bool)
 	for _, g := range games {
 		foundIDs[g.ID().Value()] = true
 	}
-	assert.True(t, foundIDs[gameID1], "game1が結果に含まれるべき")
-	assert.True(t, foundIDs[gameID2], "game2が結果に含まれるべき")
+	if !foundIDs[gameID1] {
+		t.Error("game1が結果に含まれるべき")
+	}
+	if !foundIDs[gameID2] {
+		t.Error("game2が結果に含まれるべき")
+	}
 
 	// 日付降順を確認: date2(6/15) > date1(6/14) なのでgame2が先に来る
 	var idx1, idx2 int
@@ -205,12 +257,16 @@ func TestGameRepository_FindAll(t *testing.T) {
 			idx2 = i
 		}
 	}
-	assert.Less(t, idx2, idx1, "新しい日付の試合が先に来るべき")
+	if idx2 >= idx1 {
+		t.Errorf("新しい日付の試合が先に来るべき: idx2=%d, idx1=%d", idx2, idx1)
+	}
 
 	// stadium名の検証
 	for _, g := range games {
 		if g.ID().Value() == gameID1 || g.ID().Value() == gameID2 {
-			assert.Equal(t, stadiumName, g.Stadium().Name().Value())
+			if got := g.Stadium().Name().Value(); got != stadiumName {
+				t.Errorf("Stadium.Name: got %v, want %v", got, stadiumName)
+			}
 		}
 	}
 }
@@ -230,8 +286,12 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 	g1 := newTestGame(t, gameID1, "阪神タイガース", 3, 1, stadiumID, stadiumName, gameDate)
 	g2 := newTestGame(t, gameID2, "読売ジャイアンツ", 0, 2, stadiumID, stadiumName, gameDate)
 
-	require.NoError(t, repo.Save(context.Background(), g1))
-	require.NoError(t, repo.Save(context.Background(), g2))
+	if err := repo.Save(context.Background(), g1); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := repo.Save(context.Background(), g2); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	t.Cleanup(func() {
 		cleanupTestGamesAndStadiums(t, db, []string{gameID1, gameID2}, []string{stadiumID})
@@ -242,8 +302,12 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 		id2, _ := game.ParseGameID(gameID2)
 
 		games, err := repo.FindByIDs(context.Background(), []game.GameID{id1, id2})
-		require.NoError(t, err)
-		assert.Len(t, games, 2)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(games) != 2 {
+			t.Fatalf("got len %d, want %d", len(games), 2)
+		}
 	})
 
 	t.Run("存在しないIDを含む場合は存在分のみ返却される", func(t *testing.T) {
@@ -251,15 +315,25 @@ func TestGameRepository_FindByIDs(t *testing.T) {
 		nonExistent, _ := game.ParseGameID(testPrefix + "non-existent")
 
 		games, err := repo.FindByIDs(context.Background(), []game.GameID{id1, nonExistent})
-		require.NoError(t, err)
-		assert.Len(t, games, 1)
-		assert.Equal(t, gameID1, games[0].ID().Value())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(games) != 1 {
+			t.Fatalf("got len %d, want %d", len(games), 1)
+		}
+		if got := games[0].ID().Value(); got != gameID1 {
+			t.Errorf("got %v, want %v", got, gameID1)
+		}
 	})
 
 	t.Run("空配列を渡すと空の結果が返る", func(t *testing.T) {
 		games, err := repo.FindByIDs(context.Background(), []game.GameID{})
-		require.NoError(t, err)
-		assert.Empty(t, games)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(games) != 0 {
+			t.Errorf("got len %d, want %d", len(games), 0)
+		}
 	})
 }
 
@@ -274,7 +348,9 @@ func TestGameRepository_FindByID(t *testing.T) {
 	gameID := testPrefix + "game-findbyid"
 	gameDate := time.Date(2025, 6, 15, 18, 0, 0, 0, time.UTC)
 	g := newTestGame(t, gameID, "横浜DeNAベイスターズ", 4, 2, stadiumID, stadiumName, gameDate)
-	require.NoError(t, repo.Save(context.Background(), g))
+	if err := repo.Save(context.Background(), g); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	t.Cleanup(func() {
 		cleanupTestGamesAndStadiums(t, db, []string{gameID}, []string{stadiumID})
@@ -283,22 +359,42 @@ func TestGameRepository_FindByID(t *testing.T) {
 	t.Run("存在するIDで全フィールドが取得できる", func(t *testing.T) {
 		id, _ := game.ParseGameID(gameID)
 		found, err := repo.FindByID(context.Background(), id)
-		require.NoError(t, err)
-		require.NotNil(t, found)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if found == nil {
+			t.Fatal("got nil, want non-nil")
+		}
 
-		assert.Equal(t, gameID, found.ID().Value())
-		assert.Equal(t, "横浜DeNAベイスターズ", found.Opponent().Value())
-		assert.Equal(t, 4, found.DragonsScore().Value())
-		assert.Equal(t, 2, found.OpponentScore().Value())
-		assert.Equal(t, game.Win, found.Result().Value())
-		assert.Equal(t, stadiumName, found.Stadium().Name().Value())
+		if got := found.ID().Value(); got != gameID {
+			t.Errorf("ID: got %v, want %v", got, gameID)
+		}
+		if got := found.Opponent().Value(); got != "横浜DeNAベイスターズ" {
+			t.Errorf("Opponent: got %v, want %v", got, "横浜DeNAベイスターズ")
+		}
+		if got := found.DragonsScore().Value(); got != 4 {
+			t.Errorf("DragonsScore: got %v, want %v", got, 4)
+		}
+		if got := found.OpponentScore().Value(); got != 2 {
+			t.Errorf("OpponentScore: got %v, want %v", got, 2)
+		}
+		if got := found.Result().Value(); got != game.Win {
+			t.Errorf("Result: got %v, want %v", got, game.Win)
+		}
+		if got := found.Stadium().Name().Value(); got != stadiumName {
+			t.Errorf("Stadium.Name: got %v, want %v", got, stadiumName)
+		}
 	})
 
 	t.Run("存在しないIDの場合nilが返る", func(t *testing.T) {
 		id, _ := game.ParseGameID(testPrefix + "non-existent-id")
 		found, err := repo.FindByID(context.Background(), id)
-		require.NoError(t, err)
-		assert.Nil(t, found)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if found != nil {
+			t.Errorf("got %v, want nil", found)
+		}
 	})
 }
 
@@ -318,21 +414,35 @@ func TestGameRepository_Delete(t *testing.T) {
 		gameID := testPrefix + "game-delete-ok"
 		gameDate := time.Date(2025, 6, 15, 18, 0, 0, 0, time.UTC)
 		g := newTestGame(t, gameID, "広島東洋カープ", 1, 0, stadiumID, stadiumName, gameDate)
-		require.NoError(t, repo.Save(context.Background(), g))
+		if err := repo.Save(context.Background(), g); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		deleted, err := repo.Delete(context.Background(), g.ID())
-		require.NoError(t, err)
-		assert.True(t, deleted)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !deleted {
+			t.Error("got false, want true")
+		}
 
 		found, err := repo.FindByID(context.Background(), g.ID())
-		require.NoError(t, err)
-		assert.Nil(t, found)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if found != nil {
+			t.Errorf("got %v, want nil", found)
+		}
 	})
 
 	t.Run("存在しないIDを削除するとfalseが返る", func(t *testing.T) {
 		id, _ := game.ParseGameID(testPrefix + "game-delete-none")
 		deleted, err := repo.Delete(context.Background(), id)
-		require.NoError(t, err)
-		assert.False(t, deleted)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if deleted {
+			t.Error("got true, want false")
+		}
 	})
 }
