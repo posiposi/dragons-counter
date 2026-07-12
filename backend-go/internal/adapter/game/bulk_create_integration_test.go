@@ -7,11 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	gameadapter "github.com/posiposi/dragons-counter/backend-go/internal/adapter/game"
-	"github.com/posiposi/dragons-counter/backend-go/internal/port"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/ports"
 )
 
 const bulkTestPrefix = "bulk-test-"
@@ -38,7 +35,7 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 	})
 
 	t.Run("正常に1件保存できsavedCountが1になる", func(t *testing.T) {
-		inputs := []port.BulkCreateGameInput{
+		inputs := []ports.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 4, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "阪神タイガース",
@@ -50,9 +47,15 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 
 		result := adapter.BulkSave(context.Background(), inputs)
 
-		assert.Equal(t, 1, result.SavedCount)
-		assert.Equal(t, 0, result.SkippedCount)
-		assert.Empty(t, result.Errors)
+		if result.SavedCount != 1 {
+			t.Errorf("SavedCount: got %d, want %d", result.SavedCount, 1)
+		}
+		if result.SkippedCount != 0 {
+			t.Errorf("SkippedCount: got %d, want %d", result.SkippedCount, 0)
+		}
+		if len(result.Errors) != 0 {
+			t.Errorf("Errors: got %v, want empty", result.Errors)
+		}
 	})
 
 	t.Run("日付が重複する場合はスキップされskippedCountが増加する", func(t *testing.T) {
@@ -60,14 +63,16 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 		gameDate := time.Date(2024, 5, 10, 0, 0, 0, 0, time.UTC)
 		gameID := bulkTestPrefix + "dup-date"
 		g := newTestGame(t, gameID, "読売ジャイアンツ", 3, 1, bantelinStadiumID, "バンテリンドーム", gameDate)
-		require.NoError(t, repo.Save(context.Background(), g))
+		if err := repo.Save(context.Background(), g); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		t.Cleanup(func() {
 			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
 		})
 
 		// 同日付でBulkSave
-		inputs := []port.BulkCreateGameInput{
+		inputs := []ports.BulkCreateGameInput{
 			{
 				GameDate:      gameDate,
 				Opponent:      "広島東洋カープ",
@@ -79,13 +84,19 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 
 		result := adapter.BulkSave(context.Background(), inputs)
 
-		assert.Equal(t, 0, result.SavedCount)
-		assert.Equal(t, 1, result.SkippedCount)
-		assert.Empty(t, result.Errors)
+		if result.SavedCount != 0 {
+			t.Errorf("SavedCount: got %d, want %d", result.SavedCount, 0)
+		}
+		if result.SkippedCount != 1 {
+			t.Errorf("SkippedCount: got %d, want %d", result.SkippedCount, 1)
+		}
+		if len(result.Errors) != 0 {
+			t.Errorf("Errors: got %v, want empty", result.Errors)
+		}
 	})
 
 	t.Run("球場名が完全一致する場合に正しいUUIDが使われる", func(t *testing.T) {
-		inputs := []port.BulkCreateGameInput{
+		inputs := []ports.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "阪神タイガース",
@@ -97,23 +108,35 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 
 		result := adapter.BulkSave(context.Background(), inputs)
 
-		assert.Equal(t, 1, result.SavedCount)
-		assert.Empty(t, result.Errors)
+		if result.SavedCount != 1 {
+			t.Errorf("SavedCount: got %d, want %d", result.SavedCount, 1)
+		}
+		if len(result.Errors) != 0 {
+			t.Errorf("Errors: got %v, want empty", result.Errors)
+		}
 
 		// DBから確認: stadium_idが甲子園のUUIDであること
 		rows, err := db.QueryContext(context.Background(),
 			"SELECT stadium_id FROM games WHERE game_date = ?", time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC))
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		defer rows.Close()
 
+		if !rows.Next() {
+			t.Fatal("expected a row but got none")
+		}
 		var stadiumID string
-		require.True(t, rows.Next())
-		require.NoError(t, rows.Scan(&stadiumID))
-		assert.Equal(t, koshienStadiumID, stadiumID)
+		if err := rows.Scan(&stadiumID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if stadiumID != koshienStadiumID {
+			t.Errorf("stadium_id: got %v, want %v", stadiumID, koshienStadiumID)
+		}
 	})
 
 	t.Run("球場名が部分一致でフォールバックする", func(t *testing.T) {
-		inputs := []port.BulkCreateGameInput{
+		inputs := []ports.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "読売ジャイアンツ",
@@ -125,23 +148,35 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 
 		result := adapter.BulkSave(context.Background(), inputs)
 
-		assert.Equal(t, 1, result.SavedCount)
-		assert.Empty(t, result.Errors)
+		if result.SavedCount != 1 {
+			t.Errorf("SavedCount: got %d, want %d", result.SavedCount, 1)
+		}
+		if len(result.Errors) != 0 {
+			t.Errorf("Errors: got %v, want empty", result.Errors)
+		}
 
 		// DBから確認: stadium_idがバンテリンドームのUUIDであること
 		rows, err := db.QueryContext(context.Background(),
 			"SELECT stadium_id FROM games WHERE game_date = ?", time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC))
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		defer rows.Close()
 
+		if !rows.Next() {
+			t.Fatal("expected a row but got none")
+		}
 		var stadiumID string
-		require.True(t, rows.Next())
-		require.NoError(t, rows.Scan(&stadiumID))
-		assert.Equal(t, bantelinStadiumID, stadiumID)
+		if err := rows.Scan(&stadiumID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if stadiumID != bantelinStadiumID {
+			t.Errorf("stadium_id: got %v, want %v", stadiumID, bantelinStadiumID)
+		}
 	})
 
 	t.Run("未知の球場名はデフォルトのバンテリンドームになる", func(t *testing.T) {
-		inputs := []port.BulkCreateGameInput{
+		inputs := []ports.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC),
 				Opponent:      "横浜DeNAベイスターズ",
@@ -153,19 +188,31 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 
 		result := adapter.BulkSave(context.Background(), inputs)
 
-		assert.Equal(t, 1, result.SavedCount)
-		assert.Empty(t, result.Errors)
+		if result.SavedCount != 1 {
+			t.Errorf("SavedCount: got %d, want %d", result.SavedCount, 1)
+		}
+		if len(result.Errors) != 0 {
+			t.Errorf("Errors: got %v, want empty", result.Errors)
+		}
 
 		// DBから確認: stadium_idがバンテリンドームのUUIDであること
 		rows, err := db.QueryContext(context.Background(),
 			"SELECT stadium_id FROM games WHERE game_date = ?", time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC))
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		defer rows.Close()
 
+		if !rows.Next() {
+			t.Fatal("expected a row but got none")
+		}
 		var stadiumID string
-		require.True(t, rows.Next())
-		require.NoError(t, rows.Scan(&stadiumID))
-		assert.Equal(t, bantelinStadiumID, stadiumID)
+		if err := rows.Scan(&stadiumID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if stadiumID != bantelinStadiumID {
+			t.Errorf("stadium_id: got %v, want %v", stadiumID, bantelinStadiumID)
+		}
 	})
 
 	t.Run("複数件を一括保存し集計が正しい", func(t *testing.T) {
@@ -173,13 +220,15 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 		dupDate := time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC)
 		gameID := bulkTestPrefix + "multi-dup"
 		g := newTestGame(t, gameID, "広島東洋カープ", 1, 1, bantelinStadiumID, "バンテリンドーム", dupDate)
-		require.NoError(t, repo.Save(context.Background(), g))
+		if err := repo.Save(context.Background(), g); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		t.Cleanup(func() {
 			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
 		})
 
-		inputs := []port.BulkCreateGameInput{
+		inputs := []ports.BulkCreateGameInput{
 			{
 				GameDate:      time.Date(2024, 9, 14, 0, 0, 0, 0, time.UTC),
 				Opponent:      "阪神タイガース",
@@ -205,8 +254,14 @@ func TestBulkCreateGameAdapter_BulkSave(t *testing.T) {
 
 		result := adapter.BulkSave(context.Background(), inputs)
 
-		assert.Equal(t, 2, result.SavedCount)
-		assert.Equal(t, 1, result.SkippedCount)
-		assert.Empty(t, result.Errors)
+		if result.SavedCount != 2 {
+			t.Errorf("SavedCount: got %d, want %d", result.SavedCount, 2)
+		}
+		if result.SkippedCount != 1 {
+			t.Errorf("SkippedCount: got %d, want %d", result.SkippedCount, 1)
+		}
+		if len(result.Errors) != 0 {
+			t.Errorf("Errors: got %v, want empty", result.Errors)
+		}
 	})
 }

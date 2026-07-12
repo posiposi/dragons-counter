@@ -9,7 +9,7 @@ import (
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
-	"github.com/posiposi/dragons-counter/backend-go/internal/port"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/ports"
 )
 
 var stadiumNameToID = map[string]string{
@@ -30,20 +30,24 @@ var stadiumNameToID = map[string]string{
 
 const defaultStadiumID = "a1b2c3d4-e5f6-7890-abcd-ef1234567001"
 
+// BulkCreateGameAdapter implements ports.BulkCreateGamePort using sqlc queries
+// with duplicate-date skip logic.
 type BulkCreateGameAdapter struct {
 	db         *sql.DB
-	findByDate port.FindGameByDatePort
+	findByDate ports.FindGameByDatePort
 }
 
-func NewBulkCreateGameAdapter(db *sql.DB, findByDate port.FindGameByDatePort) *BulkCreateGameAdapter {
+// NewBulkCreateGameAdapter creates a new BulkCreateGameAdapter.
+func NewBulkCreateGameAdapter(db *sql.DB, findByDate ports.FindGameByDatePort) *BulkCreateGameAdapter {
 	return &BulkCreateGameAdapter{
 		db:         db,
 		findByDate: findByDate,
 	}
 }
 
-func (a *BulkCreateGameAdapter) BulkSave(ctx context.Context, inputs []port.BulkCreateGameInput) port.BulkCreateGameResult {
-	result := port.BulkCreateGameResult{}
+// BulkSave persists multiple games, skipping dates that already have a game recorded.
+func (a *BulkCreateGameAdapter) BulkSave(ctx context.Context, inputs []ports.BulkCreateGameInput) ports.BulkCreateGameResult {
+	result := ports.BulkCreateGameResult{}
 	queries := sqlc.New(a.db)
 
 	for _, input := range inputs {
