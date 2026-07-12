@@ -11,10 +11,10 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/posiposi/dragons-counter/backend-go/internal/infrastructure/persistence"
 	"github.com/posiposi/dragons-counter/backend-go/internal/config"
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
 	"github.com/posiposi/dragons-counter/backend-go/internal/domain/model"
+	"github.com/posiposi/dragons-counter/backend-go/internal/infrastructure/persistence"
 )
 
 const testPrefix = "repo-test-"
