@@ -222,16 +222,3 @@ func gameResultToDB(result model.GameResultValue) sqlc.GamesResult {
 		return sqlc.GamesResultDraw
 	}
 }
-
-func gameResultToDomain(result sqlc.GamesResult) model.GameResultValue {
-	switch result {
-	case sqlc.GamesResultWin:
-		return model.Win
-	case sqlc.GamesResultLose:
-		return model.Lose
-	case sqlc.GamesResultDraw:
-		return model.Draw
-	default:
-		return model.Draw
-	}
-}
