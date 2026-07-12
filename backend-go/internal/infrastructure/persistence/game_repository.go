@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
@@ -129,7 +130,7 @@ func (r *GameRepository) Save(ctx context.Context, g model.Game) error {
 		Opponent:      g.Opponent().Value(),
 		DragonsScore:  int32(g.DragonsScore().Value()),
 		OpponentScore: int32(g.OpponentScore().Value()),
-		Result:        gameResultToDB(g.Result().Value()),
+		Result:        sqlc.GamesResult(strings.ToLower(string(g.Result().Value()))),
 		StadiumID:     g.Stadium().ID().Value(),
 		CreatedAt:     now,
 		UpdatedAt:     now,
@@ -210,15 +211,3 @@ func toDomainGame(row gameRow) (model.Game, error) {
 	return model.NewGame(gID, gDate, opp, dScore, oScore, stadium, row.CreatedAt, row.UpdatedAt), nil
 }
 
-func gameResultToDB(result model.GameResultValue) sqlc.GamesResult {
-	switch result {
-	case model.Win:
-		return sqlc.GamesResultWin
-	case model.Lose:
-		return sqlc.GamesResultLose
-	case model.Draw:
-		return sqlc.GamesResultDraw
-	default:
-		return sqlc.GamesResultDraw
-	}
-}
