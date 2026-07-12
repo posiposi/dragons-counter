@@ -4,48 +4,48 @@ import (
 	"fmt"
 
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
-	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/model"
 )
 
-func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
-	gameID, err := game.ParseGameID(row.ID)
+func GameRowToDomain(row sqlc.FindGamesByDateRow) (model.Game, error) {
+	gameID, err := model.ParseGameID(row.ID)
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to parse game id: %w", err)
+		return model.Game{}, fmt.Errorf("failed to parse game id: %w", err)
 	}
 
-	gameDate, err := game.NewGameDate(row.GameDate)
+	gameDate, err := model.NewGameDate(row.GameDate)
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to create game date: %w", err)
+		return model.Game{}, fmt.Errorf("failed to create game date: %w", err)
 	}
 
-	opponent, err := game.NewOpponent(row.Opponent)
+	opponent, err := model.NewOpponent(row.Opponent)
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to create opponent: %w", err)
+		return model.Game{}, fmt.Errorf("failed to create opponent: %w", err)
 	}
 
-	dragonsScore, err := game.NewScore(int(row.DragonsScore))
+	dragonsScore, err := model.NewScore(int(row.DragonsScore))
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to create dragons score: %w", err)
+		return model.Game{}, fmt.Errorf("failed to create dragons score: %w", err)
 	}
 
-	opponentScore, err := game.NewScore(int(row.OpponentScore))
+	opponentScore, err := model.NewScore(int(row.OpponentScore))
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to create opponent score: %w", err)
+		return model.Game{}, fmt.Errorf("failed to create opponent score: %w", err)
 	}
 
-	stadiumID, err := game.ParseStadiumID(row.StadiumID)
+	stadiumID, err := model.ParseStadiumID(row.StadiumID)
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to parse stadium id: %w", err)
+		return model.Game{}, fmt.Errorf("failed to parse stadium id: %w", err)
 	}
 
-	stadiumName, err := game.NewStadiumName(row.StadiumName)
+	stadiumName, err := model.NewStadiumName(row.StadiumName)
 	if err != nil {
-		return game.Game{}, fmt.Errorf("failed to create stadium name: %w", err)
+		return model.Game{}, fmt.Errorf("failed to create stadium name: %w", err)
 	}
 
-	stadium := game.NewStadium(stadiumID, stadiumName)
+	stadium := model.NewStadium(stadiumID, stadiumName)
 
-	g := game.NewGame(
+	g := model.NewGame(
 		gameID,
 		gameDate,
 		opponent,
@@ -59,28 +59,28 @@ func GameRowToDomain(row sqlc.FindGamesByDateRow) (game.Game, error) {
 	return g, nil
 }
 
-func GameResultToDB(result game.GameResultValue) sqlc.GamesResult {
+func GameResultToDB(result model.GameResultValue) sqlc.GamesResult {
 	switch result {
-	case game.Win:
+	case model.Win:
 		return sqlc.GamesResultWin
-	case game.Lose:
+	case model.Lose:
 		return sqlc.GamesResultLose
-	case game.Draw:
+	case model.Draw:
 		return sqlc.GamesResultDraw
 	default:
 		return sqlc.GamesResultDraw
 	}
 }
 
-func GameResultToDomain(result sqlc.GamesResult) game.GameResultValue {
+func GameResultToDomain(result sqlc.GamesResult) model.GameResultValue {
 	switch result {
 	case sqlc.GamesResultWin:
-		return game.Win
+		return model.Win
 	case sqlc.GamesResultLose:
-		return game.Lose
+		return model.Lose
 	case sqlc.GamesResultDraw:
-		return game.Draw
+		return model.Draw
 	default:
-		return game.Draw
+		return model.Draw
 	}
 }

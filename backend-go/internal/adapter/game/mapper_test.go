@@ -6,7 +6,7 @@ import (
 
 	gameadapter "github.com/posiposi/dragons-counter/backend-go/internal/adapter/game"
 	"github.com/posiposi/dragons-counter/backend-go/internal/db/sqlc"
-	"github.com/posiposi/dragons-counter/backend-go/internal/domain/game"
+	"github.com/posiposi/dragons-counter/backend-go/internal/domain/model"
 )
 
 func TestGameRowToDomain(t *testing.T) {
@@ -18,7 +18,7 @@ func TestGameRowToDomain(t *testing.T) {
 		name           string
 		row            sqlc.FindGamesByDateRow
 		wantOpponent   string
-		wantResult     game.GameResultValue
+		wantResult     model.GameResultValue
 		wantDragons    int
 		wantOpponentSc int
 	}{
@@ -37,7 +37,7 @@ func TestGameRowToDomain(t *testing.T) {
 				StadiumName:   "バンテリンドーム ナゴヤ",
 			},
 			wantOpponent:   "阪神タイガース",
-			wantResult:     game.Win,
+			wantResult:     model.Win,
 			wantDragons:    5,
 			wantOpponentSc: 3,
 		},
@@ -56,7 +56,7 @@ func TestGameRowToDomain(t *testing.T) {
 				StadiumName:   "東京ドーム",
 			},
 			wantOpponent:   "読売ジャイアンツ",
-			wantResult:     game.Lose,
+			wantResult:     model.Lose,
 			wantDragons:    1,
 			wantOpponentSc: 4,
 		},
@@ -75,7 +75,7 @@ func TestGameRowToDomain(t *testing.T) {
 				StadiumName:   "MAZDA Zoom-Zoom スタジアム広島",
 			},
 			wantOpponent:   "広島東洋カープ",
-			wantResult:     game.Draw,
+			wantResult:     model.Draw,
 			wantDragons:    2,
 			wantOpponentSc: 2,
 		},
@@ -94,7 +94,7 @@ func TestGameRowToDomain(t *testing.T) {
 				StadiumName:   "バンテリンドーム ナゴヤ",
 			},
 			wantOpponent:   "阪神タイガース",
-			wantResult:     game.Win,
+			wantResult:     model.Win,
 			wantDragons:    3,
 			wantOpponentSc: 1,
 		},
@@ -145,11 +145,11 @@ func TestGameResultConversion(t *testing.T) {
 	tests := []struct {
 		name     string
 		dbValue  sqlc.GamesResult
-		domValue game.GameResultValue
+		domValue model.GameResultValue
 	}{
-		{name: "WIN と win が相互変換できる", dbValue: sqlc.GamesResultWin, domValue: game.Win},
-		{name: "LOSE と lose が相互変換できる", dbValue: sqlc.GamesResultLose, domValue: game.Lose},
-		{name: "DRAW と draw が相互変換できる", dbValue: sqlc.GamesResultDraw, domValue: game.Draw},
+		{name: "WIN と win が相互変換できる", dbValue: sqlc.GamesResultWin, domValue: model.Win},
+		{name: "LOSE と lose が相互変換できる", dbValue: sqlc.GamesResultLose, domValue: model.Lose},
+		{name: "DRAW と draw が相互変換できる", dbValue: sqlc.GamesResultDraw, domValue: model.Draw},
 	}
 
 	for _, tt := range tests {
