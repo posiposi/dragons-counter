@@ -30,7 +30,12 @@ func (r *GameRepository) FindAll(ctx context.Context) ([]model.Game, error) {
 
 	games := make([]model.Game, 0, len(rows))
 	for _, row := range rows {
-		g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
+		g, err := toDomainGame(gameRow{
+			ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+			DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+			Result: row.Result, StadiumID: row.StadiumID, StadiumName: row.StadiumName,
+			CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert game row: %w", err)
 		}
@@ -49,7 +54,12 @@ func (r *GameRepository) FindByID(ctx context.Context, id model.GameID) (*model.
 		return nil, fmt.Errorf("failed to find game by id: %w", err)
 	}
 
-	g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
+	g, err := toDomainGame(gameRow{
+		ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+		DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+		Result: row.Result, StadiumID: row.StadiumID, StadiumName: row.StadiumName,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert game row: %w", err)
 	}
@@ -72,7 +82,12 @@ func (r *GameRepository) FindByIDs(ctx context.Context, ids []model.GameID) ([]m
 			return nil, fmt.Errorf("failed to find game by id %s: %w", id.Value(), err)
 		}
 
-		g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
+		g, err := toDomainGame(gameRow{
+			ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+			DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+			Result: row.Result, StadiumID: row.StadiumID, StadiumName: row.StadiumName,
+			CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert game row: %w", err)
 		}
@@ -93,7 +108,12 @@ func (r *GameRepository) FindByDate(ctx context.Context, gameDate model.GameDate
 	}
 
 	row := rows[0]
-	g, err := toDomainGame(row.ID, row.GameDate, row.Opponent, row.DragonsScore, row.OpponentScore, row.Result, row.StadiumID, row.StadiumName, row.CreatedAt, row.UpdatedAt)
+	g, err := toDomainGame(gameRow{
+		ID: row.ID, GameDate: row.GameDate, Opponent: row.Opponent,
+		DragonsScore: row.DragonsScore, OpponentScore: row.OpponentScore,
+		Result: row.Result, StadiumID: row.StadiumID, StadiumName: row.StadiumName,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert game row: %w", err)
 	}
@@ -136,45 +156,58 @@ func (r *GameRepository) Delete(ctx context.Context, id model.GameID) (bool, err
 	return affected > 0, nil
 }
 
-func toDomainGame(id string, gameDate time.Time, opponent string, dragonsScore, opponentScore int32, result sqlc.GamesResult, stadiumID, stadiumName string, createdAt, updatedAt time.Time) (model.Game, error) {
-	gID, err := model.ParseGameID(id)
+type gameRow struct {
+	ID            string
+	GameDate      time.Time
+	Opponent      string
+	DragonsScore  int32
+	OpponentScore int32
+	Result        sqlc.GamesResult
+	StadiumID     string
+	StadiumName   string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+func toDomainGame(row gameRow) (model.Game, error) {
+	gID, err := model.ParseGameID(row.ID)
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to parse game id: %w", err)
 	}
 
-	gDate, err := model.NewGameDate(gameDate)
+	gDate, err := model.NewGameDate(row.GameDate)
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to create game date: %w", err)
 	}
 
-	opp, err := model.NewOpponent(opponent)
+	opp, err := model.NewOpponent(row.Opponent)
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to create opponent: %w", err)
 	}
 
-	dScore, err := model.NewScore(int(dragonsScore))
+	dScore, err := model.NewScore(int(row.DragonsScore))
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to create dragons score: %w", err)
 	}
 
-	oScore, err := model.NewScore(int(opponentScore))
+	oScore, err := model.NewScore(int(row.OpponentScore))
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to create opponent score: %w", err)
 	}
 
-	sID, err := model.ParseStadiumID(stadiumID)
+	sID, err := model.ParseStadiumID(row.StadiumID)
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to parse stadium id: %w", err)
 	}
 
-	sName, err := model.NewStadiumName(stadiumName)
+	sName, err := model.NewStadiumName(row.StadiumName)
 	if err != nil {
 		return model.Game{}, fmt.Errorf("failed to create stadium name: %w", err)
 	}
 
 	stadium := model.NewStadium(sID, sName)
 
-	return model.NewGame(gID, gDate, opp, dScore, oScore, stadium, createdAt, updatedAt), nil
+	return model.NewGame(gID, gDate, opp, dScore, oScore, stadium, row.CreatedAt, row.UpdatedAt), nil
 }
 
 func gameResultToDB(result model.GameResultValue) sqlc.GamesResult {
