@@ -210,4 +210,3 @@ func toDomainGame(row gameRow) (model.Game, error) {
 
 	return model.NewGame(gID, gDate, opp, dScore, oScore, stadium, row.CreatedAt, row.UpdatedAt), nil
 }
-
