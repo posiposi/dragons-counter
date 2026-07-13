@@ -44,6 +44,7 @@ Google Go Style Guide (https://google.github.io/styleguide/go/) に準拠する�
 ## Code Format
 
 - `gofmt` の出力に準拠する（必須）
+- **コミット前に必ず `gofmt -w` を対象ファイルに実行する**（CIのlintで検出されるため、事前に修正すること）
 - 外部パッケージの構造体リテラルではフィールド名を必ず指定する
 - ゼロ値フィールドは明確さを損なわない限り省略可
 - 複雑な条件式はブール変数に抽出してから使用
