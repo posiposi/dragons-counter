@@ -398,6 +398,105 @@ func TestGameRepository_FindByID(t *testing.T) {
 	})
 }
 
+func TestGameRepository_FindByDate(t *testing.T) {
+	db := setupDB(t)
+	repo := gameadapter.NewGameRepository(db)
+
+	stadiumID := testPrefix + "stadium-findbydate"
+	stadiumName := "バンテリンドーム ナゴヤ"
+	insertTestStadium(t, db, stadiumID, stadiumName)
+
+	t.Cleanup(func() {
+		cleanupTestGamesAndStadiums(t, db, nil, []string{stadiumID})
+	})
+
+	t.Run("一致する日付のゲームが存在する場合にGameを返す", func(t *testing.T) {
+		gameID := testPrefix + "game-findbydate-hit"
+		gameDate := time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC)
+		g := newTestGame(t, gameID, "阪神タイガース", 5, 3, stadiumID, stadiumName, gameDate)
+		if err := repo.Save(context.Background(), g); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		t.Cleanup(func() {
+			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
+		})
+
+		searchDate, err := game.NewGameDate(gameDate)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		found, err := repo.FindByDate(context.Background(), searchDate)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if found == nil {
+			t.Fatal("got nil, want non-nil")
+		}
+
+		if got := found.ID().Value(); got != gameID {
+			t.Errorf("ID: got %v, want %v", got, gameID)
+		}
+		if got := found.Opponent().Value(); got != "阪神タイガース" {
+			t.Errorf("Opponent: got %v, want %v", got, "阪神タイガース")
+		}
+		if got := found.DragonsScore().Value(); got != 5 {
+			t.Errorf("DragonsScore: got %v, want %v", got, 5)
+		}
+		if got := found.OpponentScore().Value(); got != 3 {
+			t.Errorf("OpponentScore: got %v, want %v", got, 3)
+		}
+		if got := found.Result().Value(); got != game.Win {
+			t.Errorf("Result: got %v, want %v", got, game.Win)
+		}
+		if got := found.Stadium().Name().Value(); got != stadiumName {
+			t.Errorf("Stadium.Name: got %v, want %v", got, stadiumName)
+		}
+	})
+
+	t.Run("ゲームが存在しない日付の場合はnilを返す", func(t *testing.T) {
+		searchDate, err := game.NewGameDate(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		found, err := repo.FindByDate(context.Background(), searchDate)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if found != nil {
+			t.Errorf("got %v, want nil", found)
+		}
+	})
+
+	t.Run("別の日付のゲームがある場合でも指定日付に一致しなければnilを返す", func(t *testing.T) {
+		gameID := testPrefix + "game-findbydate-miss"
+		gameDate := time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC)
+		g := newTestGame(t, gameID, "読売ジャイアンツ", 2, 4, stadiumID, stadiumName, gameDate)
+		if err := repo.Save(context.Background(), g); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		t.Cleanup(func() {
+			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
+		})
+
+		searchDate, err := game.NewGameDate(time.Date(2024, 7, 2, 0, 0, 0, 0, time.UTC))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		found, err := repo.FindByDate(context.Background(), searchDate)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if found != nil {
+			t.Errorf("got %v, want nil", found)
+		}
+	})
+}
+
 func TestGameRepository_Delete(t *testing.T) {
 	db := setupDB(t)
 	repo := persistence.NewGameRepository(db)
