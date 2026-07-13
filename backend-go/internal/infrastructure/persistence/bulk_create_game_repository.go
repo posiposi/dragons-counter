@@ -96,7 +96,7 @@ func (a *BulkCreateGameAdapter) BulkSave(ctx context.Context, inputs []repositor
 			Opponent:      opponent.Value(),
 			DragonsScore:  int32(dragonsScore.Value()),
 			OpponentScore: int32(opponentScore.Value()),
-			Result:        gameResultToDB(gameResult.Value()),
+			Result:        sqlc.GamesResult(strings.ToLower(string(gameResult.Value()))),
 			StadiumID:     stadiumID,
 			CreatedAt:     now,
 			UpdatedAt:     now,
