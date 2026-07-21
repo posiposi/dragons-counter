@@ -18,3 +18,6 @@ UPDATE users_games SET deleted_at = ?, updated_at = ? WHERE id = ?;
 -- name: RestoreUserGame :exec
 UPDATE users_games SET deleted_at = NULL, impression = ?, updated_at = ?
 WHERE user_id = ? AND game_id = ?;
+
+-- name: GetUserGameByUserIDAndGameIDWithDeleted :one
+SELECT * FROM users_games WHERE user_id = ? AND game_id = ? LIMIT 1;

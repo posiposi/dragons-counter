@@ -63,6 +63,30 @@ func (q *Queries) GetUserGameByUserIDAndGameID(ctx context.Context, arg GetUserG
 	return i, err
 }
 
+const getUserGameByUserIDAndGameIDWithDeleted = `-- name: GetUserGameByUserIDAndGameIDWithDeleted :one
+SELECT id, user_id, game_id, impression, created_at, updated_at, deleted_at FROM users_games WHERE user_id = ? AND game_id = ? LIMIT 1
+`
+
+type GetUserGameByUserIDAndGameIDWithDeletedParams struct {
+	UserID string `json:"user_id"`
+	GameID string `json:"game_id"`
+}
+
+func (q *Queries) GetUserGameByUserIDAndGameIDWithDeleted(ctx context.Context, arg GetUserGameByUserIDAndGameIDWithDeletedParams) (UsersGame, error) {
+	row := q.db.QueryRowContext(ctx, getUserGameByUserIDAndGameIDWithDeleted, arg.UserID, arg.GameID)
+	var i UsersGame
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.GameID,
+		&i.Impression,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const listUserGamesByUserID = `-- name: ListUserGamesByUserID :many
 SELECT id, user_id, game_id, impression, created_at, updated_at, deleted_at FROM users_games
 WHERE user_id = ? AND deleted_at IS NULL
