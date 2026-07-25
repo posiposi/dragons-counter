@@ -26,6 +26,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id string) (User, error)
 	GetUserGameByUserIDAndGameID(ctx context.Context, arg GetUserGameByUserIDAndGameIDParams) (UsersGame, error)
+	GetUserGameByUserIDAndGameIDWithDeleted(ctx context.Context, arg GetUserGameByUserIDAndGameIDWithDeletedParams) (UsersGame, error)
 	ListStadiums(ctx context.Context) ([]Stadium, error)
 	ListUserGamesByUserID(ctx context.Context, userID string) ([]UsersGame, error)
 	ListUsers(ctx context.Context) ([]User, error)

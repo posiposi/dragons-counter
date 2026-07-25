@@ -400,7 +400,7 @@ func TestGameRepository_FindByID(t *testing.T) {
 
 func TestGameRepository_FindByDate(t *testing.T) {
 	db := setupDB(t)
-	repo := gameadapter.NewGameRepository(db)
+	repo := persistence.NewGameRepository(db)
 
 	stadiumID := testPrefix + "stadium-findbydate"
 	stadiumName := "バンテリンドーム ナゴヤ"
@@ -422,7 +422,7 @@ func TestGameRepository_FindByDate(t *testing.T) {
 			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
 		})
 
-		searchDate, err := game.NewGameDate(gameDate)
+		searchDate, err := model.NewGameDate(gameDate)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -447,8 +447,8 @@ func TestGameRepository_FindByDate(t *testing.T) {
 		if got := found.OpponentScore().Value(); got != 3 {
 			t.Errorf("OpponentScore: got %v, want %v", got, 3)
 		}
-		if got := found.Result().Value(); got != game.Win {
-			t.Errorf("Result: got %v, want %v", got, game.Win)
+		if got := found.Result().Value(); got != model.Win {
+			t.Errorf("Result: got %v, want %v", got, model.Win)
 		}
 		if got := found.Stadium().Name().Value(); got != stadiumName {
 			t.Errorf("Stadium.Name: got %v, want %v", got, stadiumName)
@@ -456,7 +456,7 @@ func TestGameRepository_FindByDate(t *testing.T) {
 	})
 
 	t.Run("ゲームが存在しない日付の場合はnilを返す", func(t *testing.T) {
-		searchDate, err := game.NewGameDate(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC))
+		searchDate, err := model.NewGameDate(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC))
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -482,7 +482,7 @@ func TestGameRepository_FindByDate(t *testing.T) {
 			cleanupTestGamesAndStadiums(t, db, []string{gameID}, nil)
 		})
 
-		searchDate, err := game.NewGameDate(time.Date(2024, 7, 2, 0, 0, 0, 0, time.UTC))
+		searchDate, err := model.NewGameDate(time.Date(2024, 7, 2, 0, 0, 0, 0, time.UTC))
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
