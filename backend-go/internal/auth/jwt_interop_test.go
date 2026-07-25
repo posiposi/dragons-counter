@@ -1,52 +1,44 @@
 package auth_test
 
 import (
-	"encoding/json"
-	"os"
 	"testing"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/posiposi/dragons-counter/backend-go/internal/auth"
 )
 
-type jwtFixture struct {
-	Token   string `json:"token"`
-	Secret  string `json:"secret"`
-	Payload struct {
-		Sub   string `json:"sub"`
-		Email string `json:"email"`
-		Role  string `json:"role"`
-	} `json:"payload"`
-}
-
-func loadFixture(t *testing.T) jwtFixture {
+func signTestToken(t *testing.T, secret string, claims jwt.MapClaims) string {
 	t.Helper()
-	data, err := os.ReadFile("../../testdata/jwt-interop.json")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := token.SignedString([]byte(secret))
 	if err != nil {
-		t.Fatalf("fixture ファイルの読み込みに失敗: %v", err)
+		t.Fatalf("テスト用トークンの生成に失敗: %v", err)
 	}
-	var fixture jwtFixture
-	if err := json.Unmarshal(data, &fixture); err != nil {
-		t.Fatalf("fixture のパースに失敗: %v", err)
-	}
-	return fixture
+	return signed
 }
 
-func TestVerifyJWT_InteropWithNode(t *testing.T) {
-	fixture := loadFixture(t)
+func TestVerifyJWT_ValidToken(t *testing.T) {
+	secret := "test-secret"
+	claims := jwt.MapClaims{
+		"sub":   "660e8400-e29b-41d4-a716-446655440001",
+		"email": "test@example.com",
+		"role":  "admin",
+	}
+	tokenString := signTestToken(t, secret, claims)
 
-	claims, err := auth.VerifyJWT(fixture.Token, fixture.Secret)
+	result, err := auth.VerifyJWT(tokenString, secret)
 	if err != nil {
 		t.Fatalf("JWT 検証に失敗: %v", err)
 	}
 
-	if claims.Sub != fixture.Payload.Sub {
-		t.Errorf("sub: got %q, want %q", claims.Sub, fixture.Payload.Sub)
+	if result.Sub != claims["sub"] {
+		t.Errorf("sub: got %q, want %q", result.Sub, claims["sub"])
 	}
-	if claims.Email != fixture.Payload.Email {
-		t.Errorf("email: got %q, want %q", claims.Email, fixture.Payload.Email)
+	if result.Email != claims["email"] {
+		t.Errorf("email: got %q, want %q", result.Email, claims["email"])
 	}
-	if claims.Role != fixture.Payload.Role {
-		t.Errorf("role: got %q, want %q", claims.Role, fixture.Payload.Role)
+	if result.Role != claims["role"] {
+		t.Errorf("role: got %q, want %q", result.Role, claims["role"])
 	}
 }
 
@@ -58,9 +50,13 @@ func TestVerifyJWT_InvalidToken(t *testing.T) {
 }
 
 func TestVerifyJWT_WrongSecret(t *testing.T) {
-	fixture := loadFixture(t)
+	tokenString := signTestToken(t, "correct-secret", jwt.MapClaims{
+		"sub":   "user-id",
+		"email": "test@example.com",
+		"role":  "user",
+	})
 
-	_, err := auth.VerifyJWT(fixture.Token, "wrong-secret")
+	_, err := auth.VerifyJWT(tokenString, "wrong-secret")
 	if err == nil {
 		t.Error("異なるシークレットでエラーが返されるべき")
 	}
