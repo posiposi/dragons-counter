@@ -9,13 +9,4 @@ export class JwtTokenServiceAdapter implements TokenServicePort {
   sign(payload: { sub: string; email: string; role: string }): string {
     return this.jwtService.sign(payload);
   }
-
-  verify(token: string): { sub: string; email: string; role: string } {
-    const decoded = this.jwtService.verify<{
-      sub: string;
-      email: string;
-      role: string;
-    }>(token);
-    return { sub: decoded.sub, email: decoded.email, role: decoded.role };
-  }
 }
